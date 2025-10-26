@@ -6,53 +6,41 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('poll_kendaraans', function (Blueprint $table) {
-            $table->id();
-            $table->string('nomor_perjalanan');
+        Schema::create('perjalanans', function (Blueprint $table) {
+            $table->id('nomor_perjalanan');
             $table->dateTime('waktu_keberangkatan');
-            $table->dateTime('waktu_kepulangan');
-            $table->string('nopol_kendaraan');
-            $table->string('jenis_kendaraan');
-            $table->string('status');
-            $table->string('pengemudi');
-            $table->string('nip_pengemudi');
-            $table->string('wa_pengemudi');
-            $table->string('asisten_driver')->nullable();
-            $table->string('nip_asisten_pengemudi')->nullable();
-            $table->string('wa_asisten')->nullable();
-            $table->string('nama_pengguna');
-            $table->string('wa_pengguna');
+            $table->dateTime('waktu_kepulangan')->nullable();
+            $table->string('status_perjalanan');
             $table->text('alamat_tujuan');
-            $table->string('kota_kabupaten');
-            $table->string('provinsi');
             $table->string('lokasi_keberangkatan');
             $table->integer('jumlah_rombongan');
             $table->string('jenis_kegiatan');
             $table->string('nama_kegiatan');
             $table->string('jenis_operasional');
-            $table->string('unit_kerja');
             $table->string('status_operasional');
-            $table->string('no_surat_tugas');
+            $table->string('no_surat_tugas')->unique();
             $table->string('file_surat_jalan')->nullable();
             $table->string('docs_surat_tugas')->nullable();
             $table->string('upload_surat_tugas')->nullable();
             $table->string('download_file')->nullable();
             $table->boolean('status_cek_1')->default(false);
             $table->boolean('status_cek_2')->default(false);
+
+            $table->foreignId('pengguna_id')->constrained('penggunas', 'pengguna_id');
+            $table->foreignId('pengemudi_id')->constrained('stafs', 'staf_id');
+            $table->foreignId('asisten_id')->nullable()->constrained('stafs', 'staf_id');
+            $table->string('nopol_kendaraan');
+            $table->foreign('nopol_kendaraan')->references('nopol_kendaraan')->on('kendaraans');
+            $table->foreignId('tujuan_wilayah_id')->constrained('wilayahs', 'wilayah_id');
+            
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('poll_kendaraans');
+        Schema::dropIfExists('perjalanans');
     }
 };

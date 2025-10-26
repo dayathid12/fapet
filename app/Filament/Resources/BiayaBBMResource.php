@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PollKendaraanResource\Pages;
-use App\Filament\Resources\PollKendaraanResource\RelationManagers;
-use App\Models\PollKendaraan;
+use App\Filament\Resources\BiayaBBMResource\Pages;
+use App\Filament\Resources\BiayaBBMResource\RelationManagers;
+use App\Models\BiayaBBM;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,11 +13,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class PollKendaraanResource extends Resource
+class BiayaBBMResource extends Resource
 {
-    protected static ?string $model = PollKendaraan::class;
-    protected static ?string $navigationLabel = 'Poll Kendaraan';
+    protected static ?string $model = BiayaBBM::class;
+    protected static ?string $navigationIcon = 'heroicon-s-truck';
+  protected static ?string $navigationLabel = 'BBM';
   protected static ?string $navigationGroup = 'Poll Kendaraan';
+
 
     public static function form(Form $form): Form
     {
@@ -37,8 +39,7 @@ class PollKendaraanResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->extraAttributes(['class' => 'hover:bg-blue-100']),
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -57,9 +58,9 @@ class PollKendaraanResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPollKendaraans::route('/'),
-            'create' => Pages\CreatePollKendaraan::route('/create'),
-            'edit' => Pages\EditPollKendaraan::route('/{record}/edit'),
+            'index' => Pages\ListBiayaBBMS::route('/'),
+            'create' => Pages\CreateBiayaBBM::route('/create'),
+            'edit' => Pages\EditBiayaBBM::route('/{record}/edit'),
         ];
     }
 }

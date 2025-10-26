@@ -6,22 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('pool_kendaraans', function (Blueprint $table) {
-            $table->id();
+        Schema::create('wilayahs', function (Blueprint $table) {
+            $table->id('wilayah_id');
+            $table->string('nama_wilayah');
+            $table->string('kota_kabupaten');
+            $table->string('provinsi');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('pool_kendaraans');
+        Schema::dropIfExists('wilayahs');
     }
 };

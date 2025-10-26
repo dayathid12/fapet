@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PollKendaraanResource\Pages;
-use App\Filament\Resources\PollKendaraanResource\RelationManagers;
-use App\Models\PollKendaraan;
+use App\Filament\Resources\PenerimaSPTJBResource\Pages;
+use App\Filament\Resources\PenerimaSPTJBResource\RelationManagers;
+use App\Models\PenerimaSPTJB;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,11 +13,12 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class PollKendaraanResource extends Resource
+class PenerimaSPTJBResource extends Resource
 {
-    protected static ?string $model = PollKendaraan::class;
-    protected static ?string $navigationLabel = 'Poll Kendaraan';
-  protected static ?string $navigationGroup = 'Poll Kendaraan';
+    protected static ?string $model = PenerimaSPTJB::class;
+
+    protected static ?string $navigationGroup = 'Pelaporan';
+    protected static ?string $navigationLabel = 'Penerima SPTJB';
 
     public static function form(Form $form): Form
     {
@@ -37,8 +38,7 @@ class PollKendaraanResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->extraAttributes(['class' => 'hover:bg-blue-100']),
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -57,9 +57,9 @@ class PollKendaraanResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPollKendaraans::route('/'),
-            'create' => Pages\CreatePollKendaraan::route('/create'),
-            'edit' => Pages\EditPollKendaraan::route('/{record}/edit'),
+            'index' => Pages\ListPenerimaSPTJBS::route('/'),
+            'create' => Pages\CreatePenerimaSPTJB::route('/create'),
+            'edit' => Pages\EditPenerimaSPTJB::route('/{record}/edit'),
         ];
     }
 }
