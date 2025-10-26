@@ -17,21 +17,55 @@ class PerjalananResource extends Resource
 {
     protected static ?string $model = Perjalanan::class;
 
-  protected static ?string $navigationLabel = 'Pelayanan Perjalanan';
-  protected static ?string $navigationGroup = 'Poll Kendaraan';
+    protected static ?string $navigationLabel = 'Pelayanan Perjalanan';
+    protected static ?string $navigationGroup = 'Poll Kendaraan';
+    protected static ?int $navigationSort = 0;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\DateTimePicker::make('waktu_keberangkatan')
-                    ->required(),
-                Forms\Components\DateTimePicker::make('waktu_kepulangan'),
-                Forms\Components\TextInput::make('status_perjalanan')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Grid::make(3)
+
+                    ->schema([
+                        // Kolom 1
+                        Forms\Components\ToggleButtons::make('status_operasional')
+                            ->options([
+                                'Peminjaman' => 'Peminjaman',
+                                'Operasional' => 'Operasional',
+                            ])
+                            ->grouped()
+                            ->required(),
+
+                        // Kolom 2
+                        Forms\Components\ToggleButtons::make('status_perjalanan')
+                            ->options([
+                                'Menunggu Persetujuan' => 'Menunggu Persetujuan',
+                                'Terjadwal' => 'Terjadwal',
+                                'Ditolak' => 'Ditolak',
+                            ])
+                            ->grouped()
+                            ->required(),
+
+                        // Kolom 3
+                        Forms\Components\ToggleButtons::make('jenis_kegiatan')
+                            ->options([
+                                'LK' => 'LK',
+                                'DK' => 'DK',
+                                'LB' => 'LB',
+                            ])
+                            ->grouped()
+                            ->required(),
+                    ]),
+
+                Forms\Components\Grid::make(2)
+                    ->schema([
+                        Forms\Components\DateTimePicker::make('waktu_keberangkatan')
+                            ->required(),
+                        Forms\Components\DateTimePicker::make('waktu_kepulangan'),
+                    ]),
+
                 Forms\Components\Textarea::make('alamat_tujuan')
-                    ->required()
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('lokasi_keberangkatan')
                     ->required()
@@ -39,18 +73,14 @@ class PerjalananResource extends Resource
                 Forms\Components\TextInput::make('jumlah_rombongan')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('jenis_kegiatan')
-                    ->required()
-                    ->maxLength(255),
+
                 Forms\Components\TextInput::make('nama_kegiatan')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('jenis_operasional')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('status_operasional')
-                    ->required()
-                    ->maxLength(255),
+
                 Forms\Components\TextInput::make('no_surat_tugas')
                     ->required()
                     ->maxLength(255),
@@ -87,6 +117,9 @@ class PerjalananResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('nomor_perjalanan')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('waktu_keberangkatan')
                     ->dateTime()
                     ->sortable(),

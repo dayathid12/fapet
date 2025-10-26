@@ -17,8 +17,8 @@ class PollKendaraanResource extends Resource
 {
     protected static ?string $model = PollKendaraan::class;
     protected static ?string $navigationLabel = 'Poll Kendaraan';
-  protected static ?string $navigationGroup = 'Poll Kendaraan';
-
+    protected static ?string $navigationGroup = 'Poll Kendaraan';
+    protected static ?int $navigationSort = 2;
     public static function form(Form $form): Form
     {
         return $form

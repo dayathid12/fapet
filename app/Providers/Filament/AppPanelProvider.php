@@ -74,13 +74,18 @@ class AppPanelProvider extends PanelProvider
                      ->icon('heroicon-s-pencil'),
 
                 NavigationGroup::make()
-                    ->label('Pool Kendaraan')
+                    ->label('Poll Kendaraan')
                      ->icon('heroicon-s-truck'),
+
+                NavigationGroup::make()
+                    ->label('Pelaporan')
+                     ->icon('heroicon-s-document'),
 
 
                 NavigationGroup::make()
                     ->label('Roles and Permissions')
                     ->icon('heroicon-s-lock-closed')
+
 
 
             ])

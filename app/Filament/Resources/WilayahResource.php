@@ -16,11 +16,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class WilayahResource extends Resource
 {
     protected static ?string $model = Wilayah::class;
-
-      protected static ?string $navigationIcon = 'heroicon-s-truck';
     protected static ?string $navigationLabel = 'Wilayah';
     protected static ?string $navigationGroup = 'Poll Kendaraan';
 
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

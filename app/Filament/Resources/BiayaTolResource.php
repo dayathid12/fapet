@@ -17,9 +17,10 @@ class BiayaTolResource extends Resource
 {
     protected static ?string $model = BiayaTol::class;
 
-  protected static ?string $navigationLabel = 'Biaya Tol';
-   
-  protected static ?string $navigationGroup = 'Poll Kendaraan';
+     protected static ?string $navigationLabel = 'Biaya Tol';
+    protected static ?string $navigationGroup = 'Poll Kendaraan';
+
+      protected static ?int $navigationSort = 2;
     public static function form(Form $form): Form
     {
         return $form

@@ -17,9 +17,10 @@ class PenggunaResource extends Resource
 {
     protected static ?string $model = Pengguna::class;
 
-  protected static ?string $navigationLabel = 'Pengguna';
+  protected static ?string $navigationLabel = 'Data Pengemudi';
   protected static ?string $navigationGroup = 'Poll Kendaraan';
 
+    protected static ?int $navigationSort = 2;
     public static function form(Form $form): Form
     {
         return $form

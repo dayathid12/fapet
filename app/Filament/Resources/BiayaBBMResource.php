@@ -16,11 +16,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class BiayaBBMResource extends Resource
 {
     protected static ?string $model = BiayaBBM::class;
-    protected static ?string $navigationIcon = 'heroicon-s-truck';
-  protected static ?string $navigationLabel = 'BBM';
-  protected static ?string $navigationGroup = 'Poll Kendaraan';
 
+     protected static ?string $navigationLabel = 'BBM';
+     protected static ?string $navigationGroup = 'Poll Kendaraan';
 
+    protected static ?int $navigationSort = 2;
     public static function form(Form $form): Form
     {
         return $form
