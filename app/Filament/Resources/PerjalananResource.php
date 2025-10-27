@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PerjalananResource\Pages;
 use App\Filament\Resources\PerjalananResource\RelationManagers;
 use App\Models\Perjalanan;
+use App\Models\Wilayah;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -148,6 +149,12 @@ class PerjalananResource extends Resource
                     ->description('Informasi lengkap perjalanan')
                     ->icon('heroicon-o-map-pin')
                     ->schema([
+
+                         Forms\Components\TextInput::make('nama_kegiatan')
+                            ->label('Nama Kegiatan')
+                            ->required()
+                            ->placeholder('Masukkan nama kegiatan')
+                            ->maxLength(255),
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('lokasi_keberangkatan')
@@ -167,11 +174,22 @@ class PerjalananResource extends Resource
                             ->placeholder('Masukkan alamat lengkap tujuan')
                             ->columnSpanFull()
                             ->rows(3),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
                                 Forms\Components\Select::make('tujuan_wilayah_id')
                                     ->label('Kota Kabupaten')
                                     ->relationship('wilayah', 'nama_wilayah')
                                     ->searchable()
                                     ->preload()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $city = Wilayah::where('wilayah_id', $state)->first();
+                                        if ($city) {
+                                            $set('provinsi', $city->provinsi);
+                                        } else {
+                                            $set('provinsi', null);
+                                        }
+                                    })
                                     ->createOptionForm([
                                         Forms\Components\TextInput::make('nama_wilayah')
                                             ->label('Nama Wilayah Baru')
@@ -188,11 +206,12 @@ class PerjalananResource extends Resource
                                     ])
                                     ->required()
                                     ->placeholder('Pilih kota kabupaten...'),
-                        Forms\Components\TextInput::make('nama_kegiatan')
-                            ->label('Nama Kegiatan')
-                            ->required()
-                            ->placeholder('Masukkan nama kegiatan')
-                            ->maxLength(255),
+                                Forms\Components\TextInput::make('provinsi')
+                                    ->label('Provinsi')
+                                    ->disabled()
+                                    ->placeholder('Provinsi akan muncul otomatis'),
+                            ]),
+
                     ]),
 
                 Forms\Components\Section::make('Dokumen & Berkas')
@@ -201,11 +220,7 @@ class PerjalananResource extends Resource
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('no_surat_tugas')
-                                    ->label('No. Surat Tugas')
-                                    ->required()
-                                    ->placeholder('Masukkan nomor surat tugas')
-                                    ->maxLength(255),
+                               
                                 Forms\Components\FileUpload::make('file_surat_jalan')
                                     ->label('File Surat Jalan')
                                     ->directory('surat-jalan')
