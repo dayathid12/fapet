@@ -28,13 +28,14 @@ return new class extends Migration
             $table->boolean('status_cek_1')->default(false);
             $table->boolean('status_cek_2')->default(false);
 
-            $table->foreignId('pengguna_id')->constrained('penggunas', 'pengguna_id');
+            $table->string('nama_pengguna')->nullable();
+            $table->string('kontak_pengguna')->nullable();
             $table->foreignId('pengemudi_id')->constrained('stafs', 'staf_id');
             $table->foreignId('asisten_id')->nullable()->constrained('stafs', 'staf_id');
             $table->string('nopol_kendaraan');
             $table->foreign('nopol_kendaraan')->references('nopol_kendaraan')->on('kendaraans');
             $table->foreignId('tujuan_wilayah_id')->constrained('wilayahs', 'wilayah_id');
-            
+
             $table->timestamps();
         });
     }

@@ -30,11 +30,13 @@ class Perjalanan extends Model
         'download_file',
         'status_cek_1',
         'status_cek_2',
-        'pengguna_id',
+        'nama_pengguna',
+        'kontak_pengguna',
         'pengemudi_id',
         'asisten_id',
         'nopol_kendaraan',
         'tujuan_wilayah_id',
+        'unit_kerja_id',
     ];
 
     protected static function boot()
@@ -46,4 +48,16 @@ class Perjalanan extends Model
             }
         });
     }
+
+    public function unitKerja()
+    {
+        return $this->belongsTo(UnitKerja::class, 'unit_kerja_id', 'unit_kerja_id');
+    }
+
+    public function wilayah()
+    {
+        return $this->belongsTo(Wilayah::class, 'tujuan_wilayah_id', 'wilayah_id');
+    }
+
+
 }

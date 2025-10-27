@@ -41,8 +41,7 @@ class WilayahResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nama_wilayah')
-                    ->searchable(),
+                
                 Tables\Columns\TextColumn::make('kota_kabupaten')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('provinsi')
