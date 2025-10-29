@@ -13,10 +13,13 @@ return new class extends Migration
             $table->string('jenis_kendaraan');
             $table->string('merk_type')->nullable();
             $table->string('warna_tanda')->nullable();
-            $table->year('tahun_pembuatan')->nullable();
+            $table->string('tahun_pembuatan')->nullable();
             $table->string('nomor_rangka')->unique()->nullable();
             $table->string('nomor_mesin')->unique()->nullable();
             $table->string('jenis_bbm_default')->nullable();
+            $table->string('lokasi_kendaraan')->nullable();
+            $table->string('penggunaan')->nullable();
+            $table->string('foto_kendaraan')->nullable();
             $table->timestamps();
         });
     }

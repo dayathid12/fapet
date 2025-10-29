@@ -28,6 +28,8 @@ class Perjalanan extends Model
         'docs_surat_tugas',
         'upload_surat_tugas',
         'download_file',
+        'surat_peminjaman_kendaraan',
+        'dokumen_pendukung',
         'status_cek_1',
         'status_cek_2',
         'nama_pengguna',
@@ -39,12 +41,20 @@ class Perjalanan extends Model
         'unit_kerja_id',
     ];
 
+    protected $attributes = [
+        'status_operasional' => 'Belum Ditetapkan',
+    ];
+
     protected static function boot()
     {
         parent::boot();
         static::creating(function ($model) {
             if ($model->getKey() === null) {
                 $model->setAttribute($model->getKeyName(), static::max($model->getKeyName()) + 1);
+            }
+            if (empty($model->no_surat_tugas)) {
+                $nextNumber = static::max('nomor_perjalanan') + 1;
+                $model->no_surat_tugas = 'ST-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT) . '/' . date('Y');
             }
         });
     }
@@ -59,5 +69,19 @@ class Perjalanan extends Model
         return $this->belongsTo(Wilayah::class, 'tujuan_wilayah_id', 'wilayah_id');
     }
 
+    public function kendaraan()
+    {
+        return $this->belongsTo(Kendaraan::class, 'nopol_kendaraan', 'nopol_kendaraan');
+    }
+
+    public function pengemudi()
+    {
+        return $this->belongsTo(Staf::class, 'pengemudi_id', 'staf_id');
+    }
+
+    public function asisten()
+    {
+        return $this->belongsTo(Staf::class, 'asisten_id', 'staf_id');
+    }
 
 }

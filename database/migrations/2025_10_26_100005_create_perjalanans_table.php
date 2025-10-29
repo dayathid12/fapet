@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('docs_surat_tugas')->nullable();
             $table->string('upload_surat_tugas')->nullable();
             $table->string('download_file')->nullable();
+            $table->string('surat_peminjaman_kendaraan')->nullable();
+            $table->string('dokumen_pendukung')->nullable();
             $table->boolean('status_cek_1')->default(false);
             $table->boolean('status_cek_2')->default(false);
 

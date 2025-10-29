@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PerjalananResource\Pages;
 use App\Filament\Resources\PerjalananResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Enums\MaxWidth;
 
 class EditPerjalanan extends EditRecord
 {
@@ -15,5 +16,10 @@ class EditPerjalanan extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    public function getMaxContentWidth(): ?string
+    {
+        return MaxWidth::SevenExtraLarge->value;
     }
 }
