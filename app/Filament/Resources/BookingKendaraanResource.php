@@ -27,7 +27,22 @@ class BookingKendaraanResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Forms\Components\Select::make('nopol_kendaraan')
+                    ->label('Nomor Polisi')
+                    ->options(Kendaraan::all()->pluck('nopol_kendaraan', 'nopol_kendaraan'))
+                    ->required()
+                    ->searchable()
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $kendaraan = Kendaraan::where('nopol_kendaraan', $state)->first();
+                        if ($kendaraan) {
+                            $set('merk_type', $kendaraan->merk_type);
+                        }
+                    }),
+                Forms\Components\TextInput::make('merk_type')
+                    ->label('Merk & Tipe')
+                    ->disabled()
+                    ->dehydrated(false),
             ]);
     }
 
@@ -69,11 +84,16 @@ class BookingKendaraanResource extends Resource
                     });
 
                     if ($perjalanansOnDay->isNotEmpty()) {
-                        return $perjalanansOnDay->map(function($p) {
-                            $berangkat = Carbon::parse($p->waktu_keberangkatan)->format('H:i');
-                            $pulang = $p->waktu_kepulangan ? Carbon::parse($p->waktu_kepulangan)->format('H:i') : '-';
-                            return "<b>{$p->nama_kegiatan}</b><br>({$berangkat} - {$pulang})";
-                        })->implode('<hr class="my-1">');
+                        $content = '';
+                        foreach ($perjalanansOnDay as $perjalanan) {
+                            $keberangkatan = Carbon::parse($perjalanan->waktu_keberangkatan)->format('H:i');
+                            $kepulangan = $perjalanan->waktu_kepulangan ? Carbon::parse($perjalanan->waktu_kepulangan)->format('H:i') : '-';
+                            $content .= '<div class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-green-100 text-green-600 mb-1" style="font-family: Arial, sans-serif;">';
+                            $content .= '<svg class="w-4 h-4 mr-1 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>';
+                            $content .= htmlspecialchars($perjalanan->nama_kegiatan) . '<br>' . $keberangkatan . ' - ' . $kepulangan;
+                            $content .= '</div><br>';
+                        }
+                        return $content;
                     }
                     return '';
                 })
@@ -86,18 +106,9 @@ class BookingKendaraanResource extends Resource
                     if ($perjalanansOnDay->isEmpty()) return 'success';
                     return 'success';
                 })
-                ->icon(function (Kendaraan $record) use ($day) {
-                    $perjalanansOnDay = $record->perjalanans->filter(function ($perjalanan) use ($day) {
-                        $keberangkatan = Carbon::parse($perjalanan->waktu_keberangkatan)->startOfDay();
-                        $kepulangan = Carbon::parse($perjalanan->waktu_kepulangan)->endOfDay();
-                        return $day->between($keberangkatan, $kepulangan);
-                    });
-                    if ($perjalanansOnDay->isEmpty()) return 'heroicon-o-check';
-                    return 'heroicon-o-check';
-                })
                 ->weight('bold')
                 ->alignCenter()
-                ->width('120px');
+                ->width('90px');
         }
 
         return $table
@@ -110,14 +121,14 @@ class BookingKendaraanResource extends Resource
                     ->weight('bold')
                     ->searchable()
                     ->sortable()
-                    ->width('200px'),
+                    ->width('130px'),
                 Tables\Columns\TextColumn::make('merk_type')
                     ->label('Merk & Tipe')
                     ->badge()
                     ->color('gray')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->searchable()
-                    ->width('200px'),
+                    ->width('130px'),
             ], $dateColumns))
             ->filters([
                 Tables\Filters\SelectFilter::make('jenis_kendaraan')
@@ -128,29 +139,6 @@ class BookingKendaraanResource extends Resource
                         'Mikrobus' => 'Mikrobus',
                         'Ambulance' => 'Ambulance',
                         'Pick Up' => 'Pick Up',
-                    ]),
-                Tables\Filters\SelectFilter::make('lokasi_kendaraan')
-                    ->label('Lokasi Kendaraan')
-                    ->options([
-                        'Fakultas Hukum' => 'Fakultas Hukum',
-                        'Fakultas Ekonomi dan Bisnis' => 'Fakultas Ekonomi dan Bisnis',
-                        'Fakultas Kedokteran' => 'Fakultas Kedokteran',
-                        'FMIPA' => 'FMIPA',
-                        'Fakultas Pertanian' => 'Fakultas Pertanian',
-                        'Fakultas Kedokteran Gigi' => 'Fakultas Kedokteran Gigi',
-                        'Fakultas Ilmu Budaya' => 'Fakultas Ilmu Budaya',
-                        'FISIP' => 'FISIP',
-                        'Fakultas Psikologi' => 'Fakultas Psikologi',
-                        'Fakultas Peternakan' => 'Fakultas Peternakan',
-                        'Fakultas Ilmu Komunikasi' => 'Fakultas Ilmu Komunikasi',
-                        'Fakultas Keperawatan' => 'Fakultas Keperawatan',
-                        'FPIK' => 'FPIK',
-                        'FTIP' => 'FTIP',
-                        'Fakultas Farmasi' => 'Fakultas Farmasi',
-                        'Fakultas Teknik Geologi' => 'Fakultas Teknik Geologi',
-                        'Sekolah Pasca Sarjana' => 'Sekolah Pasca Sarjana',
-                        'MWA' => 'MWA',
-                        'Rektor' => 'Rektor',
                     ]),
                 Tables\Filters\SelectFilter::make('status_booking')
                     ->label('Status Booking')
@@ -220,7 +208,7 @@ class BookingKendaraanResource extends Resource
             ])
             ->defaultSort('nopol_kendaraan', 'asc')
             ->striped()
-            ->paginated([10, 25, 50, 100])
+            ->paginated([25, 50, 100])
             ->emptyStateHeading('Tidak ada data kendaraan')
             ->emptyStateDescription('Belum ada kendaraan yang terdaftar. Mulai dengan membuat kendaraan baru.')
             ->emptyStateIcon('heroicon-o-truck')
@@ -243,6 +231,7 @@ class BookingKendaraanResource extends Resource
     {
         return [
             'index' => Pages\ListBookingKendaraans::route('/'),
+            'create' => Pages\CreateBookingKendaraan::route('/create'),
         ];
     }
 }

@@ -183,6 +183,9 @@ class KendaraanResource extends Resource
     {
         return [
             'index' => Pages\ListKendaraans::route('/'),
+            'create' => Pages\CreateKendaraan::route('/create'),
+            'view' => Pages\ViewKendaraan::route('/{record}'),
+            'edit' => Pages\EditKendaraan::route('/{record}/edit'),
         ];
     }
 }

@@ -17,7 +17,12 @@ class ListBookingKendaraans extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            Actions\Action::make('tambah_kendaraan')
+                ->label('Tambah Kendaraan')
+                ->url(fn () => BookingKendaraanResource::getUrl('create'))
+                ->color('success'),
+        ];
     }
 
 
