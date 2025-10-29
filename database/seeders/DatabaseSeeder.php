@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             UnitKerjaSeeder::class,
             WilayahSeeder::class,
             KendaraanSeeder::class,
+            StafSeeder::class,
+            PerjalananSeeder::class,
         ]);
     }
 }

@@ -154,12 +154,7 @@ class KendaraanResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
-                    ->icon('heroicon-o-eye')
-                    ->color('info'),
-                Tables\Actions\EditAction::make()
-                    ->icon('heroicon-o-pencil')
-                    ->color('warning'),
+                //
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -188,9 +183,6 @@ class KendaraanResource extends Resource
     {
         return [
             'index' => Pages\ListKendaraans::route('/'),
-            'create' => Pages\CreateKendaraan::route('/create'),
-            'view' => Pages\ViewKendaraan::route('/{record}'),
-            'edit' => Pages\EditKendaraan::route('/{record}/edit'),
         ];
     }
 }

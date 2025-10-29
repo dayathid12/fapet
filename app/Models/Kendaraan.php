@@ -26,4 +26,9 @@ class Kendaraan extends Model
         'penggunaan',
         'foto_kendaraan',
     ];
+
+    public function perjalanans()
+    {
+        return $this->hasMany(Perjalanan::class, 'nopol_kendaraan', 'nopol_kendaraan');
+    }
 }

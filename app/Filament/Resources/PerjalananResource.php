@@ -347,7 +347,7 @@ class PerjalananResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                    Tables\Columns\TextColumn::make('status_perjalanan')
+                Tables\Columns\TextColumn::make('status_perjalanan')
                     ->label('Status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -356,37 +356,50 @@ class PerjalananResource extends Resource
                         'Ditolak' => 'danger',
                         default => 'gray',
                     })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'Menunggu Persetujuan' => 'heroicon-o-clock',
+                        'Terjadwal' => 'heroicon-o-check-circle',
+                        'Ditolak' => 'heroicon-o-x-circle',
+                        default => 'heroicon-o-question-mark-circle',
+                    })
                     ->searchable(),
 
-                    Tables\Columns\TextColumn::make('waktu_keberangkatan')
+                Tables\Columns\TextColumn::make('waktu_keberangkatan')
                     ->label('Waktu Berangkat')
                     ->dateTime('d/m/Y H:i')
+                    ->icon('heroicon-o-arrow-right-on-rectangle')
                     ->sortable(),
 
-                 Tables\Columns\TextColumn::make('waktu_kepulangan')
-                    ->label('Waktu Berangkat')
+                Tables\Columns\TextColumn::make('waktu_kepulangan')
+                    ->label('Waktu Pulang')
                     ->dateTime('d/m/Y H:i')
+                    ->icon('heroicon-o-arrow-left-on-rectangle')
                     ->sortable(),
 
-
-                    Tables\Columns\TextColumn::make('nopol_kendaraan')
+                Tables\Columns\TextColumn::make('nopol_kendaraan')
                     ->label('Nomor Kendaraan')
+                    ->icon('heroicon-o-truck')
+                    ->copyable()
                     ->searchable(),
 
-                    Tables\Columns\TextColumn::make('merk_type')
+                Tables\Columns\TextColumn::make('merk_type')
                     ->label('Jenis Kendaraan')
+                    ->icon('heroicon-o-tag')
                     ->searchable(),
 
-                    Tables\Columns\TextColumn::make('pengemudi.nama_staf')
+                Tables\Columns\TextColumn::make('pengemudi.nama_staf')
                     ->label('Pengemudi')
+                    ->icon('heroicon-o-user-circle')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('')
+                Tables\Columns\TextColumn::make('nama_pengguna')
                     ->label('Nama Pengguna')
+                    ->icon('heroicon-o-user')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('unitKerja.nama_unit_kerja')
                     ->label('Unit Kerja')
+                    ->icon('heroicon-o-building-office')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('updated_at')
