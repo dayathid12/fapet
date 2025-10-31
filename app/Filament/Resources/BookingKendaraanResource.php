@@ -23,26 +23,55 @@ class BookingKendaraanResource extends Resource
     protected static ?string $navigationGroup = 'Poll Kendaraan';
     protected static ?int $navigationSort = 1;
 
+    public static function canViewAny(): bool
+    {
+        return true;
+    }
+
+    public static function canView($record): bool
+    {
+        return true;
+    }
+
+    public static function canCreate(): bool
+    {
+        return true;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return true;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return true;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Select::make('nopol_kendaraan')
-                    ->label('Nomor Polisi')
+                    ->label('Nopol Kendaraan')
                     ->options(Kendaraan::all()->pluck('nopol_kendaraan', 'nopol_kendaraan'))
-                    ->required()
                     ->searchable()
-                    ->reactive()
+                    ->preload()
+                    ->live()
                     ->afterStateUpdated(function ($state, callable $set) {
-                        $kendaraan = Kendaraan::where('nopol_kendaraan', $state)->first();
-                        if ($kendaraan) {
-                            $set('merk_type', $kendaraan->merk_type);
+                        $vehicle = Kendaraan::where('nopol_kendaraan', $state)->first();
+                        if ($vehicle) {
+                            $set('merk_type', $vehicle->merk_type);
+                        } else {
+                            $set('merk_type', null);
                         }
-                    }),
+                    })
+                    ->placeholder('Pilih nomor polisi kendaraan...')
+                    ->required(),
                 Forms\Components\TextInput::make('merk_type')
                     ->label('Merk & Tipe')
                     ->disabled()
-                    ->dehydrated(false),
+                    ->placeholder('Merk & Tipe akan muncul otomatis'),
             ]);
     }
 
@@ -90,7 +119,8 @@ class BookingKendaraanResource extends Resource
                             $kepulangan = $perjalanan->waktu_kepulangan ? Carbon::parse($perjalanan->waktu_kepulangan)->format('H:i') : '-';
                             $content .= '<div class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-green-100 text-green-600 mb-1" style="font-family: Arial, sans-serif;">';
                             $content .= '<svg class="w-4 h-4 mr-1 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>';
-                            $content .= htmlspecialchars($perjalanan->nama_kegiatan) . '<br>' . $keberangkatan . ' - ' . $kepulangan;
+                            $content .= '<svg class="w-4 h-4 mr-1 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
+                            $content .= htmlspecialchars($perjalanan->nomor_perjalanan) . '<br>' . htmlspecialchars($perjalanan->nama_kegiatan) . '<br>' . $keberangkatan . ' - ' . $kepulangan;
                             $content .= '</div><br>';
                         }
                         return $content;
@@ -121,14 +151,16 @@ class BookingKendaraanResource extends Resource
                     ->weight('bold')
                     ->searchable()
                     ->sortable()
-                    ->width('130px'),
+                    ->width('130px')
+                    ->extraAttributes(['class' => 'sticky left-0 bg-white z-10']),
                 Tables\Columns\TextColumn::make('merk_type')
                     ->label('Merk & Tipe')
                     ->badge()
                     ->color('gray')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->searchable()
-                    ->width('130px'),
+                    ->width('130px')
+                    ->extraAttributes(['class' => 'sticky left-[130px] bg-white z-10']),
             ], $dateColumns))
             ->filters([
                 Tables\Filters\SelectFilter::make('jenis_kendaraan')
@@ -216,7 +248,7 @@ class BookingKendaraanResource extends Resource
             ->description(function () {
                 $currentMonth = request('month', now()->format('Y-m'));
                 $date = Carbon::createFromFormat('Y-m', $currentMonth);
-                return 'Menampilkan jadwal kendaraan untuk bulan ' . $date->locale('id')->isoFormat('MMMM YYYY') . '. Gunakan filter untuk melihat kendaraan berdasarkan status booking.';
+                return 'Menampilkan jadwal kendaraan untuk bulan ' . $date->locale('id')->isoFormat('MMMM YYYY') . '.';
             });
     }
 

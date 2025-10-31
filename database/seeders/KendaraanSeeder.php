@@ -13,15 +13,15 @@ class KendaraanSeeder extends Seeder
     public function run(): void
     {
         Kendaraan::create([
-            'nopol' => 'D 1 DUP',
-            'merk' => 'Toyota',
-            'jenis' => 'Avanza',
+            'nopol_kendaraan' => 'D 1 DUP',
+            'merk_type' => 'Toyota Avanza',
+            'jenis_kendaraan' => 'Avanza',
         ]);
 
         Kendaraan::create([
-            'nopol' => 'D 1022 D',
-            'merk' => 'Mitsubishi',
-            'jenis' => 'Xpander',
+            'nopol_kendaraan' => 'D 1022 D',
+            'merk_type' => 'Mitsubishi Xpander',
+            'jenis_kendaraan' => 'Xpander',
         ]);
     }
 }

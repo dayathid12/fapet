@@ -13,7 +13,22 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'user']);
+        $admin = Role::firstOrCreate(['name' => 'Admin']);
+        $admin->accessible_resources = [
+            'App\Filament\Resources\UserResource',
+            'App\Filament\Resources\RoleResource',
+            'App\Filament\Resources\PermissionResource',
+            'App\Filament\Resources\KendaraanResource',
+            'App\Filament\Resources\BookingKendaraanResource',
+        ];
+        $admin->save();
+
+        $user = Role::firstOrCreate(['name' => 'User']);
+        $user->accessible_resources = [
+            'App\Filament\Resources\UserResource',
+            'App\Filament\Resources\KendaraanResource',
+            'App\Filament\Resources\BookingKendaraanResource',
+        ];
+        $user->save();
     }
 }

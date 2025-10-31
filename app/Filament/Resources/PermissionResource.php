@@ -2,23 +2,22 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\PermissionResource\Pages;
+use App\Filament\Resources\PermissionResource\RelationManagers;
+use App\Models\Permission;
 use Filament\Forms;
-use App\Models\User;
-use Filament\Tables;
 use Filament\Forms\Form;
-use Filament\Tables\Table;
 use Filament\Resources\Resource;
-use Filament\Forms\Components\Select;
+use Filament\Tables;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\UserResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\UserResource\RelationManagers;
 
-class UserResource extends Resource
+class PermissionResource extends Resource
 {
-    protected static ?string $model = User::class;
-    protected static ?string $navigationLabel = 'User';
+    protected static ?string $model = Permission::class;
 
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Roles and Permissions';
 
     public static function canViewAny(): bool
@@ -50,20 +49,13 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
+                Forms\Components\TextInput::make('guard_name')
                     ->required()
-                    ->maxLength(255),
-
-                Forms\Components\TextInput::make('password')
-                    ->visibleOn('create')
-                    ->password()
-                    ->maxLength(255),
-                     Select::make('roles')->multiple()->relationship('roles', 'name')->preload(),
+                    ->maxLength(255)
+                    ->default('web'),
             ]);
     }
 
@@ -71,14 +63,10 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
+                Tables\Columns\TextColumn::make('guard_name')
                     ->searchable(),
-                    Tables\Columns\TextColumn::make('roles.name')
-                    ->searchable(),
-
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -89,7 +77,7 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                //
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -98,8 +86,6 @@ class UserResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -114,18 +100,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'view' => Pages\ViewUser::route('/{record}'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => Pages\ListPermissions::route('/'),
+            'create' => Pages\CreatePermission::route('/create'),
+            'edit' => Pages\EditPermission::route('/{record}/edit'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
     }
 }

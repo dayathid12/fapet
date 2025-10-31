@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\JadwalController;
+use App\Http\Controllers\PerjalananController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,3 +25,6 @@ Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCa
 
 // Route untuk Jadwal Kendaraan
 Route::get('/jadwal-kendaraan', [JadwalController::class, 'index'])->name('jadwal.index');
+
+// Route untuk PDF Perjalanan
+Route::get('/perjalanan/{nomor_perjalanan}/pdf', [PerjalananController::class, 'generatePdf'])->name('perjalanan.pdf');

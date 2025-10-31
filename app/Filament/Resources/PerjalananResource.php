@@ -260,7 +260,7 @@ class PerjalananResource extends Resource
                                     ->relationship('pengemudi', 'nama_staf')
                                     ->searchable()
                                     ->preload()
-                                    ->required()
+
                                     ->placeholder('Pilih nama pengemudi...'),
                                 Forms\Components\Select::make('asisten_id')
                                     ->label('Nama Asisten')
@@ -274,6 +274,7 @@ class PerjalananResource extends Resource
                                 Forms\Components\Select::make('nopol_kendaraan')
                                     ->label('Nomor Polisi Kendaraan')
                                     ->relationship('kendaraan', 'nopol_kendaraan')
+                                    ->getOptionLabelFromRecordUsing(fn (Kendaraan $record) => "{$record->nopol_kendaraan} ({$record->merk_type})")
                                     ->searchable()
                                     ->preload()
                                     ->live()
@@ -292,38 +293,11 @@ class PerjalananResource extends Resource
                                             ->label('Nomor Polisi Kendaraan Baru')
                                             ->required()
                                             ->maxLength(255),
-                                        Forms\Components\TextInput::make('jenis_kendaraan')
-                                            ->label('Jenis Kendaraan')
-                                            ->required()
-                                            ->maxLength(255),
                                         Forms\Components\TextInput::make('merk_type')
-                                            ->label('Merk/Type')
+                                            ->label('Merk & Tipe')
                                             ->required()
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('warna_tanda')
-                                            ->label('Warna/Tanda')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('tahun_pembuatan')
-                                            ->label('Tahun Pembuatan')
-                                            ->required()
-                                            ->numeric(),
-                                        Forms\Components\TextInput::make('nomor_rangka')
-                                            ->label('Nomor Rangka')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('nomor_mesin')
-                                            ->label('Nomor Mesin')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('lokasi_kendaraan')
-                                            ->label('Lokasi Kendaraan')
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('penggunaan')
-                                            ->label('Penggunaan')
                                             ->maxLength(255),
                                     ])
-                                    ->required()
                                     ->placeholder('Pilih nomor polisi kendaraan...'),
                                 Forms\Components\TextInput::make('merk_type')
                                     ->label('Merk & Tipe')
@@ -441,6 +415,13 @@ class PerjalananResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->icon('heroicon-o-pencil')
                     ->color('warning'),
+                Tables\Actions\Action::make('generatePdf')
+                    ->label('PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->visible(fn (Perjalanan $record): bool => $record->status_perjalanan === 'Terjadwal')
+                    ->url(fn (Perjalanan $record): string => route('perjalanan.pdf', $record->nomor_perjalanan))
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
