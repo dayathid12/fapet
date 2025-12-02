@@ -1,60 +1,253 @@
-<div class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 sm:p-6 lg:p-8">
-    <div x-data="{ step: 1 }" class="max-w-4xl mx-auto">
+<style>
+    /* Reset & Base Styles */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-        {{-- Stepper Navigation with Glassmorphism Effect --}}
-        <div class="relative mb-8 p-4 bg-white/30 backdrop-blur-xl border border-white/40 rounded-2xl shadow-lg">
-            <div class="flex items-center justify-between">
-                {{-- Step 1 --}}
-                <div class="flex-1 text-center cursor-pointer" @click="step = 1">
-                    <div :class="{'animate-pulse': step === 1}" class="mx-auto w-12 h-12 flex items-center justify-center rounded-full transition-all duration-300"
-                         :class="step >= 1 ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-400'">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                    </div>
-                    <p class="mt-2 text-xs sm:text-sm font-bold" :class="step >= 1 ? 'text-blue-700' : 'text-gray-500'">Perjalanan</p>
-                </div>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #ffffff; /* Ganti ke putih */
+        background-image: linear-gradient(
+            45deg,
+            #f8f8f8 25%, /* Sangat terang, hampir putih */
+            transparent 25%,
+            transparent 50%,
+            #f8f8f8 50%,
+            #f8f8f8 75%,
+            transparent 75%,
+            transparent
+        );
+        background-size: 20px 20px; /* Ukuran pola */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        color: #333;
+    }
 
-                {{-- Connector --}}
-                <div class="flex-1 h-1 bg-gray-200 rounded-full"><div class="h-1 rounded-full bg-blue-600" :style="`width: ${step > 1 ? '100%' : '0%'}`"></div></div>
+    /* Container Kartu Utama */
+    .card {
+        background-color: #ffffff;
+        width: 100%;
+        max-width: 1100px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        padding: 40px;
+    }
 
-                {{-- Step 2 --}}
-                <div class="flex-1 text-center cursor-pointer" @click="step = 2">
-                    <div :class="{'animate-pulse': step === 2}" class="mx-auto w-12 h-12 flex items-center justify-center rounded-full transition-all duration-300"
-                         :class="step >= 2 ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-400'">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    </div>
-                    <p class="mt-2 text-xs sm:text-sm font-bold" :class="step >= 2 ? 'text-blue-700' : 'text-gray-500'">Pengguna</p>
-                </div>
+    /* Header (Logo & Judul) */
+    .header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
 
-                {{-- Connector --}}
-                <div class="flex-1 h-1 bg-gray-200 rounded-full"><div class="h-1 rounded-full bg-blue-600" :style="`width: ${step > 2 ? '100%' : '0%'}`"></div></div>
+    h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 8px;
+    }
 
-                {{-- Step 3 --}}
-                <div class="flex-1 text-center cursor-pointer" @click="step = 3">
-                    <div :class="{'animate-pulse': step === 3}" class="mx-auto w-12 h-12 flex items-center justify-center rounded-full transition-all duration-300"
-                         :class="step >= 3 ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-400'">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <p class="mt-2 text-xs sm:text-sm font-bold" :class="step >= 3 ? 'text-blue-700' : 'text-gray-500'">Detail</p>
-                </div>
+    h4 {
+        font-size: 15px;
+        font-weight: 400;
+        color: #555;
+    }
 
-                {{-- Connector --}}
-                <div class="flex-1 h-1 bg-gray-200 rounded-full"><div class="h-1 rounded-full bg-blue-600" :style="`width: ${step > 3 ? '100%' : '0%'}`"></div></div>
+    /* Stepper (Indikator Langkah) */
+    .stepper-container {
+        margin-bottom: 35px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden; /* Agar border-radius bekerja pada child elements */
+    }
 
-                {{-- Step 4 --}}
-                <div class="flex-1 text-center cursor-pointer" @click="step = 4">
-                    <div :class="{'animate-pulse': step === 4}" class="mx-auto w-12 h-12 flex items-center justify-center rounded-full transition-all duration-300"
-                         :class="step >= 4 ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-400'">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    </div>
-                    <p class="mt-2 text-xs sm:text-sm font-bold" :class="step >= 4 ? 'text-blue-700' : 'text-gray-500'">Dokumen</p>
-                </div>
+    .stepper {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .step-item {
+        flex: 1;
+        padding: 18px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 500;
+        color: #999;
+        background-color: #fff;
+        position: relative;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+    }
+
+    /* Separator antar step */
+    .step-item:not(:last-child) {
+        border-right: 1px solid #e0e0e0;
+    }
+
+    .step-item i {
+        font-size: 16px;
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    /* Active Step Style */
+    .step-item.active {
+        color: #ffffff;
+        background-color: #87ceeb; /* Warna Biru Soft */
+        font-weight: 600;
+    }
+
+    .step-item.active i {
+        color: #87ceeb;
+        background-color: #fff;
+        border-color: #87ceeb;
+    }
+
+    .step-item.active:not(:last-child)::after {
+        border-left-color: #87ceeb;
+    }
+
+
+    /* Form Layout - Dihapus karena Filament akan menanganinya */
+
+    /* Footer Button */
+    .form-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn {
+        background-color: #6c757d;
+        color: #ffffff;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 5px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .btn-next {
+        background-color: #007bff;
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2); /* Subtle blue shadow */
+    }
+
+    .btn-next:hover {
+        background-color: #0069d9; /* Slightly darker blue on hover */
+        box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3); /* Slightly larger shadow on hover */
+        transform: translateY(-2px); /* A bit more lift */
+    }
+
+    .btn-submit {
+        background-color: #28a745;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+        .step-item span {
+            display: none;
+        }
+        .step-item i {
+            margin-right: 0;
+        }
+        .step-item {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .card {
+            padding: 20px;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .header h2 {
+            font-size: 18px;
+        }
+    }
+</style>
+
+<div class="card">
+    <!-- Header Section -->
+    <div class="header">
+        <div class="logo-container">
+            <img src="{{ asset('images/Unpad_logo.png') }}" alt="Unpad Logo" class="h-16 mx-auto mb-4">
+        </div>
+        <h2>Formulir Peminjaman Kendaraan Universitas Padjadjaran</h2>
+        <h4>Direktorat Pengelolaan Aset dan Sarana Prasarana</h4>
+    </div>
+
+    <!-- Stepper Section -->
+    <div class="stepper-container">
+        <div class="stepper">
+            <div @class(['step-item', 'active' => $this->currentStep >= 1])>
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>Informasi Perjalanan</span>
+            </div>
+            <div @class(['step-item', 'active' => $this->currentStep >= 2])>
+                <i class="fa-solid fa-user-group"></i>
+                <span>Informasi Pengguna</span>
+            </div>
+            <div @class(['step-item', 'active' => $this->currentStep >= 3])>
+                <i class="fa-solid fa-list-check"></i>
+                <span>Detail Perjalanan</span>
+            </div>
+            <div @class(['step-item', 'active' => $this->currentStep >= 4])>
+                <i class="fa-solid fa-file-alt"></i>
+                <span>Dokumen & Berkas</span>
             </div>
         </div>
-
-        {{-- Form Content Card --}}
-        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl transition-all duration-500">
-            {{ $this->form }}
-        </div>
-
     </div>
+
+    <!-- Form Section -->
+    <form wire:submit.prevent="submit">
+        {{ $this->form }}
+
+        <!-- Footer Buttons -->
+        <div class="form-footer">
+            <div>
+                @if ($this->currentStep > 1)
+                    <button type="button" wire:click="previousStep" class="btn">
+                        Sebelumnya
+                    </button>
+                @endif
+            </div>
+            <div>
+                @if ($this->currentStep < 4)
+                    <button type="button" wire:click="nextStep" class="btn btn-next">
+                        Selanjutnya
+                    </button>
+                @else
+                    <button type="submit" class="btn btn-submit">
+                        Ajukan Permohonan
+                    </button>
+                @endif
+            </div>
+        </div>
+    </form>
 </div>

@@ -322,72 +322,110 @@ class PerjalananResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nomor_perjalanan')
-                    ->label('Nomor Perjalanan')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('status_perjalanan')
-                    ->label('Status')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Permohonan' => 'info',
-                        'Menunggu Persetujuan' => 'warning',
-                        'Terjadwal' => 'success',
-                        'Ditolak' => 'danger',
-                        default => 'gray',
+                    ->label('Nomor Perjalanan & Status')
+                    ->formatStateUsing(function ($record) {
+                        $nomor = $record->nomor_perjalanan;
+                        $status = $record->status_perjalanan;
+                        $statusColor = match ($status) {
+                            'Permohonan' => 'info',
+                            'Menunggu Persetujuan' => 'warning',
+                            'Terjadwal' => 'success',
+                            'Ditolak' => 'danger',
+                            default => 'gray',
+                        };
+                        $statusIcon = match ($status) {
+                            'Permohonan' => 'heroicon-o-document-text',
+                            'Menunggu Persetujuan' => 'heroicon-o-arrow-path animate-spin',
+                            'Terjadwal' => 'heroicon-o-check-circle',
+                            'Ditolak' => 'heroicon-o-x-circle',
+                            default => 'heroicon-o-question-mark-circle',
+                        };
+                        $capsuleClass = match ($status) {
+                            'Permohonan' => 'bg-blue-100 text-blue-800 border border-blue-200',
+                            'Menunggu Persetujuan' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+                            'Terjadwal' => 'bg-green-100 text-green-800 border border-green-200',
+                            'Ditolak' => 'bg-red-100 text-red-800 border border-red-200',
+                            default => 'bg-gray-100 text-gray-800 border border-gray-200',
+                        };
+                        return "<div class='flex items-center space-x-2'>
+                                    <div class='font-mono text-sm font-semibold'>{$nomor}</div>
+                                    <div class='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {$capsuleClass}'>
+                                        <x-{$statusIcon} class='h-4 w-4 mr-1' />
+                                        {$status}
+                                    </div>
+                                </div>";
                     })
-                    ->icon(fn (string $state): string => match ($state) {
-                        'Permohonan' => 'heroicon-o-document-text',
-                        'Menunggu Persetujuan' => 'heroicon-o-clock',
-                        'Terjadwal' => 'heroicon-o-check-circle',
-                        'Ditolak' => 'heroicon-o-x-circle',
-                        default => 'heroicon-o-question-mark-circle',
+                    ->html()
+                    ->searchable(['nomor_perjalanan', 'status_perjalanan'])
+                    ->sortable()
+                    ->extraAttributes(['class' => 'px-4 py-3']),
+
+
+                Tables\Columns\TextColumn::make('waktu')
+                    ->label('Waktu')
+                    ->formatStateUsing(function ($record) {
+                        $berangkat = $record->waktu_keberangkatan ? \Carbon\Carbon::parse($record->waktu_keberangkatan)->format('d/m/Y H:i') : '-';
+                        $pulang = $record->waktu_kepulangan ? \Carbon\Carbon::parse($record->waktu_kepulangan)->format('d/m/Y H:i') : '-';
+                        return "<div class='space-y-1'>
+                                    <div class='flex items-center text-sm'>
+                                        <x-heroicon-s-arrow-up-right class='h-4 w-4 text-green-500 mr-1' /> <span class='font-medium'>Berangkat:</span> {$berangkat}
+                                    </div>
+                                    <div class='flex items-center text-sm'>
+                                        <x-heroicon-s-arrow-down-left class='h-4 w-4 text-red-500 mr-1' /> <span class='font-medium'>Pulang:</span> {$pulang}
+                                    </div>
+                                </div>";
                     })
-                    ->searchable(),
+                    ->html()
+                    ->sortable(['waktu_keberangkatan'])
+                    ->extraAttributes(['class' => 'px-4 py-3']),
 
-                Tables\Columns\TextColumn::make('waktu_keberangkatan')
-                    ->label('Waktu Berangkat')
-                    ->dateTime('d/m/Y H:i')
-                    ->icon('heroicon-o-arrow-right-on-rectangle')
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('kendaraan')
+                    ->label('Kendaraan')
+                    ->formatStateUsing(function ($record) {
+                        $nopol = $record->nopol_kendaraan ?: '-';
+                        $merk = $record->merk_type ?: '-';
+                        return "<div class='space-y-1'>
+                                    <div class='flex items-center text-sm'>
+                                        <x-heroicon-o-truck class='h-4 w-4 text-gray-500 mr-1' />
+                                        <div class='font-mono text-sm font-bold'>{$nopol}</div>
+                                    </div>
+                                    <div class='text-xs text-gray-500'>{$merk}</div>
+                                </div>";
+                    })
+                    ->html()
+                    ->searchable(['nopol_kendaraan', 'merk_type'])
+                    ->extraAttributes(['class' => 'px-4 py-3']),
 
-                Tables\Columns\TextColumn::make('waktu_kepulangan')
-                    ->label('Waktu Pulang')
-                    ->dateTime('d/m/Y H:i')
-                    ->icon('heroicon-o-arrow-left-on-rectangle')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('nopol_kendaraan')
-                    ->label('Nomor Kendaraan')
-                    ->icon('heroicon-o-truck')
-                    ->copyable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('merk_type')
-                    ->label('Jenis Kendaraan')
-                    ->icon('heroicon-o-tag')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('pengemudi.nama_staf')
-                    ->label('Pengemudi')
-                    ->icon('heroicon-o-user-circle')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('nama_pengguna')
-                    ->label('Nama Pengguna')
-                    ->icon('heroicon-o-user')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('orang')
+                    ->label('Orang')
+                    ->formatStateUsing(function ($record) {
+                        $driver = $record->pengemudi?->nama_staf ?: '-';
+                        $user = $record->nama_pengguna ?: '-';
+                        return "<div class='space-y-1'>
+                                    <div class='flex items-center text-sm'>
+                                        <x-heroicon-o-user class='h-4 w-4 text-blue-500 mr-1' /> <span class='font-medium'>Driver:</span> {$driver}
+                                    </div>
+                                    <div class='flex items-center text-sm'>
+                                        <x-heroicon-o-users class='h-4 w-4 text-green-500 mr-1' /> <span class='font-medium'>Pemohon:</span> {$user}
+                                    </div>
+                                </div>";
+                    })
+                    ->html()
+                    ->searchable(['pengemudi.nama_staf', 'nama_pengguna'])
+                    ->extraAttributes(['class' => 'px-4 py-3']),
 
                 Tables\Columns\TextColumn::make('unitKerja.nama_unit_kerja')
                     ->label('Unit Kerja')
                     ->icon('heroicon-o-building-office')
-                    ->searchable(),
+                    ->searchable()
+                    ->extraAttributes(['class' => 'px-4 py-3']),
 
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Terakhir Diubah')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->extraAttributes(['class' => 'px-4 py-3']),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status_perjalanan')
@@ -411,24 +449,25 @@ class PerjalananResource extends Resource
                         'Kunjungan Industri' => 'Kunjungan Industri',
                         'Kegiatan Perlombaan' => 'Kegiatan Perlombaan',
                         'Kegiatan Kemahasiswaan' => 'Kegiatan Kemahasiswaan',
-                        'Kegiatan Perkulihaan' => 'Kegiatan Perkulihaan',
+                        'Kegiatan Perkuluntuihaan' => 'Kegiatan Perkulihaan',
                         'Kegiatan Lainya' => 'Kegiatan Lainya',
                     ]),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
-                    ->icon('heroicon-o-eye')
-                    ->color('info'),
-                Tables\Actions\EditAction::make()
-                    ->icon('heroicon-o-pencil')
-                    ->color('warning'),
-                Tables\Actions\Action::make('generatePdf')
-                    ->label('PDF')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('success')
-                    ->visible(fn (Perjalanan $record): bool => $record->status_perjalanan === 'Terjadwal')
-                    ->url(fn (Perjalanan $record): string => route('perjalanan.pdf', $record->nomor_perjalanan))
-                    ->openUrlInNewTab(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make()
+                        ->icon('heroicon-o-eye')
+                        ->color('info'),
+                    Tables\Actions\Action::make('generatePdf')
+                        ->label('PDF')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('success')
+                        ->visible(fn (Perjalanan $record): bool => $record->status_perjalanan === 'Terjadwal')
+                        ->url(fn (Perjalanan $record): string => route('perjalanan.pdf', $record->nomor_perjalanan))
+                        ->openUrlInNewTab(),
+                ])
+                ->icon('heroicon-m-ellipsis-horizontal')
+                ->color('gray'),
             ])
 
             ->defaultSort('updated_at', 'desc')

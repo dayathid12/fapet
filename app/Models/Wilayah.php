@@ -10,4 +10,10 @@ class Wilayah extends Model
     use HasFactory;
 
     protected $primaryKey = 'wilayah_id';
+
+    protected $fillable = [
+        'nama_wilayah',
+        'kota_kabupaten',
+        'provinsi',
+    ];
 }
