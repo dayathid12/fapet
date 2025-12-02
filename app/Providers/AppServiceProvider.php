@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Contracts\Role;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Models\Permission;
+use Livewire\Livewire; // Add this line
+use App\Filament\Pages\PeminjamanKendaraanUnpad; // Add this line
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,5 +31,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Permission::class, PermissionPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(User::class, UserPolicy::class);
+
+        // Register the Livewire component for the public form
+        Livewire::component('filament.pages.peminjaman-kendaraan-unpad', PeminjamanKendaraanUnpad::class);
     }
 }
