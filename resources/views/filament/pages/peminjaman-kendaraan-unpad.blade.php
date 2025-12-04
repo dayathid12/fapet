@@ -166,6 +166,13 @@
         transform: translateY(-1px);
     }
 
+    .btn[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        pointer-events: none;
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
         .step-item span {
@@ -239,7 +246,7 @@
             </div>
             <div>
                 @if ($this->currentStep < 4)
-                    <button type="button" wire:click="nextStep" class="btn btn-next">
+                    <button type="button" wire:click="nextStep" class="btn btn-next" @disabled(!$this->isCurrentStepValid())>
                         Selanjutnya
                     </button>
                 @else
