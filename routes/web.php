@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\PerjalananController;
+use App\Http\Controllers\PeminjamanKendaraanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,9 +30,7 @@ Route::get('/jadwal-kendaraan', [JadwalController::class, 'index'])->name('jadwa
 // Route untuk PDF Perjalanan
 Route::get('/perjalanan/{nomor_perjalanan}/pdf', [PerjalananController::class, 'generatePdf'])->name('perjalanan.pdf');
 
-Route::get('/PeminjamanKendaraanUnpad', function () {
-    return view('peminjaman-kendaraan-unpad-public');
-})->name('peminjaman.form');
-
-Route::get('/success/{token}', [App\Http\Controllers\PeminjamanController::class, 'success'])->name('peminjaman.success');
-Route::get('/status/{token}', [App\Http\Controllers\PeminjamanController::class, 'status'])->name('peminjaman.status');
+Route::get('/PeminjamanKendaraanUnpad', [PeminjamanKendaraanController::class, 'show'])->name('peminjaman.form');
+Route::post('/PeminjamanKendaraanUnpad/submit', [PeminjamanKendaraanController::class, 'submit'])->name('peminjaman.submit');
+Route::get('/peminjaman/sukses/{token}', [PeminjamanKendaraanController::class, 'success'])->name('peminjaman.success');
+Route::get('/peminjaman/status/{token}', [PeminjamanKendaraanController::class, 'status'])->name('peminjaman.status');

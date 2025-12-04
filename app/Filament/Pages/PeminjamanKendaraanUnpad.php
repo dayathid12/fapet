@@ -102,13 +102,13 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
                             'Kegiatan Perkuliahan' => 'Kegiatan Perkuliahan',
                             'Kegiatan Lainnya' => 'Kegiatan Lainnya',
                         ])
-
+                        ->searchable()
                         ->required(),
 
                     Select::make('tujuan_wilayah_id')
                         ->label('Kota Kabupaten')
                         ->options(fn () => $this->getWilayahOptions())
-
+                        ->searchable()
                         ->required(),
                 ])->visible(fn () => $this->currentStep === 1),
 
@@ -174,6 +174,7 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
                     ->options(fn () => $this->getWilayahOptions())
                     ->searchable()
                     ->required()
+                    ->placeholder('Pilih kota kabupaten...')
                     ->visible(fn () => $this->currentStep === 3),
 
                 TextInput::make('provinsi')
@@ -246,15 +247,22 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
 
         if (!empty($data['tujuan_wilayah_id_step3'])) {
             $data['tujuan_wilayah_id'] = $data['tujuan_wilayah_id_step3'];
+            // Fetch provinsi based on tujuan_wilayah_id
+            $wilayah = Wilayah::find($data['tujuan_wilayah_id']);
+            if ($wilayah) {
+                $data['provinsi'] = $wilayah->provinsi;
+            }
         }
         unset($data['tujuan_wilayah_id_step3']);
 
         $data['jenis_kegiatan'] = $data['nama_kegiatan'] ?? null;
-        $data['nopol_kendaraan'] = null;
+        // nopol_kendaraan is now nullable, so setting to null is acceptable if not provided
+        // We can remove this line if we want it to implicitly be null when not provided by the form
+        // $data['nopol_kendaraan'] = null;
         $data['status_perjalanan'] = 'Permohonan';
         $data['jenis_operasional'] = 'Peminjaman';
         $data['status_operasional'] = 'Belum Ditetapkan';
-        $data['pengemudi_id'] = null;
+        $data['pengemudi_id'] = null; // Now nullable, so this is fine
 
         try {
             Perjalanan::create($data);

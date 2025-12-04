@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kendaraans', function (Blueprint $table) {
-            $table->id();
-            $table->string('nopol')->unique();
-            $table->string('merk')->nullable();
-            $table->string('jenis')->nullable();
-            $table->timestamps();
+        Schema::table('perjalanans', function (Blueprint $table) {
+            $table->string('nopol_kendaraan')->nullable()->change();
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kendaraans');
+        Schema::table('perjalanans', function (Blueprint $table) {
+            $table->string('nopol_kendaraan')->change();
+        });
     }
 };

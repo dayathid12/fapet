@@ -56,9 +56,6 @@ class Perjalanan extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            if ($model->getKey() === null) {
-                $model->setAttribute($model->getKeyName(), static::max($model->getKeyName()) + 1);
-            }
             if (empty($model->no_surat_tugas)) {
                 $nextNumber = static::max('nomor_perjalanan') + 1;
                 $model->no_surat_tugas = 'ST-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT) . '/' . date('Y');
