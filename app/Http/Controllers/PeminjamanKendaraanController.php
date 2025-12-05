@@ -99,11 +99,14 @@ class PeminjamanKendaraanController extends Controller
 
             Log::info('PeminjamanKendaraan saved successfully with ID:', ['id' => $perjalanan->nomor_perjalanan]);
 
+            $trackingUrl = route('peminjaman.status', ['token' => $token]);
+            Log::info('Generated token and tracking URL:', ['token' => $token, 'tracking_url' => $trackingUrl]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Permohonan peminjaman kendaraan berhasil diajukan!',
                 'token' => $token,
-                'tracking_url' => route('peminjaman.status', ['token' => $token]),
+                'tracking_url' => $trackingUrl,
             ]);
         } catch (\Exception $e) {
             Log::error('Error saving PeminjamanKendaraan:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);

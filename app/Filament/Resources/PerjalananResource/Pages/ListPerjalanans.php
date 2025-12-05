@@ -3,16 +3,24 @@
 namespace App\Filament\Resources\PerjalananResource\Pages;
 
 use App\Filament\Resources\PerjalananResource;
+use App\Filament\Widgets\PerjalananStatsWidget;
 use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Support\HtmlString;
+use Filament\Forms\Components\Card;
 
 
 class ListPerjalanans extends ListRecords
 {
     protected static string $resource = PerjalananResource::class;
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+        ];
+    }
 
     protected function getHeaderActions(): array
     {

@@ -340,32 +340,32 @@ class PerjalananResource extends Resource
                     ->sortable()
                     ->html()
                     ->formatStateUsing(function ($state, Perjalanan $record) {
-                        // Tentukan Tema Warna Badge & Ring berdasarkan Status
-                        // Menggunakan Tailwind classes
+                        // Tentukan Tema Warna Badge & Ring berdasarkan Status dengan Warna yang Jelas
+                        // Menggunakan Tailwind classes dengan warna yang sesuai permintaan
                         $badgeClasses = match ($record->status_perjalanan) {
-                            'Terjadwal' => 'bg-emerald-100 text-emerald-700 ring-emerald-600/20',
-                            'Menunggu Persetujuan' => 'bg-amber-100 text-amber-700 ring-amber-600/20',
-                            'Ditolak' => 'bg-rose-100 text-rose-700 ring-rose-600/20',
-                            'Selesai' => 'bg-blue-50 text-blue-700 ring-blue-600/20',
-                            default => 'bg-gray-100 text-gray-600 ring-gray-600/20',
+                            'Terjadwal' => 'bg-gradient-to-r from-blue-500 to-blue-600 text-white ring-blue-400/50 shadow-lg shadow-blue-500/25',
+                            'Menunggu Persetujuan' => 'bg-gradient-to-r from-amber-400 to-orange-500 text-white ring-amber-400/50 shadow-lg shadow-amber-500/25 animate-bounce',
+                            'Ditolak' => 'bg-gradient-to-r from-red-500 to-red-600 text-white ring-red-400/50 shadow-lg shadow-red-500/25',
+                            'Selesai' => 'bg-gradient-to-r from-green-500 to-green-600 text-white ring-green-400/50 shadow-lg shadow-green-500/25',
+                            default => 'bg-gradient-to-r from-gray-400 to-gray-500 text-white ring-gray-400/50 shadow-lg shadow-gray-500/25',
                         };
 
                         // SVG Icons untuk Status
                         $iconSvg = match ($record->status_perjalanan) {
-                            'Terjadwal', 'Selesai' => '<svg class=\"w-3 h-3 mr-1.5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" /></svg>',
-                            'Menunggu Persetujuan' => '<svg class=\"w-3 h-3 mr-1.5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z\" /></svg>',
-                            'Ditolak' => '<svg class=\"w-3 h-3 mr-1.5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" /></svg>',
+                            'Terjadwal', 'Selesai' => '<svg class="w-3 h-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+                            'Menunggu Persetujuan' => '<svg class="w-3 h-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+                            'Ditolak' => '<svg class="w-3 h-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
                             default => '',
                         };
 
                         $number = $record->id; // Gunakan ID sebagai nomor urut
 
                         return new HtmlString('
-                            <div class="flex flex-col gap-2 py-2">
-                                <div>
+                            <div class="flex flex-col items-center gap-2 py-2">
+                                <div class="text-center">
                                    <div class="text-base font-bold text-slate-900 leading-tight">' . $state . '</div>
                                 </div>
-                                <div>
+                                <div class="flex justify-center">
                                   <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ring-1 ring-inset bg-white/90 shadow-sm ' . $badgeClasses . '">
                                       ' . $iconSvg . '
                                       ' . $record->status_perjalanan . '
@@ -513,13 +513,13 @@ class PerjalananResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            // --- STYLING BARIS (CARD LOOK - BORDER KIRI & HOVER) ---
+            // --- STYLING BARIS MODERN UNTUK FILAMENT ---
             ->recordClasses(fn (Perjalanan $record) => match ($record->status_perjalanan) {
-                'Terjadwal' => 'relative shadow-md hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 border-l-4 border-l-emerald-500 bg-emerald-50/40 hover:bg-emerald-50 transition-all duration-300 ease-out rounded-xl',
-                'Menunggu Persetujuan' => 'relative shadow-md hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 border-l-4 border-l-amber-500 bg-amber-50/40 hover:bg-amber-50 transition-all duration-300 ease-out rounded-xl',
-                'Ditolak' => 'relative shadow-md hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 border-l-4 border-l-rose-500 bg-rose-50/40 hover:bg-rose-50 transition-all duration-300 ease-out rounded-xl',
-                'Selesai' => 'relative shadow-md hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 border-l-4 border-l-blue-500 bg-blue-50/40 hover:bg-blue-50 transition-all duration-300 ease-out rounded-xl',
-                default => 'relative shadow-md hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 border-l-4 border-l-slate-400 bg-slate-50/40 hover:bg-slate-50 transition-all duration-300 ease-out rounded-xl',
+                'Terjadwal' => 'border-l-4 border-l-blue-500 bg-blue-50/50 hover:bg-blue-100/70 transition-colors duration-200',
+                'Menunggu Persetujuan' => 'border-l-4 border-l-amber-500 bg-amber-50/50 hover:bg-amber-100/70 transition-colors duration-200',
+                'Ditolak' => 'border-l-4 border-l-red-500 bg-red-50/50 hover:bg-red-100/70 transition-colors duration-200',
+                'Selesai' => 'border-l-4 border-l-green-500 bg-green-50/50 hover:bg-green-100/70 transition-colors duration-200',
+                default => 'border-l-4 border-l-slate-400 bg-slate-50/50 hover:bg-slate-100/70 transition-colors duration-200',
             })
             ->filters([
                 Tables\Filters\SelectFilter::make('status_perjalanan')

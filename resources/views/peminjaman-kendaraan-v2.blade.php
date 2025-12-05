@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Peminjaman Kendaraan - Universitas Padjadjaran</title>
 
     <!-- Fonts: Plus Jakarta Sans -->
@@ -586,17 +587,28 @@
                     </div>
 
                     <p class="text-xs text-yellow-700 mb-3 leading-relaxed">
-                        Gunakan link di bawah ini untuk melacak progres pengajuan Anda secara real-time.
+                        Gunakan informasi di bawah ini untuk melacak progres pengajuan Anda secara real-time.
                     </p>
+
+                    <div class="bg-white border border-yellow-300 rounded-lg p-3 flex items-center justify-between shadow-inner group relative mb-4">
+                        <div class="overflow-hidden mr-2 w-full">
+                            <p class="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Kode Peminjaman (Token):</p>
+                            <code id="rawToken" class="text-gray-800 font-mono text-xs block truncate select-all"></code>
+                        </div>
+                        <button onclick="copyRawToken()" class="flex-shrink-0 p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors relative" title="Salin Kode" id="copyTokenBtn">
+                            <i id="copyTokenIcon" class="fa-regular fa-copy text-lg"></i>
+                            <span id="copyTokenTooltip" class="absolute -top-8 -left-2 bg-gray-800 text-white text-[10px] py-1 px-2 rounded opacity-0 transition-opacity duration-200 pointer-events-none">Disalin!</span>
+                        </button>
+                    </div>
 
                     <div class="bg-white border border-yellow-300 rounded-lg p-3 flex items-center justify-between shadow-inner group relative">
                         <div class="overflow-hidden mr-2 w-full">
                             <p class="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Link Tracking:</p>
                             <code id="trackingUrl" class="text-gray-800 font-mono text-xs block truncate select-all"></code>
                         </div>
-                        <button onclick="copyLink()" class="flex-shrink-0 p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors relative" title="Salin Link" id="copyBtn">
-                            <i id="copyIcon" class="fa-regular fa-copy text-lg"></i>
-                            <span id="copyTooltip" class="absolute -top-8 -left-2 bg-gray-800 text-white text-[10px] py-1 px-2 rounded opacity-0 transition-opacity duration-200 pointer-events-none">Disalin!</span>
+                        <button onclick="copyTrackingLink()" class="flex-shrink-0 p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors relative" title="Salin Link" id="copyTrackingLinkBtn">
+                            <i id="copyTrackingLinkIcon" class="fa-regular fa-copy text-lg"></i>
+                            <span id="copyTrackingLinkTooltip" class="absolute -top-8 -left-2 bg-gray-800 text-white text-[10px] py-1 px-2 rounded opacity-0 transition-opacity duration-200 pointer-events-none">Disalin!</span>
                         </button>
                     </div>
                 </div>
@@ -878,38 +890,84 @@
             summaryContainer.innerHTML = html;
         }
 
-        function submitForm() {
+        // Function to clear all error messages
+        function clearErrors() {
+            document.querySelectorAll('.tech-input.error').forEach(input => {
+                input.classList.remove('error');
+            });
+            document.querySelectorAll('.error-msg').forEach(msg => {
+                msg.classList.add('hidden');
+                msg.innerText = ''; // Clear existing text
+            });
+        }
+
+        async function submitForm() {
             if(!agreementCheck.checked) {
                 alert('Mohon setujui pernyataan terlebih dahulu.');
                 return;
             }
 
-            // Simulate Loading
+            clearErrors(); // Clear previous errors on new submission attempt
+
             const btnText = document.getElementById('btnText');
             const btnIcon = document.getElementById('btnIcon');
             const loadingIcon = document.getElementById('loadingIcon');
+            const originalBtnText = btnText.innerText;
 
             btnSubmit.disabled = true;
             btnText.innerText = 'Mengirim...';
             btnIcon.classList.add('hidden');
             loadingIcon.classList.remove('hidden');
 
-            // Simulate API Call delay
-            setTimeout(() => {
-                // In a real scenario, you would get the tracking URL from the server response.
-                // For this demo, we'll generate a random one.
-                const randomCode = 'REQ-' + new Date().getFullYear() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
-                const trackingUrl = `https://aset.unpad.ac.id/status/${randomCode}`;
+            const formData = new FormData(form);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
 
-                // Open the new modal with the generated URL
-                openModal(trackingUrl);
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                // Reset button state (optional, as the page will reload)
+            try {
+                const response = await fetch('/PeminjamanKendaraanUnpad/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ data: data }) // Wrap form data in 'data' key as expected by controller
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    openModal(result.tracking_url);
+                } else {
+                    alert('Terjadi kesalahan: ' + (result.message || 'Gagal menyimpan data.'));
+                    if (result.errors) {
+                        for (const fieldName in result.errors) {
+                            const inputElement = document.querySelector(`[name="${fieldName}"]`);
+                            if (inputElement) {
+                                inputElement.classList.add('error');
+                                const errorMsgElement = inputElement.closest('.group')?.querySelector('.error-msg'); // More robust targeting
+                                if (errorMsgElement) {
+                                    errorMsgElement.innerText = result.errors[fieldName][0];
+                                    errorMsgElement.classList.remove('hidden');
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Network or server error:', error);
+                alert('Terjadi kesalahan jaringan atau server. Mohon coba lagi.');
+            } finally {
                 btnSubmit.disabled = false;
-                btnText.innerText = 'Kirim Permohonan';
+                btnText.innerText = originalBtnText;
                 btnIcon.classList.remove('hidden');
                 loadingIcon.classList.add('hidden');
-            }, 1500);
+            }
         }
     </script>
 <script>
