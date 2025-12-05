@@ -7,6 +7,7 @@ use App\Models\Wilayah;
 use App\Models\UnitKerja;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class PeminjamanKendaraanController extends Controller
 {
@@ -50,12 +51,15 @@ class PeminjamanKendaraanController extends Controller
         $validator = validator($data, $rules);
 
         if ($validator->fails()) {
+            Log::info('Validation failed for PeminjamanKendaraan form:', ['errors' => $validator->errors()->toArray(), 'data_received' => $data]);
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi data gagal',
                 'errors' => $validator->errors()->toArray(),
             ], 422);
         }
+
+        Log::info('Validation passed for PeminjamanKendaraan form.');
 
         try {
             // Generate unique token/UUID
@@ -88,8 +92,12 @@ class PeminjamanKendaraanController extends Controller
                 'nopol_kendaraan' => null,
             ];
 
+            Log::info('Saving PeminjamanKendaraan with data:', $saveData);
+
             // Save to database
             $perjalanan = Perjalanan::create($saveData);
+
+            Log::info('PeminjamanKendaraan saved successfully with ID:', ['id' => $perjalanan->nomor_perjalanan]);
 
             return response()->json([
                 'success' => true,
@@ -98,6 +106,7 @@ class PeminjamanKendaraanController extends Controller
                 'tracking_url' => route('peminjaman.status', ['token' => $token]),
             ]);
         } catch (\Exception $e) {
+            Log::error('Error saving PeminjamanKendaraan:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage(),

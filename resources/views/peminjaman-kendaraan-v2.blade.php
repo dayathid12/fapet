@@ -16,6 +16,12 @@
     <!-- Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
+    <!-- Tom Select -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+
     <script>
         tailwind.config = {
             theme: {
@@ -202,10 +208,7 @@
         <!-- HEADER -->
         <div class="flex flex-col md:flex-row items-center justify-between mb-8 animate-fade-up mt-8">
             <div class="flex items-start gap-4">
-                <div class="w-40 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center p-1 mt-1">
-                    <!-- Placeholder Logo Unpad -->
-                    <img src="{{ asset('images/Unpad_logo.png') }}" alt="Unpad" class="w-full h-auto object-contain">
-                </div>
+                <img src="{{ asset('images/Unpad_logo.png') }}" alt="Unpad" class="w-40 h-auto mt-2">
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Peminjaman Kendaraan</h1>
                     <div class="flex items-center text-xs text-slate-500 font-semibold uppercase tracking-wider mt-0.5">
@@ -355,17 +358,7 @@
                                 </div>
                                 <div class="group">
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Kota Tujuan <span class="text-red-500">*</span></label>
-                                    <div class="relative">
-                                        <select name="tujuan_wilayah_id" class="tech-input w-full px-4 py-3 rounded-xl text-sm font-medium text-slate-700 appearance-none cursor-pointer" required>
-                                            <option value="">Pilih Kota...</option>
-                                            <!-- Static Options for Demo -->
-                                            <option value="1">Bandung</option>
-                                            <option value="2">Sumedang</option>
-                                            <option value="3">Jakarta</option>
-                                            <option value="4">Luar Kota Lainnya</option>
-                                        </select>
-                                        <i class="ph-bold ph-caret-down absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
-                                    </div>
+                                    <select id="select-tujuan" name="tujuan_wilayah_id" placeholder="Ketik untuk mencari kota..." required></select>
                                     <p class="text-red-500 text-[10px] mt-1 hidden error-msg">Pilih satu</p>
                                 </div>
                             </div>
@@ -381,17 +374,7 @@
                             <div class="space-y-6">
                                 <div class="group">
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Unit Kerja / Fakultas <span class="text-red-500">*</span></label>
-                                    <div class="relative">
-                                        <select name="unit_kerja_id" class="tech-input w-full px-4 py-3 rounded-xl text-sm font-medium text-slate-700 appearance-none cursor-pointer" required>
-                                            <option value="">Pilih Unit...</option>
-                                            <option value="1">Fakultas MIPA</option>
-                                            <option value="2">Fakultas Hukum</option>
-                                            <option value="3">Fakultas Ekonomi Bisnis</option>
-                                            <option value="4">Rektorat</option>
-                                            <option value="5">Lainnya</option>
-                                        </select>
-                                        <i class="ph-bold ph-caret-down absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
-                                    </div>
+                                    <select id="select-unit-kerja" name="unit_kerja_id" placeholder="Ketik untuk mencari unit kerja..." required></select>
                                     <p class="text-red-500 text-[10px] mt-1 hidden error-msg">Pilih satu</p>
                                 </div>
 
@@ -410,20 +393,19 @@
 
                                 <!-- Box Perwakilan -->
                                 <div class="bg-blue-50/50 border border-blue-100 rounded-2xl p-5 mt-4 transition-all">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3">
-                                                <i class="ph-bold ph-shield-check"></i>
-                                            </div>
-                                            Perwakilan Lapangan
-                                        </h3>
-                                        <label class="inline-flex items-center cursor-pointer group">
-                                            <input type="checkbox" id="useSameInfo" class="sr-only peer">
-                                            <div class="relative w-10 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
-                                            <span class="ms-3 text-xs font-bold text-slate-500 group-hover:text-blue-600 transition-colors">Sama dengan peminjam</span>
-                                        </label>
-                                    </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="flex flex-col gap-2 mb-4">
+                                                                        <label class="inline-flex items-center cursor-pointer group">
+                                                                            <input type="checkbox" id="useSameInfo" class="sr-only peer">
+                                                                            <div class="relative w-10 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+                                                                            <span class="ms-3 text-xs font-bold text-slate-500 group-hover:text-blue-600 transition-colors">Sama dengan peminjam</span>
+                                                                        </label>
+                                                                        <h3 class="text-sm font-bold text-slate-800 flex items-center">
+                                                                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3">
+                                                                                <i class="ph-bold ph-shield-check"></i>
+                                                                            </div>
+                                                                            Perwakilan Lapangan
+                                                                        </h3>
+                                                                    </div>                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div class="group">
                                             <input type="text" id="inputNamaWakil" name="nama_personil_perwakilan" placeholder="Nama Perwakilan" class="tech-input w-full px-4 py-3 rounded-xl text-sm" required>
                                             <p class="text-red-500 text-[10px] mt-1 hidden error-msg">Wajib diisi</p>
@@ -460,36 +442,14 @@
                             </div>
                         </div>
 
-                        <!-- STEP 3: DETAIL -->
+                        <!-- STEP 3: DETAIL & UPLOAD -->
                         <div class="step-panel" data-step="3">
                             <div class="mb-8 pb-4 border-b border-slate-100">
-                                <h2 class="text-2xl font-bold text-slate-900">Detail Tambahan</h2>
-                                <p class="text-sm text-slate-500 mt-1">Informasi pendukung kegiatan.</p>
+                                <h2 class="text-2xl font-bold text-slate-900">Detail Tambahan dan Upload File</h2>
+                                <p class="text-sm text-slate-500 mt-1">Informasi pendukung dan upload berkas wajib.</p>
                             </div>
 
                             <div class="space-y-6">
-                                <div class="p-4 bg-orange-50 border-l-4 border-orange-400 rounded-r-lg flex items-start">
-                                    <i class="ph-fill ph-info text-orange-500 text-lg mr-3 mt-0.5"></i>
-                                    <p class="text-xs text-orange-900 leading-relaxed">
-                                        <span class="font-bold">Konfirmasi Wilayah:</span> Sistem membutuhkan verifikasi ulang kota tujuan untuk perhitungan estimasi BBM dan Driver.
-                                    </p>
-                                </div>
-
-                                <div class="group">
-                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Verifikasi Kota Tujuan <span class="text-red-500">*</span></label>
-                                    <div class="relative">
-                                        <select name="tujuan_wilayah_id_step3" class="tech-input w-full px-4 py-3 rounded-xl text-sm font-medium text-slate-700 appearance-none cursor-pointer" required>
-                                            <option value="">Pilih Kota...</option>
-                                            <option value="1">Bandung</option>
-                                            <option value="2">Sumedang</option>
-                                            <option value="3">Jakarta</option>
-                                            <option value="4">Luar Kota Lainnya</option>
-                                        </select>
-                                        <i class="ph-bold ph-check-circle absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
-                                    </div>
-                                    <p class="text-red-500 text-[10px] mt-1 hidden error-msg">Pilih satu</p>
-                                </div>
-
                                 <div class="group">
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Uraian Kegiatan</label>
                                     <textarea name="uraian_singkat_kegiatan" rows="4" class="tech-input w-full px-4 py-3 rounded-xl text-sm font-medium text-slate-700 resize-none" placeholder="Jelaskan secara singkat agenda kegiatan..."></textarea>
@@ -498,6 +458,25 @@
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Catatan Khusus</label>
                                     <input type="text" name="catatan_keterangan_tambahan" class="tech-input w-full px-4 py-3 rounded-xl text-sm font-medium text-slate-700" placeholder="Opsional (cth: Membawa alat berat, butuh bagasi luas)">
                                 </div>
+
+                                <div class="p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg flex items-start">
+                                    <i class="ph-fill ph-upload-simple text-blue-500 text-lg mr-3 mt-0.5"></i>
+                                    <p class="text-xs text-blue-900 leading-relaxed">
+                                        <span class="font-bold">Upload Berkas:</span> Harap siapkan file dalam format PDF, JPG, atau PNG. Ukuran maksimal 5MB.
+                                    </p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="group">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Surat Peminjaman Kendaraan</label>
+                                        <input type="file" name="surat_peminjaman" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"/>
+                                    </div>
+                                    <div class="group">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Dokumen Pendukung</label>
+                                        <input type="file" name="dokumen_pendukung" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"/>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 
@@ -553,38 +532,137 @@
     </div>
 
     <!-- SUCCESS MODAL -->
-    <div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+    <!-- Container Utama Modal (Default: hidden/opacity-0, diaktifkan via JS) -->
+    <div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none">
 
-        <!-- Modal Card -->
-        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 text-center relative overflow-hidden transform scale-95 transition-all duration-300 z-10">
-            <!-- Decorative Top Bar -->
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+        <!-- Card Content -->
+        <div id="modalContent" class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 relative transform scale-90 opacity-0 transition-all duration-300 max-h-[95vh] overflow-y-auto mt-10">
 
-            <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 animate-[bounce_1s_infinite]">
-                <i class="ph-fill ph-check-circle text-5xl"></i>
-            </div>
-
-            <h3 class="text-2xl font-bold text-slate-900 mb-2">Berhasil!</h3>
-            <p class="text-sm text-slate-500 mb-8 leading-relaxed">Permohonan peminjaman kendaraan Anda telah berhasil dikirim dan sedang diproses.</p>
-
-            <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 mb-6 relative group cursor-pointer hover:bg-blue-50 hover:border-blue-100 transition-colors" onclick="copyTicket()">
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Tiket ID</p>
-                <div class="flex items-center justify-center gap-2">
-                    <p id="ticketCode" class="text-xl font-mono font-bold text-slate-800 tracking-widest">TRX-8829</p>
-                    <i class="ph-bold ph-copy text-slate-400 group-hover:text-blue-500"></i>
-                </div>
-                <div id="copyToast" class="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] py-1 px-3 rounded opacity-0 transition-opacity">Copied!</div>
-            </div>
-
-            <button onclick="location.reload()" class="block w-full py-3.5 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-slate-800 transition-all hover:shadow-lg">
-                Selesai
+            <!-- Tombol Close (X) -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10">
+                <i class="fa-solid fa-times text-xl"></i>
             </button>
+
+            <!-- Bagian Icon Premium (Floating) -->
+            <div class="flex justify-center -mt-20 mb-6 relative z-20">
+                <!-- Efek Glow Belakang -->
+                <div class="absolute top-6 left-1/2 -translate-x-1/2 w-20 h-20 bg-green-400 rounded-full blur-2xl opacity-40"></div>
+
+                <!-- Lingkaran Utama -->
+                <div class="success-glow relative w-28 h-28 bg-gradient-to-tr from-green-500 to-emerald-400 rounded-full flex items-center justify-center border-[6px] border-white shadow-2xl animate-pop-in">
+                    <i class="fa-solid fa-check text-white text-5xl drop-shadow-md transform transition-transform hover:scale-110 duration-200"></i>
+                </div>
+            </div>
+
+            <!-- Konten Teks -->
+            <div class="text-center px-2 pt-2">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2 tracking-tight">Berhasil!</h2>
+                <p class="text-gray-600 mb-6 leading-relaxed">
+                    Permohonan peminjaman kendaraan berhasil diajukan.
+                </p>
+
+                <!-- Box Notifikasi WhatsApp -->
+                <div class="bg-green-50 border border-green-100 rounded-xl p-4 mb-4 flex items-start text-left animate-bounce-short shadow-sm">
+                    <div class="flex-shrink-0 mr-3 mt-1">
+                        <i class="fa-brands fa-whatsapp text-green-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-green-800 mb-1">Langkah Selanjutnya</h3>
+                        <p class="text-xs text-green-700 leading-tight">
+                            Cek notifikasi pada nomor Whatsapp Anda untuk mendapatkan link tracking.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Box Link Tracking -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-left shadow-sm animate-bounce-short" style="animation-delay: 0.1s;">
+                    <div class="flex items-start mb-2">
+                        <div class="flex-shrink-0 mr-2 mt-0.5">
+                            <i class="fa-solid fa-circle-exclamation text-yellow-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-yellow-800">PENTING: Simpan Kode Ini</h3>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-yellow-700 mb-3 leading-relaxed">
+                        Gunakan link di bawah ini untuk melacak progres pengajuan Anda secara real-time.
+                    </p>
+
+                    <div class="bg-white border border-yellow-300 rounded-lg p-3 flex items-center justify-between shadow-inner group relative">
+                        <div class="overflow-hidden mr-2 w-full">
+                            <p class="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Link Tracking:</p>
+                            <code id="trackingUrl" class="text-gray-800 font-mono text-xs block truncate select-all"></code>
+                        </div>
+                        <button onclick="copyLink()" class="flex-shrink-0 p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors relative" title="Salin Link" id="copyBtn">
+                            <i id="copyIcon" class="fa-regular fa-copy text-lg"></i>
+                            <span id="copyTooltip" class="absolute -top-8 -left-2 bg-gray-800 text-white text-[10px] py-1 px-2 rounded opacity-0 transition-opacity duration-200 pointer-events-none">Disalin!</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <div class="mt-2">
+                <button onclick="closeModalAndReload()" class="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3.5 rounded-xl transition-all duration-200 shadow-md transform active:scale-95 text-base">
+                    OK, Mengerti
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
+        // --- MODAL LOGIC ---
+        function openModal(trackingUrl) {
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('modalContent');
+            document.getElementById('trackingUrl').innerText = trackingUrl;
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                content.classList.remove('scale-90', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('modalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-90', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }, 200);
+        }
+
+        function closeModalAndReload() {
+            closeModal();
+            // Optional: Add a small delay before reloading to see the closing animation
+            setTimeout(() => {
+                window.location.reload();
+            }, 300);
+        }
+
+        function copyLink() {
+            const urlText = document.getElementById('trackingUrl').innerText;
+            const copyIcon = document.getElementById('copyIcon');
+            const tooltip = document.getElementById('copyTooltip');
+
+            navigator.clipboard.writeText(urlText).then(() => {
+                // Feedback Visual
+                const originalClass = copyIcon.className;
+                copyIcon.className = "fa-solid fa-check text-green-500 text-lg";
+                tooltip.classList.remove('opacity-0');
+
+                setTimeout(() => {
+                    copyIcon.className = originalClass;
+                    tooltip.classList.add('opacity-0');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        // --- FORM LOGIC ---
         const form = document.getElementById('mainForm');
         const btnPrev = document.getElementById('btnPrev');
         const btnNext = document.getElementById('btnNext');
@@ -818,25 +896,74 @@
 
             // Simulate API Call delay
             setTimeout(() => {
-                // Show Success Modal
-                const modal = document.getElementById('successModal');
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-                modal.querySelector('div[class*="scale-95"]').classList.remove('scale-95');
-                modal.querySelector('div[class*="scale-95"]').classList.add('scale-100');
+                // In a real scenario, you would get the tracking URL from the server response.
+                // For this demo, we'll generate a random one.
+                const randomCode = 'REQ-' + new Date().getFullYear() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+                const trackingUrl = `https://aset.unpad.ac.id/status/${randomCode}`;
 
-                // Generate Random Ticket
-                document.getElementById('ticketCode').innerText = 'TRX-' + Math.floor(1000 + Math.random() * 9000);
+                // Open the new modal with the generated URL
+                openModal(trackingUrl);
+
+                // Reset button state (optional, as the page will reload)
+                btnSubmit.disabled = false;
+                btnText.innerText = 'Kirim Permohonan';
+                btnIcon.classList.remove('hidden');
+                loadingIcon.classList.add('hidden');
             }, 1500);
         }
-
-        function copyTicket() {
-            const ticket = document.getElementById('ticketCode').innerText;
-            navigator.clipboard.writeText(ticket);
-
-            const toast = document.getElementById('copyToast');
-            toast.classList.remove('opacity-0');
-            setTimeout(() => toast.classList.add('opacity-0'), 2000);
-        }
     </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        new TomSelect('#select-tujuan', {
+            valueField: 'value',
+            labelField: 'label',
+            searchField: 'label',
+            openOnFocus: true,
+            load: function(query, callback) {
+                var url = "{{ route('api.wilayah.search') }}?q=" + encodeURIComponent(query);
+                fetch(url)
+                    .then(response => response.json())
+                    .then(json => {
+                        callback(json.items);
+                    }).catch(()=>{
+                        callback();
+                    });
+            },
+            render: {
+                option: function(item, escape) {
+                    return `<div>${escape(item.label)}</div>`;
+                },
+                item: function(item, escape) {
+                    return `<div>${escape(item.label)}</div>`;
+                }
+            }
+        });
+
+        new TomSelect('#select-unit-kerja', {
+            valueField: 'value',
+            labelField: 'label',
+            searchField: 'label',
+            openOnFocus: true,
+            load: function(query, callback) {
+                var url = "{{ route('api.unit-kerja.search') }}?q=" + encodeURIComponent(query);
+                fetch(url)
+                    .then(response => response.json())
+                    .then(json => {
+                        callback(json.items);
+                    }).catch(()=>{
+                        callback();
+                    });
+            },
+            render: {
+                option: function(item, escape) {
+                    return `<div>${escape(item.label)}</div>`;
+                },
+                item: function(item, escape) {
+                    return `<div>${escape(item.label)}</div>`;
+                }
+            }
+        });
+    });
+</script>
 </body>
 </html>

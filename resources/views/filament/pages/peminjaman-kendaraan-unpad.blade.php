@@ -270,4 +270,54 @@
             </div>
         </div>
     </form>
+
+    <!-- Success Modal -->
+    @if($showSuccessModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+            <div class="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full mx-4">
+                <div class="text-center">
+                    <div class="mb-6">
+                        <i class="fas fa-check-circle text-green-500 text-7xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Berhasil!</h2>
+                    <p class="text-gray-600 mb-6">Permohonan peminjaman kendaraan berhasil diajukan.</p>
+
+                    <!-- Checklist Icon and Items -->
+                    <div class="mb-6 bg-blue-50 p-4 rounded-lg">
+                        <div class="flex items-center justify-center mb-4">
+                            <i class="fas fa-list-check text-blue-500 text-3xl mr-3"></i>
+                            <span class="text-lg font-semibold text-gray-700">Status Pengajuan</span>
+                        </div>
+                        <ul class="text-left text-sm text-gray-600 space-y-2">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-3 text-lg"></i> Data telah diterima
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-clock text-yellow-500 mr-3 text-lg"></i> Menunggu verifikasi admin
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-clock text-yellow-500 mr-3 text-lg"></i> Proses persetujuan
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-clock text-yellow-500 mr-3 text-lg"></i> Penugasan kendaraan
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-clock text-yellow-500 mr-3 text-lg"></i> Kendaraan siap digunakan
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Tracking Link -->
+                    <div class="bg-gray-100 p-4 rounded-lg mb-6">
+                        <p class="text-sm text-gray-500 mb-2">Link Tracking:</p>
+                        <a href="{{ $trackingUrl }}" target="_blank" class="text-blue-600 hover:text-blue-800 break-all text-base font-medium">{{ $trackingUrl }}</a>
+                    </div>
+
+                    <button wire:click="$set('showSuccessModal', false)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

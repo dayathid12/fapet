@@ -32,6 +32,9 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
 
     public ?array $data = [];
 
+    public $showSuccessModal = false;
+    public $trackingUrl = '';
+
     private $wilayahOptions = null;
     private $unitKerjaOptions = null;
 
@@ -185,11 +188,27 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
                 Textarea::make('uraian_singkat_kegiatan')
                     ->label('Uraian Singkat Kegiatan')
                     ->rows(3)
+                    ->required()
                     ->visible(fn () => $this->currentStep === 3),
 
                 Textarea::make('catatan_keterangan_tambahan')
                     ->label('Catatan/Keterangan Tambahan')
                     ->rows(3)
+                    ->visible(fn () => $this->currentStep === 3),
+
+                \Filament\Forms\Components\FileUpload::make('surat_peminjaman_kendaraan')
+                    ->label('Surat Peminjaman Kendaraan')
+                    ->directory('surat-peminjaman-kendaraan')
+                    ->acceptedFileTypes(['application/pdf', 'image/*'])
+                    ->maxSize(5120)
+                    ->required()
+                    ->visible(fn () => $this->currentStep === 3),
+
+                \Filament\Forms\Components\FileUpload::make('dokumen_pendukung')
+                    ->label('Dokumen Pendukung')
+                    ->directory('dokumen-pendukung')
+                    ->acceptedFileTypes(['application/pdf', 'image/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+                    ->maxSize(5120)
                     ->visible(fn () => $this->currentStep === 3),
             ])
             ->statePath('data');
@@ -215,7 +234,7 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
                 && !empty($data['nama_personil_perwakilan'] ?? null)
                 && !empty($data['kontak_pengguna_perwakilan'] ?? null)
                 && !empty($data['status_sebagai'] ?? null),
-            3 => !empty($data['tujuan_wilayah_id_step3'] ?? null),
+            3 => !empty($data['tujuan_wilayah_id_step3'] ?? null) && !empty($data['surat_peminjaman_kendaraan'] ?? null),
             4 => true,
             default => false,
         };
@@ -265,13 +284,10 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
         $data['pengemudi_id'] = null; // Now nullable, so this is fine
 
         try {
-            Perjalanan::create($data);
+            $perjalanan = Perjalanan::create($data);
 
-            Notification::make()
-                ->title('Sukses!')
-                ->body('Permohonan peminjaman kendaraan berhasil diajukan.')
-                ->success()
-                ->send();
+            $this->trackingUrl = url('/peminjaman/status/' . $perjalanan->token);
+            $this->showSuccessModal = true;
 
             $this->currentStep = 1;
             $this->data = [];
