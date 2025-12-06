@@ -358,14 +358,6 @@ class PerjalananResource extends Resource
                         'Ditolak' => 'Ditolak',
                     ]),
 
-                Tables\Filters\Filter::make('selesai_filter')
-                    ->label('Selesai')
-                    ->query(function (Builder $query) {
-                        return $query->where('status_perjalanan', 'Terjadwal')
-                                     ->where('waktu_kepulangan', '<', Carbon::now());
-                    })
-                    ->indicator('Selesai'),
-
                 Tables\Filters\SelectFilter::make('jenis_operasional')
                     ->options([
                         'Peminjaman' => 'Peminjaman',
