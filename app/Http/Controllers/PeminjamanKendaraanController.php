@@ -122,7 +122,7 @@ class PeminjamanKendaraanController extends Controller
      */
     public function status($token)
     {
-        $perjalanan = Perjalanan::where('token', $token)->firstOrFail();
+        $perjalanan = Perjalanan::with(['wilayah', 'unitKerja', 'kendaraan', 'pengemudi'])->where('token', $token)->firstOrFail();
 
         return view('peminjaman-status', [
             'perjalanan' => $perjalanan,

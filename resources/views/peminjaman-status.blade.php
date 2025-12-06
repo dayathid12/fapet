@@ -3,390 +3,617 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Permohonan - Peminjaman Kendaraan</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Pelacakan Permohonan - Peminjaman Kendaraan</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            /* Colors */
+            --primary: #2563eb; /* Blue 600 */
+            --primary-bg: #eff6ff; /* Blue 50 */
+
+            --success: #059669; /* Emerald 600 */
+            --success-bg: #ecfdf5;
+
+            --danger: #e11d48; /* Rose 600 */
+            --danger-bg: #fff1f2;
+
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-400: #94a3b8;
+            --slate-600: #475569;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f3f4f6;
+            background-color: var(--slate-50);
+            color: var(--slate-800);
             min-height: 100vh;
-            padding: 20px;
+            padding: 2rem 1rem;
         }
 
-        .navbar {
-            background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 15px 0;
-            margin-bottom: 30px;
-        }
-
-        .navbar-content {
-            max-width: 900px;
+        /* --- Layout Utils --- */
+        .container {
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 0 20px;
+        }
+
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media(min-width: 768px) {
+            .header-section {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .badge-corp {
+            background-color: var(--slate-200);
+            color: var(--slate-600);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title { font-size: 1.5rem; font-weight: 700; color: var(--slate-900); }
+        .page-subtitle { font-size: 0.875rem; color: var(--slate-600); margin-top: 0.25rem; }
+        .ref-code { font-family: monospace; font-weight: 600; color: var(--slate-800); }
+
+        .btn-print {
+            background: white;
+            border: 1px solid var(--slate-200);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--slate-600);
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-print:hover { background: var(--slate-100); }
+
+        /* --- Dashboard Grid --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
         }
 
-        .navbar h1 {
-            font-size: 18px;
-            color: #111827;
-            font-weight: 600;
+        @media(min-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 2fr 1fr;
+            }
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
+        /* --- Cards --- */
         .card {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 30px;
-            margin-bottom: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--slate-200);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
         }
 
-        .status-header {
+        .card:last-child { margin-bottom: 0; }
+
+        .card-body { padding: 1.5rem; }
+
+        /* --- Status Banner --- */
+        .status-banner {
+            border-radius: 12px;
+            border: 1px solid;
+            padding: 1.5rem;
             display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e5e7eb;
+            gap: 1rem;
+            align-items: flex-start;
         }
+
+        /* Status Themes */
+        .status-banner.pending {
+            background-color: var(--primary-bg);
+            border-color: #bfdbfe; /* Blue 200 */
+        }
+        .status-banner.pending .status-icon { background: #dbeafe; color: var(--primary); }
+        .status-banner.pending .status-text h2 { color: #1e40af; }
+        .status-banner.pending .status-text p { color: #1e40af; }
+
+        .status-banner.approved {
+            background-color: var(--success-bg);
+            border-color: #a7f3d0;
+        }
+        .status-banner.approved .status-icon { background: #d1fae5; color: var(--success); }
+        .status-banner.approved .status-text h2 { color: #065f46; }
+
+        .status-banner.rejected {
+            background-color: var(--danger-bg);
+            border-color: #fecdd3;
+        }
+        .status-banner.rejected .status-icon { background: #ffe4e6; color: var(--danger); }
+        .status-banner.rejected .status-text h2 { color: #9f1239; }
 
         .status-icon {
-            width: 60px;
-            height: 60px;
-            background: #fef3c7;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            flex-shrink: 0;
+            font-size: 1.25rem;
         }
 
-        .status-text h2 {
-            color: #111827;
-            font-size: 20px;
-            margin-bottom: 5px;
+        .status-text h2 { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .status-text p { font-size: 0.875rem; opacity: 0.9; line-height: 1.5; }
+
+        /* --- Stepper / Timeline --- */
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--slate-400);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
         }
 
-        .status-text p {
-            color: #6b7280;
-            font-size: 14px;
-        }
-
-        .timeline {
-            margin: 30px 0;
-        }
-
-        .timeline-item {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 25px;
+        .stepper {
             position: relative;
+            padding-left: 1rem;
         }
 
-        .timeline-item:not(:last-child)::before {
+        /* Vertical Line */
+        .stepper::before {
             content: '';
             position: absolute;
-            left: 29px;
-            top: 60px;
+            left: 15px; /* Half of icon width (30px) approx */
+            top: 0;
+            bottom: 0;
             width: 2px;
-            height: calc(100% + 5px);
-            background: #e5e7eb;
-        }
-
-        .timeline-dot {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            flex-shrink: 0;
-            position: relative;
+            background-color: var(--slate-100);
             z-index: 1;
         }
 
-        .timeline-dot.completed {
-            background: #10b981;
-        }
-
-        .timeline-dot.current {
-            background: #f59e0b;
-            font-size: 20px;
-        }
-
-        .timeline-dot.pending {
-            background: #d1d5db;
-        }
-
-        .timeline-content h3 {
-            color: #111827;
-            font-size: 16px;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .timeline-content p {
-            color: #6b7280;
-            font-size: 14px;
-            margin-bottom: 3px;
-        }
-
-        .timeline-date {
-            color: #9ca3af;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .details-section {
-            margin-top: 30px;
-        }
-
-        .details-section h3 {
-            color: #111827;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .details-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .detail-card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 15px;
-        }
-
-        .detail-label {
-            color: #6b7280;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .detail-value {
-            color: #111827;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .action-buttons {
+        .step-item {
+            position: relative;
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            z-index: 2;
         }
 
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
+        .step-item:last-child { margin-bottom: 0; }
+
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: 2px solid var(--slate-200);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--slate-400);
+            flex-shrink: 0;
             transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Active/Completed Step Styles */
+        .step-item.completed .step-circle {
+            background: var(--primary);
+            border-color: var(--primary);
             color: white;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+        .step-item.active .step-circle {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 4px var(--primary-bg);
         }
 
-        .btn-secondary {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+        /* If Rejected */
+        .step-item.error .step-circle {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
         }
 
-        .btn-secondary:hover {
-            background: #f8f5ff;
+        .step-content h4 { font-size: 0.875rem; font-weight: 700; color: var(--slate-800); }
+        .step-content p { font-size: 0.75rem; margin-top: 0.25rem; }
+
+        .pulse-text { color: var(--primary); font-weight: 600; animation: pulse 2s infinite; }
+        .final-text { color: var(--danger); font-weight: 700; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
         }
 
-        .info-box {
-            background: #e0f2fe;
-            border-left: 4px solid #0284c7;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
+        /* --- Route Visualization --- */
+        .route-visual {
+            position: relative;
+            padding-left: 1.5rem;
+            border-left: 2px solid var(--slate-100);
+            margin-left: 0.75rem;
         }
 
-        .info-box p {
-            color: #0c4a6e;
-            font-size: 13px;
-            line-height: 1.6;
+        .route-point { position: relative; margin-bottom: 2rem; }
+        .route-point:last-child { margin-bottom: 0; }
+
+        .route-dot {
+            position: absolute;
+            left: -1.95rem; /* Adjust based on border and dot size */
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 1px var(--slate-200);
+            background: var(--slate-200);
         }
 
-        @media (max-width: 600px) {
-            .card {
-                padding: 20px;
-            }
+        .route-dot.start { background: var(--slate-400); }
+        .route-dot.end { background: var(--primary); box-shadow: 0 0 0 1px var(--primary-bg); }
 
-            .status-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+        .route-label { font-size: 0.75rem; font-weight: 700; color: var(--slate-400); text-transform: uppercase; margin-bottom: 0.25rem; }
+        .route-val { font-size: 1rem; font-weight: 600; color: var(--slate-800); }
 
-            .details-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
+        /* --- Info List (Sidebar) --- */
+        .info-list { list-style: none; }
+        .info-list li {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
         }
+        .info-list li:last-child { margin-bottom: 0; }
+
+        .info-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--slate-100);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--slate-600);
+            flex-shrink: 0;
+        }
+
+        .info-text label { display: block; font-size: 0.75rem; color: var(--slate-500); margin-bottom: 0.125rem; }
+        .info-text div { font-size: 0.875rem; font-weight: 600; color: var(--slate-800); }
+
+        /* --- Passenger Card --- */
+        .passenger-card {
+            background: #4338ca; /* Indigo */
+            color: white;
+            border: none;
+            position: relative;
+        }
+        .passenger-bg-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 4rem;
+            opacity: 0.1;
+            color: white;
+        }
+
+        .pax-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; opacity: 0.8; margin-bottom: 0.25rem; }
+        .pax-count { font-size: 2rem; font-weight: 700; }
+        .pax-unit { font-size: 1rem; font-weight: 500; opacity: 0.8; }
+
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <div class="navbar">
-        <div class="navbar-content">
-            <h1>Status Permohonan Peminjaman Kendaraan</h1>
-        </div>
-    </div>
 
-    <!-- Content -->
     <div class="container">
-        <!-- Main Card -->
-        <div class="card">
-            <!-- Status Header -->
-            <div class="status-header">
-                <div class="status-icon">⏳</div>
-                <div class="status-text">
-                    <h2>{{ ucfirst($perjalanan->status_perjalanan) }}</h2>
-                    <p>Referensi: <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px;">{{ $token }}</code></p>
+
+        <!-- Header -->
+        <div class="header-section">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <img src="{{ asset('images/Unpad_logo.png') }}" alt="Logo Universitas Padjadjaran" style="height: 60px; width: auto; object-fit: contain;">
+                <div>
+                    <span class="badge-corp">Universitas Padjadjaran</span>
+                    <h1 class="page-title">Pelacakan Permohonan</h1>
+                    <p class="page-subtitle">ID Referensi: <span class="ref-code">{{ $perjalanan->nomor_perjalanan }}</span></p>
                 </div>
             </div>
-
-            <!-- Timeline -->
-            <div class="timeline">
-                <!-- Step 1: Submitted -->
-                <div class="timeline-item">
-                    <div class="timeline-dot completed">✓</div>
-                    <div class="timeline-content">
-                        <h3>Permohonan Diterima</h3>
-                        <p>Permohonan Anda telah kami terima dan sedang diproses.</p>
-                        <div class="timeline-date">{{ $perjalanan->created_at->format('d/m/Y H:i') }}</div>
-                    </div>
-                </div>
-
-                <!-- Step 2: Under Review -->
-                <div class="timeline-item">
-                    <div class="timeline-dot {{ $perjalanan->status_perjalanan === 'Disetujui' ? 'completed' : 'current' }}">
-                        {{ $perjalanan->status_perjalanan === 'Disetujui' ? '✓' : '...' }}
-                    </div>
-                    <div class="timeline-content">
-                        <h3>Sedang Diproses</h3>
-                        <p>Tim kami sedang meninjau permohonan Anda.</p>
-                        <div class="timeline-date">Estimasi: 1-3 hari kerja</div>
-                    </div>
-                </div>
-
-                <!-- Step 3: Approved -->
-                <div class="timeline-item">
-                    <div class="timeline-dot {{ $perjalanan->status_perjalanan === 'Disetujui' ? 'completed' : 'pending' }}">
-                        {{ $perjalanan->status_perjalanan === 'Disetujui' ? '✓' : '' }}
-                    </div>
-                    <div class="timeline-content">
-                        <h3>Disetujui/Ditolak</h3>
-                        <p>Anda akan menerima notifikasi via WhatsApp tentang keputusan kami.</p>
-                        <div class="timeline-date">Menunggu...</div>
-                    </div>
-                </div>
-
-                <!-- Step 4: Completed -->
-                <div class="timeline-item">
-                    <div class="timeline-dot pending"></div>
-                    <div class="timeline-content">
-                        <h3>Selesai</h3>
-                        <p>Proses permohonan telah selesai dan siap untuk pengambilan kendaraan.</p>
-                        <div class="timeline-date">Belum</div>
-                    </div>
-                </div>
+            <div>
+                <button class="btn-print" onclick="window.print()">
+                    <i class="fas fa-print"></i> Cetak Bukti
+                </button>
             </div>
         </div>
 
-        <!-- Details -->
-        <div class="card">
-            <div class="details-section">
-                <h3>📋 Detail Permohonan</h3>
-                <div class="details-grid">
-                    <div class="detail-card">
-                        <div class="detail-label">Nama Peminjam</div>
-                        <div class="detail-value">{{ $perjalanan->nama_pengguna }}</div>
+        <div class="dashboard-grid">
+
+            <!-- LEFT COLUMN -->
+            <div class="main-content">
+
+                <!-- Status Banner -->
+                @php
+                    $statusClass = 'pending';
+                    $statusIcon = 'fa-clock';
+                    $statusTitle = 'Menunggu Persetujuan';
+                    $statusDesc = 'Permohonan Anda sedang ditinjau oleh Bagian Umum dan Logistik.';
+
+                    if ($perjalanan->status_perjalanan === 'Terjadwal') {
+                        $statusClass = 'approved';
+                        $statusIcon = 'fa-check';
+                        $statusTitle = 'Terjadwal';
+                        $statusDesc = 'Permohonan Anda telah disetujui dan untuk selanjutnya silahkan koordinasi dengan pengemudi pada halaman ini.';
+                    } elseif ($perjalanan->status_perjalanan === 'Ditolak') {
+                        $statusClass = 'rejected';
+                        $statusIcon = 'fa-times';
+                        $statusTitle = 'Permohonan Ditolak';
+                        $statusDesc = 'Permohonan Anda ditolak. Silakan hubungi bagian logistik untuk informasi lebih lanjut.';
+                    }
+                @endphp
+                <div class="status-banner {{ $statusClass }}">
+                    <div class="status-icon">
+                        <i class="fas {{ $statusIcon }}"></i>
                     </div>
-                    <div class="detail-card">
-                        <div class="detail-label">Unit Kerja</div>
-                        <div class="detail-value">{{ $perjalanan->unitKerja->nama_unit_kerja ?? 'N/A' }}</div>
-                    </div>
-                    <div class="detail-card">
-                        <div class="detail-label">Kontak</div>
-                        <div class="detail-value">{{ $perjalanan->kontak_pengguna }}</div>
-                    </div>
-                    <div class="detail-card">
-                        <div class="detail-label">Status Pemohon</div>
-                        <div class="detail-value">{{ $perjalanan->status_sebagai }}</div>
-                    </div>
-                    <div class="detail-card">
-                        <div class="detail-label">Jenis Kegiatan</div>
-                        <div class="detail-value">{{ $perjalanan->nama_kegiatan }}</div>
-                    </div>
-                    <div class="detail-card">
-                        <div class="detail-label">Tanggal Keberangkatan</div>
-                        <div class="detail-value">{{ \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->format('d/m/Y H:i') }}</div>
-                    </div>
-                    <div class="detail-card">
-                        <div class="detail-label">Lokasi Keberangkatan</div>
-                        <div class="detail-value">{{ $perjalanan->lokasi_keberangkatan }}</div>
-                    </div>
-                    <div class="detail-card">
-                        <div class="detail-label">Jumlah Rombongan</div>
-                        <div class="detail-value">{{ $perjalanan->jumlah_rombongan }} orang</div>
+                    <div class="status-text">
+                        <h2>{{ $statusTitle }}</h2>
+                        <p>{{ $statusDesc }}</p>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Info Box -->
-        <div class="card">
-            <div class="info-box">
-                <p><strong>💡 Tips:</strong> Refresh halaman ini untuk melihat update status terbaru. Anda juga akan menerima notifikasi via WhatsApp ketika ada perubahan status permohonan.</p>
+                <!-- Progress Tracker -->
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="card-body">
+                        <h3 class="section-title">Tahapan Proses</h3>
+
+                        <div class="stepper">
+                            @php
+                                $step1Class = 'completed';
+                                $step1Icon = '<i class="fas fa-check"></i>';
+                                $step1Text = '';
+
+                                $step2Class = '';
+                                $step2Icon = '2';
+                                $step2Text = '';
+
+                                $step3Class = '';
+                                $step3Icon = '3';
+                                $step3Text = '';
+
+                                $step4Class = '';
+                                $step4Icon = '4';
+                                $step4Text = '';
+
+                                if ($perjalanan->status_perjalanan === 'Menunggu Persetujuan') {
+                                    $step2Class = 'active';
+                                    $step2Text = '<p class="pulse-text">Sedang diproses...</p>';
+                                } elseif ($perjalanan->status_perjalanan === 'Terjadwal') {
+                                    $step2Class = 'completed';
+                                    $step2Icon = '<i class="fas fa-check"></i>';
+                                    $step3Class = 'completed';
+                                    $step3Icon = '<i class="fas fa-check"></i>';
+                                    $step4Class = 'active';
+                                    $step4Text = '<p class="pulse-text">Sedang diproses...</p>';
+                                } elseif ($perjalanan->status_perjalanan === 'Ditolak') {
+                                    $step2Class = 'completed';
+                                    $step2Icon = '<i class="fas fa-check"></i>';
+                                    $step3Class = 'error';
+                                    $step3Icon = '<i class="fas fa-times"></i>';
+                                    $step3Text = '<p class="final-text">Permohonan ditolak</p>';
+                                }
+                            @endphp
+
+                            <!-- Step 1: Pengajuan - Always completed -->
+                            <div class="step-item {{ $step1Class }}">
+                                <div class="step-circle">{!! $step1Icon !!}</div>
+                                <div class="step-content">
+                                    <h4>Pengajuan</h4>
+                                    {!! $step1Text !!}
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Verifikasi -->
+                            <div class="step-item {{ $step2Class }}">
+                                <div class="step-circle">{!! $step2Icon !!}</div>
+                                <div class="step-content">
+                                    <h4>Verifikasi</h4>
+                                    {!! $step2Text !!}
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Keputusan -->
+                            <div class="step-item {{ $step3Class }}">
+                                <div class="step-circle">{!! $step3Icon !!}</div>
+                                <div class="step-content">
+                                    <h4>Keputusan</h4>
+                                    {!! $step3Text !!}
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Penugasan -->
+                            <div class="step-item {{ $step4Class }}">
+                                <div class="step-circle">{!! $step4Icon !!}</div>
+                                <div class="step-content">
+                                    <h4>Penugasan</h4>
+                                    {!! $step4Text !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trip Details -->
+                <div class="card">
+                    <div class="card-body">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+                            <h3 class="section-title" style="margin:0;">Detail Perjalanan</h3>
+                            <span style="font-size:0.75rem; font-weight:600; background:var(--slate-100); padding:2px 8px; border-radius:4px;">{{ $perjalanan->kendaraan ? '1 Kendaraan' : 'Kendaraan Belum Ditentukan' }}</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <!-- Route -->
+                            <div class="route-visual">
+                                <div class="route-point">
+                                    <div class="route-dot start"></div>
+                                    <div class="route-label">Dari</div>
+                                    <div class="route-val">{{ $perjalanan->lokasi_keberangkatan }}</div>
+                                </div>
+                                <div class="route-point">
+                                    <div class="route-dot end"></div>
+                                    <div class="route-label" style="color:var(--primary);">Ke</div>
+                                    <div class="route-val">{{ $perjalanan->alamat_tujuan }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Schedule Info -->
+                            <div style="background:var(--slate-50); padding:1rem; border-radius:8px; align-self:start;">
+                                <ul class="info-list">
+                                    <li style="margin-bottom:1rem;">
+                                        <div class="info-icon" style="width:28px; height:28px;"><i class="fas fa-calendar-alt" style="font-size:0.8rem;"></i></div>
+                                        <div class="info-text">
+                                            <label>Jadwal</label>
+                                            <div>
+                                                @php
+                                                    $departure = \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan);
+                                                    $return = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                                                    $daysDiff = $return ? $departure->diffInDays($return) : null;
+                                                @endphp
+
+                                                @if($return && $daysDiff <= 1)
+                                                    {{ $departure->locale('id')->isoFormat('dddd, D MMM YYYY') }}<br>
+                                                    {{ $departure->format('H:i') }} WIB - {{ $return->format('H:i') }} WIB
+                                                @else
+                                                    {{ $departure->locale('id')->isoFormat('dddd, D MMM YYYY') }}<br>
+                                                    {{ $departure->format('H:i') }} WIB
+                                                    @if($return)
+                                                        <br><span style="font-size: 0.75rem; font-weight: 400; color: var(--slate-600); opacity: 0.75;">
+                                                            {{ $return->locale('id')->isoFormat('dddd, D MMM YYYY') }}<br>
+                                                            {{ $return->format('H:i') }} WIB
+                                                        </span>
+                                                    @endif
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="info-icon" style="width:28px; height:28px;"><i class="fas fa-clipboard-list" style="font-size:0.8rem;"></i></div>
+                                        <div class="info-text">
+                                            <label>Keperluan</label>
+                                            <div>{{ $perjalanan->nama_kegiatan }}</div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="action-buttons">
-                <a href="{{ route('peminjaman.form') }}" class="btn btn-secondary">← Kembali ke Form</a>
-                <button onclick="location.reload()" class="btn btn-primary">🔄 Refresh Status</button>
+            <!-- RIGHT COLUMN (Sidebar) -->
+            <div class="sidebar">
+
+                <!-- User Info -->
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="section-title" style="border-bottom:1px solid var(--slate-100); padding-bottom:0.5rem;">Informasi Pemohon</h3>
+                        <ul class="info-list" style="margin-top:1rem;">
+                            <li>
+                                <div class="info-icon"><i class="fas fa-user"></i></div>
+                                <div class="info-text">
+                                    <label>Nama Lengkap</label>
+                                    <div>{{ $perjalanan->nama_pengguna }}</div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="info-icon"><i class="fas fa-building"></i></div>
+                                <div class="info-text">
+                                    <label>Unit Kerja</label>
+                                    <div>{{ $perjalanan->unitKerja ? $perjalanan->unitKerja->nama_unit_kerja : 'Unit Kerja Tidak Ditemukan' }}</div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="info-icon"><i class="fas fa-phone"></i></div>
+                                <div class="info-text">
+                                    <label>Kontak</label>
+                                    <div>{{ $perjalanan->kontak_pengguna }}</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Driver Info (only show when status is Terjadwal) -->
+                @if($perjalanan->status_perjalanan === 'Terjadwal' && $perjalanan->pengemudi)
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="section-title" style="border-bottom:1px solid var(--slate-100); padding-bottom:0.5rem;">Informasi Pengemudi</h3>
+                        <ul class="info-list" style="margin-top:1rem;">
+                            <li>
+                                <div class="info-icon"><i class="fas fa-user-tie"></i></div>
+                                <div class="info-text">
+                                    <label>Nama Pengemudi</label>
+                                    <div>{{ $perjalanan->pengemudi->nama_staf }}</div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="info-icon"><i class="fas fa-phone"></i></div>
+                                <div class="info-text">
+                                    <label>No. Telepon</label>
+                                    <div>{{ $perjalanan->pengemudi->no_telepon ?? 'Tidak tersedia' }}</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Passenger Count -->
+                <div class="card passenger-card">
+                    <div class="card-body">
+                        <i class="fas fa-car passenger-bg-icon"></i>
+                        <div class="pax-label">Total Penumpang</div>
+                        <div class="pax-count">{{ $perjalanan->jumlah_rombongan }} <span class="pax-unit">Orang</span></div>
+                    </div>
+                </div>
+
+                <!-- Help -->
+                <div style="text-align:center; font-size:0.75rem; color:var(--slate-400); margin-top:1rem;">
+                    Butuh bantuan? Hubungi logistik di <br>
+                    <a href="#" style="color:var(--primary); text-decoration:none; font-weight:600;">logistik@unpad.ac.id</a>
+                </div>
+
             </div>
+
         </div>
     </div>
+
 </body>
 </html>

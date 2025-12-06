@@ -469,8 +469,9 @@
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="group">
-                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Surat Peminjaman Kendaraan</label>
-                                        <input type="file" name="surat_peminjaman" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"/>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Surat Peminjaman Kendaraan <span class="text-red-500">*</span></label>
+                                        <input type="file" name="surat_peminjaman" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" required/>
+                                        <p class="text-red-500 text-[10px] mt-1 hidden error-msg">Wajib diisi</p>
                                     </div>
                                     <div class="group">
                                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Dokumen Pendukung</label>
@@ -539,10 +540,7 @@
         <!-- Card Content -->
         <div id="modalContent" class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 relative transform scale-90 opacity-0 transition-all duration-300 max-h-[95vh] overflow-y-auto mt-10">
 
-            <!-- Tombol Close (X) -->
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10">
-                <i class="fa-solid fa-times text-xl"></i>
-            </button>
+          
 
             <!-- Bagian Icon Premium (Floating) -->
             <div class="flex justify-center -mt-20 mb-6 relative z-20">
@@ -570,36 +568,20 @@
                     <div>
                         <h3 class="text-sm font-semibold text-green-800 mb-1">Langkah Selanjutnya</h3>
                         <p class="text-xs text-green-700 leading-tight">
-                            Cek notifikasi pada nomor Whatsapp Anda untuk mendapatkan link tracking.
+                            Cek notifikasi pada nomor Whatsapp Anda untuk mendapatkan link tracking atau coppy link di bawah.
                         </p>
                     </div>
                 </div>
 
                 <!-- Box Link Tracking -->
                 <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-left shadow-sm animate-bounce-short" style="animation-delay: 0.1s;">
-                    <div class="flex items-start mb-2">
-                        <div class="flex-shrink-0 mr-2 mt-0.5">
-                            <i class="fa-solid fa-circle-exclamation text-yellow-600 text-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-yellow-800">PENTING: Simpan Kode Ini</h3>
-                        </div>
-                    </div>
+
 
                     <p class="text-xs text-yellow-700 mb-3 leading-relaxed">
                         Gunakan informasi di bawah ini untuk melacak progres pengajuan Anda secara real-time.
                     </p>
 
-                    <div class="bg-white border border-yellow-300 rounded-lg p-3 flex items-center justify-between shadow-inner group relative mb-4">
-                        <div class="overflow-hidden mr-2 w-full">
-                            <p class="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Kode Peminjaman (Token):</p>
-                            <code id="rawToken" class="text-gray-800 font-mono text-xs block truncate select-all"></code>
-                        </div>
-                        <button onclick="copyRawToken()" class="flex-shrink-0 p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors relative" title="Salin Kode" id="copyTokenBtn">
-                            <i id="copyTokenIcon" class="fa-regular fa-copy text-lg"></i>
-                            <span id="copyTokenTooltip" class="absolute -top-8 -left-2 bg-gray-800 text-white text-[10px] py-1 px-2 rounded opacity-0 transition-opacity duration-200 pointer-events-none">Disalin!</span>
-                        </button>
-                    </div>
+
 
                     <div class="bg-white border border-yellow-300 rounded-lg p-3 flex items-center justify-between shadow-inner group relative">
                         <div class="overflow-hidden mr-2 w-full">
@@ -654,10 +636,10 @@
             }, 300);
         }
 
-        function copyLink() {
+        function copyTrackingLink() {
             const urlText = document.getElementById('trackingUrl').innerText;
-            const copyIcon = document.getElementById('copyIcon');
-            const tooltip = document.getElementById('copyTooltip');
+            const copyIcon = document.getElementById('copyTrackingLinkIcon');
+            const tooltip = document.getElementById('copyTrackingLinkTooltip');
 
             navigator.clipboard.writeText(urlText).then(() => {
                 // Feedback Visual
@@ -690,7 +672,7 @@
         const requiredFields = {
             1: ['waktu_keberangkatan', 'lokasi_keberangkatan', 'jumlah_rombongan', 'alamat_tujuan', 'nama_kegiatan', 'tujuan_wilayah_id'],
             2: ['unit_kerja_id', 'nama_pengguna', 'kontak_pengguna', 'nama_personil_perwakilan', 'kontak_pengguna_perwakilan', 'status_sebagai'],
-            3: ['tujuan_wilayah_id_step3'],
+            3: ['surat_peminjaman'],
             4: []
         };
 
