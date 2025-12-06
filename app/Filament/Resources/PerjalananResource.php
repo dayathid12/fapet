@@ -12,6 +12,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 
@@ -27,73 +28,7 @@ class PerjalananResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Informasi Perjalanan')
-                    ->description('Detail dasar perjalanan dinas')
-                    ->icon('heroicon-o-information-circle')
-                    ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                Forms\Components\ToggleButtons::make('jenis_operasional')
-                                    ->label('Jenis Operasional')
-                                    ->options([
-                                        'Peminjaman' => 'Peminjaman',
-                                        'Operasional' => 'Operasional',
-                                    ])
-                                    ->icons([
-                                        'Peminjaman' => 'heroicon-o-arrow-right-circle',
-                                        'Operasional' => 'heroicon-o-cog-6-tooth',
-                                    ])
-                                    ->colors([
-                                        'Peminjaman' => 'success',
-                                        'Operasional' => 'info',
-                                    ])
-                                    ->grouped()
-                                    ->required()
-                                    ->extraAttributes(['class' => 'justify-start']),
 
-                                Forms\Components\ToggleButtons::make('status_perjalanan')
-                                    ->label('Status Perjalanan')
-                                    ->options([
-                                        'Menunggu Persetujuan' => 'Menunggu Persetujuan',
-                                        'Terjadwal' => 'Terjadwal',
-                                        'Ditolak' => 'Ditolak',
-                                    ])
-                                    ->icons([
-                                        'Menunggu Persetujuan' => 'heroicon-o-clock',
-                                        'Terjadwal' => 'heroicon-o-check-circle',
-                                        'Ditolak' => 'heroicon-o-x-circle',
-                                    ])
-                                    ->colors([
-                                        'Menunggu Persetujuan' => 'warning',
-                                        'Terjadwal' => 'success',
-                                        'Ditolak' => 'danger',
-                                    ])
-                                    ->grouped()
-                                    ->required()
-                                    ->extraAttributes(['class' => 'justify-center']),
-                            ]),
-                        Forms\Components\ToggleButtons::make('jenis_kegiatan')
-                            ->label('Jenis Kegiatan')
-                            ->options([
-                                'LK' => 'LK',
-                                'DK' => 'DK',
-                                'LB' => 'LB',
-                            ])
-                            ->icons([
-                                'LK' => 'heroicon-o-academic-cap',
-                                'DK' => 'heroicon-o-building-office',
-                                'LB' => 'heroicon-o-globe-alt',
-                            ])
-                            ->colors([
-                                'LK' => 'info',
-                                'DK' => 'success',
-                                'LB' => 'gray',
-                            ])
-                            ->grouped()
-                            ->required()
-                            ->extraAttributes(['class' => 'justify-center']),
-
-                    ]),
 
                 Forms\Components\Section::make('Informasi Pengguna')
                     ->description('Data pengguna, unit kerja, dan kota kabupaten')
@@ -126,6 +61,18 @@ class PerjalananResource extends Resource
                                         Forms\Components\TextInput::make('kontak_pengguna')
                                             ->label('Kontak Pengguna')
                                             ->placeholder('Masukkan nomor telepon/WA')
+                                            ->maxLength(255),
+                                    ]),
+                                Forms\Components\Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('nama_perwakilan')
+                                            ->label('Nama Perwakilan')
+                                            ->placeholder('Masukkan nama perwakilan')
+                                            ->maxLength(255),
+
+                                        Forms\Components\TextInput::make('kontak_perwakilan')
+                                            ->label('Kontak Perwakilan')
+                                            ->placeholder('Masukkan nomor telepon/WA perwakilan')
                                             ->maxLength(255),
                                     ]),
                             ]),
@@ -232,6 +179,68 @@ class PerjalananResource extends Resource
                     ->description('Informasi kendaraan dan pengemudi')
                     ->icon('heroicon-o-truck')
                     ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\ToggleButtons::make('jenis_operasional')
+                                    ->label('Jenis Operasional')
+                                    ->options([
+                                        'Peminjaman' => 'Peminjaman',
+                                        'Operasional' => 'Operasional',
+                                    ])
+                                    ->icons([
+                                        'Peminjaman' => 'heroicon-o-arrow-right-circle',
+                                        'Operasional' => 'heroicon-o-cog-6-tooth',
+                                    ])
+                                    ->colors([
+                                        'Peminjaman' => 'success',
+                                        'Operasional' => 'info',
+                                    ])
+                                    ->grouped()
+                                    ->required()
+                                    ->extraAttributes(['class' => 'justify-start']),
+
+                                Forms\Components\ToggleButtons::make('status_perjalanan')
+                                    ->label('Status Perjalanan')
+                                    ->options([
+                                        'Menunggu Persetujuan' => 'Menunggu Persetujuan',
+                                        'Terjadwal' => 'Terjadwal',
+                                        'Ditolak' => 'Ditolak',
+                                    ])
+                                    ->icons([
+                                        'Menunggu Persetujuan' => 'heroicon-o-clock',
+                                        'Terjadwal' => 'heroicon-o-check-circle',
+                                        'Ditolak' => 'heroicon-o-x-circle',
+                                    ])
+                                    ->colors([
+                                        'Menunggu Persetujuan' => 'warning',
+                                        'Terjadwal' => 'success',
+                                        'Ditolak' => 'danger',
+                                    ])
+                                    ->grouped()
+                                    ->required()
+                                    ->extraAttributes(['class' => 'justify-center']),
+                            ]),
+                        Forms\Components\ToggleButtons::make('jenis_kegiatan')
+                            ->label('Jenis Kegiatan')
+                            ->options([
+                                'LK' => 'LK',
+                                'DK' => 'DK',
+                                'LB' => 'LB',
+                            ])
+                            ->icons([
+                                'LK' => 'heroicon-o-academic-cap',
+                                'DK' => 'heroicon-o-building-office',
+                                'LB' => 'heroicon-o-globe-alt',
+                            ])
+                            ->colors([
+                                'LK' => 'info',
+                                'DK' => 'success',
+                                'LB' => 'gray',
+                            ])
+                            ->grouped()
+                            ->required()
+                            ->extraAttributes(['class' => 'justify-center']),
+
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\DateTimePicker::make('waktu_keberangkatan')
@@ -347,8 +356,16 @@ class PerjalananResource extends Resource
                         'Menunggu Persetujuan' => 'Menunggu Persetujuan',
                         'Terjadwal' => 'Terjadwal',
                         'Ditolak' => 'Ditolak',
-                        'Selesai' => 'Selesai',
                     ]),
+
+                Tables\Filters\Filter::make('selesai_filter')
+                    ->label('Selesai')
+                    ->query(function (Builder $query) {
+                        return $query->where('status_perjalanan', 'Terjadwal')
+                                     ->where('waktu_kepulangan', '<', Carbon::now());
+                    })
+                    ->indicator('Selesai'),
+
                 Tables\Filters\SelectFilter::make('jenis_operasional')
                     ->options([
                         'Peminjaman' => 'Peminjaman',
