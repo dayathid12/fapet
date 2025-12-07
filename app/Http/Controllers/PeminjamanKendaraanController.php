@@ -7,7 +7,6 @@ use App\Models\Wilayah;
 use App\Models\UnitKerja;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 
 class PeminjamanKendaraanController extends Controller
 {
@@ -51,15 +50,12 @@ class PeminjamanKendaraanController extends Controller
         $validator = validator($data, $rules);
 
         if ($validator->fails()) {
-            Log::info('Validation failed for PeminjamanKendaraan form:', ['errors' => $validator->errors()->toArray(), 'data_received' => $data]);
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi data gagal',
                 'errors' => $validator->errors()->toArray(),
             ], 422);
         }
-
-        Log::info('Validation passed for PeminjamanKendaraan form.');
 
         try {
             // Generate unique token/UUID
@@ -88,26 +84,20 @@ class PeminjamanKendaraanController extends Controller
                 'status_perjalanan' => 'Menunggu Persetujuan',
                 'jenis_operasional' => 'Peminjaman',
                 'status_operasional' => 'Belum Ditetapkan',
+                'pengemudi_id' => null,
+                'nopol_kendaraan' => null,
             ];
-
-            Log::info('Saving PeminjamanKendaraan with data:', $saveData);
 
             // Save to database
             $perjalanan = Perjalanan::create($saveData);
-
-            Log::info('PeminjamanKendaraan saved successfully with ID:', ['id' => $perjalanan->nomor_perjalanan]);
-
-            $trackingUrl = route('peminjaman.status', ['token' => $token]);
-            Log::info('Generated token and tracking URL:', ['token' => $token, 'tracking_url' => $trackingUrl]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Permohonan peminjaman kendaraan berhasil diajukan!',
                 'token' => $token,
-                'tracking_url' => $trackingUrl,
+                'tracking_url' => route('peminjaman.status', ['token' => $token]),
             ]);
         } catch (\Exception $e) {
-            Log::error('Error saving PeminjamanKendaraan:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
@@ -120,17 +110,7 @@ class PeminjamanKendaraanController extends Controller
      */
     public function status($token)
     {
-        Log::info('Attempting to retrieve Perjalanan with token:', ['token' => $token]);
-        $perjalanan = Perjalanan::with(['wilayah', 'unitKerja', 'details.kendaraan', 'details.pengemudi', 'details.asisten'])->where('token', $token)->firstOrFail();
-
-        Log::info('Perjalanan found:', ['nomor_perjalanan' => $perjalanan->nomor_perjalanan, 'status_perjalanan' => $perjalanan->status_perjalanan]);
-        Log::info('Perjalanan details count:', ['count' => $perjalanan->details->count()]);
-        if ($perjalanan->details->isNotEmpty()) {
-            Log::info('First detail record:', ['detail' => $perjalanan->details->first()->toArray()]);
-        } else {
-            Log::warning('No details found for Perjalanan record with token:', ['token' => $token]);
-        }
-
+        $perjalanan = Perjalanan::where('token', $token)->firstOrFail();
 
         return view('peminjaman-status', [
             'perjalanan' => $perjalanan,

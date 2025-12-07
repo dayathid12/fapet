@@ -13,7 +13,7 @@
 
         <div class="bg-white border border-yellow-300 rounded-lg p-3 flex items-center justify-between shadow-inner group relative">
             <div class="overflow-hidden mr-2 w-full">
-                <p class="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Link Tracking:</p>
+
                 <code id="trackingUrl" class="text-gray-800 font-mono text-xs block truncate select-all">{{ $url }}</code>
             </div>
             <button onclick="copyTrackingLink()" class="flex-shrink-0 p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors relative" title="Salin Link" id="copyTrackingLinkBtn">

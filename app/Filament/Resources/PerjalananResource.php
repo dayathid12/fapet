@@ -14,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 
 class PerjalananResource extends Resource
@@ -165,13 +166,31 @@ class PerjalananResource extends Resource
                                     ->label('Surat Peminjaman Kendaraan')
                                     ->directory('surat-peminjaman-kendaraan')
                                     ->acceptedFileTypes(['application/pdf', 'image/*'])
-                                    ->maxSize(5120),
+                                    ->maxSize(5120)
+                                    ->hintActions([
+                                        Forms\Components\Actions\Action::make('view_surat_peminjaman')
+                                            ->label('Lihat')
+                                            ->icon('heroicon-o-eye')
+                                            ->color('primary')
+                                            ->url(fn (Model $record) => $record->surat_peminjaman_kendaraan ? Storage::url($record->surat_peminjaman_kendaraan) : '#')
+                                            ->openUrlInNewTab()
+                                            ->visible(fn (Model $record) => (bool) $record->surat_peminjaman_kendaraan),
+                                    ]),
 
                                 Forms\Components\FileUpload::make('dokumen_pendukung')
                                     ->label('Dokumen Pendukung')
                                     ->directory('dokumen-pendukung')
                                     ->acceptedFileTypes(['application/pdf', 'image/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                                    ->maxSize(5120),
+                                    ->maxSize(5120)
+                                    ->hintActions([
+                                        Forms\Components\Actions\Action::make('view_dokumen_pendukung')
+                                            ->label('Lihat')
+                                            ->icon('heroicon-o-eye')
+                                            ->color('primary')
+                                            ->url(fn (Model $record) => $record->dokumen_pendukung ? Storage::url($record->dokumen_pendukung) : '#')
+                                            ->openUrlInNewTab()
+                                            ->visible(fn (Model $record) => (bool) $record->dokumen_pendukung),
+                                    ]),
                             ]),
                     ]),
 
