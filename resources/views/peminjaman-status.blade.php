@@ -503,7 +503,13 @@
                     <div class="card-body">
                         <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
                             <h3 class="section-title" style="margin:0;">Detail Perjalanan</h3>
-                            <span style="font-size:0.75rem; font-weight:600; background:var(--slate-100); padding:2px 8px; border-radius:4px;">{{ $detail?->kendaraan ? '1 Kendaraan' : 'Kendaraan Belum Ditentukan' }}</span>
+                            <span style="font-size:0.75rem; font-weight:600; background:var(--slate-100); padding:2px 8px; border-radius:4px;">
+                                @if($perjalanan->details->isNotEmpty())
+                                    {{ $perjalanan->details->count() }} Kendaraan
+                                @else
+                                    Kendaraan Belum Ditentukan
+                                @endif
+                            </span>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
@@ -599,29 +605,54 @@
                     </div>
                 </div>
 
-                <!-- Driver Info (only show when status is Terjadwal or Selesai) -->
-                @if(in_array($perjalanan->status_perjalanan, ['Terjadwal', 'Selesai']) && $detail?->pengemudi)
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="section-title" style="border-bottom:1px solid var(--slate-100); padding-bottom:0.5rem;">Informasi Pengemudi</h3>
-                        <ul class="info-list" style="margin-top:1rem;">
-                            <li>
-                                <div class="info-icon"><i class="fas fa-user-tie"></i></div>
-                                <div class="info-text">
-                                    <label>Nama Pengemudi</label>
-                                    <div>{{ $detail->pengemudi->nama_staf }}</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="info-icon"><i class="fas fa-phone"></i></div>
-                                <div class="info-text">
-                                    <label>No. Telepon</label>
-                                    <div>{{ $detail->pengemudi->no_telepon ?? 'Tidak tersedia' }}</div>
-                                </div>
-                            </li>
-                        </ul>
+                <!-- Vehicle Info (only show when status is Terjadwal or Selesai) -->
+                @if(in_array($perjalanan->status_perjalanan, ['Terjadwal', 'Selesai']) && $perjalanan->details->isNotEmpty())
+                    @foreach($perjalanan->details as $detail)
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="section-title" style="border-bottom:1px solid var(--slate-100); padding-bottom:0.5rem;">Informasi Kendaraan {{ $loop->iteration }}</h3>
+                            <ul class="info-list" style="margin-top:1rem;">
+                                <li>
+                                    <div class="info-icon"><i class="fas fa-car"></i></div>
+                                    <div class="info-text">
+                                        <label>Nomor Polisi Kendaraan</label>
+                                        <div>{{ $detail->kendaraan->nopol_kendaraan ?? 'Tidak tersedia' }}</div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="info-icon"><i class="fas fa-user-tie"></i></div>
+                                    <div class="info-text">
+                                        <label>Nama Pengemudi</label>
+                                        <div>{{ $detail->pengemudi->nama_staf ?? 'Tidak tersedia' }}</div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="info-icon"><i class="fas fa-phone"></i></div>
+                                    <div class="info-text">
+                                        <label>Kontak Pengemudi</label>
+                                        <div>{{ $detail->pengemudi->no_telepon ?? 'Tidak tersedia' }}</div>
+                                    </div>
+                                </li>
+                                @if($detail->asisten)
+                                <li>
+                                    <div class="info-icon"><i class="fas fa-user-friends"></i></div>
+                                    <div class="info-text">
+                                        <label>Nama Asisten Pengemudi</label>
+                                        <div>{{ $detail->asisten->nama_staf ?? 'Tidak tersedia' }}</div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="info-icon"><i class="fas fa-phone"></i></div>
+                                    <div class="info-text">
+                                        <label>Kontak Asisten Pengemudi</label>
+                                        <div>{{ $detail->asisten->no_telepon ?? 'Tidak tersedia' }}</div>
+                                    </div>
+                                </li>
+                                @endif
+                            </ul>
+                        </div>
                     </div>
-                </div>
+                    @endforeach
                 @endif
 
                 <!-- Passenger Count -->
