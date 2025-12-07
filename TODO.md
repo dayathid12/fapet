@@ -1,18 +1,28 @@
-# TODO: Tingkatkan Tabel di http://127.0.0.1:8000/app/perjalanans
+# TODO List for Peminjaman Status Page Updates
 
-## Tugas Selesai
-- [x] Perbarui CSS untuk menggunakan font Plus Jakarta Sans
-- [x] Modifikasi kolom status menjadi desain kapsul dengan ikon (jam berputar untuk 'Menunggu Persetujuan', centang untuk 'Terjadwal')
-- [x] Perbarui kolom kendaraan menjadi nopol tebal, merk_type abu-abu lebih kecil
-- [x] Uji tabel di URL untuk memastikan perubahan render dengan benar
-- [x] Verifikasi ikon tampil dengan benar (ditambahkan animate-spin pada ikon jam)
-- [x] Konfirmasi perubahan font diterapkan pada tabel
-- [x] Pastikan hierarki pada kolom kendaraan jelas
-- [x] Hapus tampilan kartu widget statistik
+## Task Overview
+Update the stepper logic in `resources/views/peminjaman-status.blade.php` to reflect specific stages: Pengajuan, Keputusan, and Penugasan based on the provided requirements.
 
-## Sedang Dikerjakan
-- [x] Perbaiki tampilan tabel agar lebih modern dan berjalan di Filament
-- [x] Pusatkan nomor perjalanan di tengah kolom Status
-- [x] Buat kolom kendaraan dinamis untuk menampilkan nama tipe kendaraan
-- [x] Pastikan status memiliki warna (Selesai = hijau, Ditolak = merah)
-- [ ] Uji perbaikan tampilan tabel
+## Requirements Breakdown
+1. **Pengajuan (Step 1)**: If status is "Menunggu Persetujuan", show "Permohonan sedang diproses".
+2. **Keputusan (Step 3)**: 
+   - If status is "Terjadwal", show check icon with "Permohonan Disetujui".
+   - If status is "Ditolak", show red cross icon.
+3. **Penugasan (Step 4)**: 
+   - If departure time equals today, show green icon with "Sedang melakukan pelayanan".
+   - If return time is today or later, show blue checklist icon with "Pelayanan selesai".
+
+## Implementation Steps
+- [ ] Update Step 1 (Pengajuan) logic to display "Permohonan sedang diproses" when status is "Menunggu Persetujuan".
+- [ ] Update Step 3 (Keputusan) logic to show appropriate icons and text based on status.
+- [ ] Update Step 4 (Penugasan) logic with date-based conditions using Carbon for icons and text.
+- [ ] Ensure all changes are properly integrated into the existing stepper structure.
+- [ ] Test the updated logic to verify correct display based on different statuses and dates.
+
+## Files to Modify
+- `resources/views/peminjaman-status.blade.php`
+
+## Notes
+- Use Carbon for date comparisons in Step 4.
+- Maintain existing styling and structure.
+- Ensure icons and text match the requirements exactly.

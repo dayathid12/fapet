@@ -46,9 +46,9 @@ class ListPerjalanans extends ListRecords
             'terjadwal' => Tab::make('Terjadwal')
                 ->icon('heroicon-o-check-circle')
 
-                ->badge(fn () => static::getResource()::getModel()::where('status_perjalanan', 'Terjadwal')->count())
+                ->badge(fn () => static::getResource()::getModel()::where('status_perjalanan', 'Terjadwal')->where('waktu_kepulangan', '>=', \Carbon\Carbon::today())->count())
                 ->badgeColor('success')
-                ->modifyQueryUsing(fn ($query) => $query->where('status_perjalanan', 'Terjadwal')),
+                ->modifyQueryUsing(fn ($query) => $query->where('status_perjalanan', 'Terjadwal')->where('waktu_kepulangan', '>=', \Carbon\Carbon::today())),
             'ditolak' => Tab::make('Ditolak')
                 ->icon('heroicon-o-x-circle')
                 ->badge(fn () => static::getResource()::getModel()::where('status_perjalanan', 'Ditolak')->count())
@@ -61,9 +61,23 @@ class ListPerjalanans extends ListRecords
                 ->modifyQueryUsing(fn ($query) => $query->whereDate('waktu_keberangkatan', \Carbon\Carbon::today())),
             'selesai' => Tab::make('Selesai')
                 ->icon('heroicon-o-check-badge')
-                ->badge(fn () => static::getResource()::getModel()::where('status_perjalanan', 'Terjadwal')->where('waktu_kepulangan', '<', \Carbon\Carbon::today())->count())
-                ->badgeColor('success')
-                ->modifyQueryUsing(fn ($query) => $query->where('status_perjalanan', 'Terjadwal')->where('waktu_kepulangan', '<', \Carbon\Carbon::today())),
+                ->badge(function () {
+                    $query = static::getResource()::getModel()::query();
+                    $query->where('status_perjalanan', 'Selesai')
+                        ->orWhere(function ($q) {
+                            $q->where('status_perjalanan', 'Terjadwal')
+                                ->where('waktu_kepulangan', '<', \Carbon\Carbon::today());
+                        });
+                    return $query->count();
+                })
+                ->badgeColor('primary')
+                ->modifyQueryUsing(function ($query) {
+                    return $query->where('status_perjalanan', 'Selesai')
+                        ->orWhere(function ($q) {
+                            $q->where('status_perjalanan', 'Terjadwal')
+                                ->where('waktu_kepulangan', '<', \Carbon\Carbon::today());
+                        });
+                }),
         ];
     }
 }

@@ -5,16 +5,19 @@ namespace App\Filament\Resources\PerjalananResource\Pages;
 use App\Filament\Resources\PerjalananResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Actions\Action;
 
 class EditPerjalanan extends EditRecord
 {
     protected static string $resource = PerjalananResource::class;
 
-    
-
-    public function getMaxContentWidth(): ?string
+    protected function getHeaderActions(): array
     {
-        return MaxWidth::SevenExtraLarge->value;
+        return [
+            Actions\DeleteAction::make(),
+            Action::make('copyLink')
+                ->label('Copy Link Pelacakan')
+                ->view('filament.resources.perjalanan-resource.actions.copy-link', ['record' => $this->record]),
+        ];
     }
 }

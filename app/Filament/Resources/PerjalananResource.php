@@ -176,7 +176,7 @@ class PerjalananResource extends Resource
                     ]),
 
                 Forms\Components\Section::make('Kendaraan & Staf')
-                    ->description('Informasi kendaraan dan pengemudi')
+                    ->description('Informasi kendaraan dan pengemudi yang bertugas')
                     ->icon('heroicon-o-truck')
                     ->schema([
                         Forms\Components\Grid::make(2)
@@ -205,16 +205,19 @@ class PerjalananResource extends Resource
                                         'Menunggu Persetujuan' => 'Menunggu Persetujuan',
                                         'Terjadwal' => 'Terjadwal',
                                         'Ditolak' => 'Ditolak',
+                                        'Selesai' => 'Selesai',
                                     ])
                                     ->icons([
                                         'Menunggu Persetujuan' => 'heroicon-o-clock',
                                         'Terjadwal' => 'heroicon-o-check-circle',
                                         'Ditolak' => 'heroicon-o-x-circle',
+                                        'Selesai' => 'heroicon-o-check-badge',
                                     ])
                                     ->colors([
                                         'Menunggu Persetujuan' => 'warning',
                                         'Terjadwal' => 'success',
                                         'Ditolak' => 'danger',
+                                        'Selesai' => 'primary',
                                     ])
                                     ->grouped()
                                     ->required()
@@ -253,87 +256,35 @@ class PerjalananResource extends Resource
                                     ->displayFormat('d/m/Y H:i')
                                     ->native(false),
                             ]),
-                        Forms\Components\Grid::make(2)
+
+                        \Filament\Forms\Components\Repeater::make('details')
+                            ->label('Detail Kendaraan dan Staf')
+                            ->relationship()
                             ->schema([
-                                Forms\Components\Select::make('pengemudi_id')
-                                    ->label('Nama Pengemudi')
-                                    ->relationship('pengemudi', 'nama_staf')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->placeholder('Pilih nama pengemudi...'),
-                                Forms\Components\Select::make('asisten_id')
-                                    ->label('Nama Asisten')
-                                    ->relationship('asisten', 'nama_staf')
-                                    ->searchable()
-                                    ->preload()
-                                    ->placeholder('Pilih nama asisten (opsional)...'),
-                            ]),
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                Forms\Components\Select::make('nopol_kendaraan')
+                                \Filament\Forms\Components\Select::make('kendaraan_nopol')
                                     ->label('Nomor Polisi Kendaraan')
-                                    ->relationship('kendaraan', 'nopol_kendaraan')
+                                    ->options(\App\Models\Kendaraan::all()->pluck('nopol_kendaraan', 'nopol_kendaraan'))
                                     ->searchable()
-                                    ->preload()
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        $vehicle = Kendaraan::where('nopol_kendaraan', $state)->first();
-                                        if ($vehicle) {
-                                            $set('merk_type', $vehicle->merk_type);
-                                            $set('foto_kendaraan', $vehicle->foto_kendaraan);
-                                        } else {
-                                            $set('merk_type', null);
-                                            $set('foto_kendaraan', null);
-                                        }
-                                    })
-                                    ->createOptionForm([
-                                        Forms\Components\TextInput::make('nopol_kendaraan')
-                                            ->label('Nomor Polisi Kendaraan Baru')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('jenis_kendaraan')
-                                            ->label('Jenis Kendaraan')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('merk_type')
-                                            ->label('Merk/Type')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('warna_tanda')
-                                            ->label('Warna/Tanda')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('tahun_pembuatan')
-                                            ->label('Tahun Pembuatan')
-                                            ->required()
-                                            ->numeric(),
-                                        Forms\Components\TextInput::make('nomor_rangka')
-                                            ->label('Nomor Rangka')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('nomor_mesin')
-                                            ->label('Nomor Mesin')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('lokasi_kendaraan')
-                                            ->label('Lokasi Kendaraan')
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('penggunaan')
-                                            ->label('Penggunaan')
-                                            ->maxLength(255),
-                                    ])
                                     ->required()
-                                    ->placeholder('Pilih nomor polisi kendaraan...'),
-                                Forms\Components\TextInput::make('merk_type')
-                                    ->label('Merk & Tipe')
-                                    ->disabled()
-                                    ->placeholder('Merk & Tipe akan muncul otomatis'),
-                                Forms\Components\ViewField::make('foto_kendaraan')
-                                    ->label('Foto Kendaraan')
-                                    ->view('filament.forms.components.image-preview')
-                                    ->disabled(),
-                            ]),
+                                    ->placeholder('Pilih nomor polisi...'),
+                                \Filament\Forms\Components\Select::make('pengemudi_id')
+                                    ->label('Nama Pengemudi')
+                                    ->options(\App\Models\Staf::all()->pluck('nama_staf', 'staf_id'))
+                                    ->searchable()
+                                    ->required()
+                                    ->placeholder('Pilih pengemudi...'),
+                                \Filament\Forms\Components\Select::make('asisten_id')
+                                    ->label('Nama Asisten')
+                                    ->options(\App\Models\Staf::all()->pluck('nama_staf', 'staf_id'))
+                                    ->searchable()
+                                    ->placeholder('Pilih asisten (opsional)...'),
+                            ])
+                            ->columns(3)
+                            ->addActionLabel('Tambah Kendaraan & Staf')
+                            ->minItems(1)
+                            ->defaultItems(1)
+                            ->cloneable()
+                            ->columnSpanFull(),
                     ]),
             ]);
     }

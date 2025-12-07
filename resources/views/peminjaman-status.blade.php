@@ -151,6 +151,13 @@
         .status-banner.approved .status-icon { background: #d1fae5; color: var(--success); }
         .status-banner.approved .status-text h2 { color: #065f46; }
 
+        .status-banner.completed {
+            background-color: var(--success-bg);
+            border-color: #a7f3d0;
+        }
+        .status-banner.completed .status-icon { background: #d1fae5; color: var(--success); }
+        .status-banner.completed .status-text h2 { color: #065f46; }
+
         .status-banner.rejected {
             background-color: var(--danger-bg);
             border-color: #fecdd3;
@@ -184,17 +191,20 @@
 
         .stepper {
             position: relative;
-            padding-left: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
         }
 
-        /* Vertical Line */
+        /* Horizontal Line */
         .stepper::before {
             content: '';
             position: absolute;
-            left: 15px; /* Half of icon width (30px) approx */
-            top: 0;
-            bottom: 0;
-            width: 2px;
+            top: 16px; /* Half of circle height */
+            left: 0;
+            right: 0;
+            height: 2px;
             background-color: var(--slate-100);
             z-index: 1;
         }
@@ -202,12 +212,13 @@
         .step-item {
             position: relative;
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
             z-index: 2;
+            flex: 1;
+            text-align: center;
         }
-
-        .step-item:last-child { margin-bottom: 0; }
 
         .step-circle {
             width: 32px;
@@ -361,21 +372,37 @@
 
                 <!-- Status Banner -->
                 @php
+                    $perjalanan = $perjalanan; // Ensure $perjalanan is defined
+                    $detail = $perjalanan->details->first();
+                    $originalStatus = $perjalanan->status_perjalanan;
+                    $waktuKepulangan = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                
+                    $effectiveStatus = $originalStatus;
+                    if ($originalStatus === 'Terjadwal' && $waktuKepulangan && $waktuKepulangan->isPast()) {
+                        $effectiveStatus = 'Selesai';
+                    }
+                
+                    // Default values
                     $statusClass = 'pending';
                     $statusIcon = 'fa-clock';
                     $statusTitle = 'Menunggu Persetujuan';
                     $statusDesc = 'Permohonan Anda sedang ditinjau oleh Bagian Umum dan Logistik.';
-
-                    if ($perjalanan->status_perjalanan === 'Terjadwal') {
+                
+                    if ($effectiveStatus === 'Terjadwal') {
                         $statusClass = 'approved';
                         $statusIcon = 'fa-check';
                         $statusTitle = 'Terjadwal';
                         $statusDesc = 'Permohonan Anda telah disetujui dan untuk selanjutnya silahkan koordinasi dengan pengemudi pada halaman ini.';
-                    } elseif ($perjalanan->status_perjalanan === 'Ditolak') {
+                    } elseif ($effectiveStatus === 'Ditolak') {
                         $statusClass = 'rejected';
                         $statusIcon = 'fa-times';
                         $statusTitle = 'Permohonan Ditolak';
                         $statusDesc = 'Permohonan Anda ditolak. Silakan hubungi bagian logistik untuk informasi lebih lanjut.';
+                    } elseif ($effectiveStatus === 'Selesai') {
+                        $statusClass = 'completed';
+                        $statusIcon = 'fa-check-double';
+                        $statusTitle = 'Selesai';
+                        $statusDesc = 'Pelayanan perjalanan telah selesai. Terima kasih telah menggunakan layanan kami.';
                     }
                 @endphp
                 <div class="status-banner {{ $statusClass }}">
@@ -387,49 +414,60 @@
                         <p>{{ $statusDesc }}</p>
                     </div>
                 </div>
-
+                
                 <!-- Progress Tracker -->
                 <div class="card" style="margin-top: 1.5rem;">
                     <div class="card-body">
                         <h3 class="section-title">Tahapan Proses</h3>
-
+                
                         <div class="stepper">
                             @php
                                 $step1Class = 'completed';
                                 $step1Icon = '<i class="fas fa-check"></i>';
                                 $step1Text = '';
-
+                
                                 $step2Class = '';
                                 $step2Icon = '2';
                                 $step2Text = '';
-
+                
                                 $step3Class = '';
                                 $step3Icon = '3';
                                 $step3Text = '';
-
-                                $step4Class = '';
-                                $step4Icon = '4';
-                                $step4Text = '';
-
+                
+                                $today = \Carbon\Carbon::today();
+                
                                 if ($perjalanan->status_perjalanan === 'Menunggu Persetujuan') {
+                                    $step1Text = '<p class="pulse-text">Permohonan sedang diproses</p>';
                                     $step2Class = 'active';
                                     $step2Text = '<p class="pulse-text">Sedang diproses...</p>';
                                 } elseif ($perjalanan->status_perjalanan === 'Terjadwal') {
                                     $step2Class = 'completed';
                                     $step2Icon = '<i class="fas fa-check"></i>';
-                                    $step3Class = 'completed';
-                                    $step3Icon = '<i class="fas fa-check"></i>';
-                                    $step4Class = 'active';
-                                    $step4Text = '<p class="pulse-text">Sedang diproses...</p>';
+                                    $step2Text = '<p style="color: var(--success); font-weight: 600;">Permohonan Disetujui</p>';
+                
+                                    // Check for Penugasan logic
+                                    $departureDate = \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->toDateString();
+                                    $returnDate = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan)->toDateString() : null;
+                
+                                    if ($departureDate === $today->toDateString()) {
+                                        $step3Class = 'completed';
+                                        $step3Icon = '<i class="fas fa-check" style="color: var(--success);"></i>';
+                                        $step3Text = '<p style="color: var(--success); font-weight: 600;">Sedang melakukan pelayanan</p>';
+                                    } elseif ($returnDate && $returnDate >= $today->toDateString()) {
+                                        $step3Class = 'completed';
+                                        $step3Icon = '<i class="fas fa-clipboard-check" style="color: var(--primary);"></i>';
+                                        $step3Text = '<p style="color: var(--primary); font-weight: 600;">Pelayanan selesai</p>';
+                                    } else {
+                                        $step3Class = 'active';
+                                        $step3Text = '<p class="pulse-text">Sedang diproses...</p>';
+                                    }
                                 } elseif ($perjalanan->status_perjalanan === 'Ditolak') {
-                                    $step2Class = 'completed';
-                                    $step2Icon = '<i class="fas fa-check"></i>';
-                                    $step3Class = 'error';
-                                    $step3Icon = '<i class="fas fa-times"></i>';
-                                    $step3Text = '<p class="final-text">Permohonan ditolak</p>';
+                                    $step2Class = 'error';
+                                    $step2Icon = '<i class="fas fa-times" style="color: var(--danger);"></i>';
+                                    $step2Text = '<p class="final-text">Permohonan ditolak</p>';
                                 }
                             @endphp
-
+                
                             <!-- Step 1: Pengajuan - Always completed -->
                             <div class="step-item {{ $step1Class }}">
                                 <div class="step-circle">{!! $step1Icon !!}</div>
@@ -438,45 +476,36 @@
                                     {!! $step1Text !!}
                                 </div>
                             </div>
-
-                            <!-- Step 2: Verifikasi -->
+                
+                            <!-- Step 2: Keputusan -->
                             <div class="step-item {{ $step2Class }}">
                                 <div class="step-circle">{!! $step2Icon !!}</div>
                                 <div class="step-content">
-                                    <h4>Verifikasi</h4>
+                                    <h4>Keputusan</h4>
                                     {!! $step2Text !!}
                                 </div>
                             </div>
-
-                            <!-- Step 3: Keputusan -->
+                
+                            <!-- Step 3: Penugasan -->
                             <div class="step-item {{ $step3Class }}">
                                 <div class="step-circle">{!! $step3Icon !!}</div>
                                 <div class="step-content">
-                                    <h4>Keputusan</h4>
-                                    {!! $step3Text !!}
-                                </div>
-                            </div>
-
-                            <!-- Step 4: Penugasan -->
-                            <div class="step-item {{ $step4Class }}">
-                                <div class="step-circle">{!! $step4Icon !!}</div>
-                                <div class="step-content">
                                     <h4>Penugasan</h4>
-                                    {!! $step4Text !!}
+                                    {!! $step3Text !!}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Trip Details -->
                 <div class="card">
                     <div class="card-body">
                         <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
                             <h3 class="section-title" style="margin:0;">Detail Perjalanan</h3>
-                            <span style="font-size:0.75rem; font-weight:600; background:var(--slate-100); padding:2px 8px; border-radius:4px;">{{ $perjalanan->kendaraan ? '1 Kendaraan' : 'Kendaraan Belum Ditentukan' }}</span>
+                            <span style="font-size:0.75rem; font-weight:600; background:var(--slate-100); padding:2px 8px; border-radius:4px;">{{ $detail?->kendaraan ? '1 Kendaraan' : 'Kendaraan Belum Ditentukan' }}</span>
                         </div>
-
+                
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                             <!-- Route -->
                             <div class="route-visual">
@@ -491,7 +520,7 @@
                                     <div class="route-val">{{ $perjalanan->alamat_tujuan }}</div>
                                 </div>
                             </div>
-
+                
                             <!-- Schedule Info -->
                             <div style="background:var(--slate-50); padding:1rem; border-radius:8px; align-self:start;">
                                 <ul class="info-list">
@@ -505,7 +534,7 @@
                                                     $return = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
                                                     $daysDiff = $return ? $departure->diffInDays($return) : null;
                                                 @endphp
-
+                
                                                 @if($return && $daysDiff <= 1)
                                                     {{ $departure->locale('id')->isoFormat('dddd, D MMM YYYY') }}<br>
                                                     {{ $departure->format('H:i') }} WIB - {{ $return->format('H:i') }} WIB
@@ -534,12 +563,12 @@
                         </div>
                     </div>
                 </div>
-
-            </div>
-
-            <!-- RIGHT COLUMN (Sidebar) -->
-            <div class="sidebar">
-
+                
+                </div>
+                
+                <!-- RIGHT COLUMN (Sidebar) -->
+                <div class="sidebar">
+                
                 <!-- User Info -->
                 <div class="card">
                     <div class="card-body">
@@ -569,9 +598,9 @@
                         </ul>
                     </div>
                 </div>
-
-                <!-- Driver Info (only show when status is Terjadwal) -->
-                @if($perjalanan->status_perjalanan === 'Terjadwal' && $perjalanan->pengemudi)
+                
+                <!-- Driver Info (only show when status is Terjadwal or Selesai) -->
+                @if(in_array($perjalanan->status_perjalanan, ['Terjadwal', 'Selesai']) && $detail?->pengemudi)
                 <div class="card">
                     <div class="card-body">
                         <h3 class="section-title" style="border-bottom:1px solid var(--slate-100); padding-bottom:0.5rem;">Informasi Pengemudi</h3>
@@ -580,21 +609,21 @@
                                 <div class="info-icon"><i class="fas fa-user-tie"></i></div>
                                 <div class="info-text">
                                     <label>Nama Pengemudi</label>
-                                    <div>{{ $perjalanan->pengemudi->nama_staf }}</div>
+                                    <div>{{ $detail->pengemudi->nama_staf }}</div>
                                 </div>
                             </li>
                             <li>
                                 <div class="info-icon"><i class="fas fa-phone"></i></div>
                                 <div class="info-text">
                                     <label>No. Telepon</label>
-                                    <div>{{ $perjalanan->pengemudi->no_telepon ?? 'Tidak tersedia' }}</div>
+                                    <div>{{ $detail->pengemudi->no_telepon ?? 'Tidak tersedia' }}</div>
                                 </div>
                             </li>
                         </ul>
                     </div>
                 </div>
                 @endif
-
+                
                 <!-- Passenger Count -->
                 <div class="card passenger-card">
                     <div class="card-body">
@@ -603,17 +632,18 @@
                         <div class="pax-count">{{ $perjalanan->jumlah_rombongan }} <span class="pax-unit">Orang</span></div>
                     </div>
                 </div>
-
+                
                 <!-- Help -->
                 <div style="text-align:center; font-size:0.75rem; color:var(--slate-400); margin-top:1rem;">
                     Butuh bantuan? Hubungi logistik di <br>
                     <a href="#" style="color:var(--primary); text-decoration:none; font-weight:600;">logistik@unpad.ac.id</a>
                 </div>
-
-            </div>
-
-        </div>
-    </div>
-
-</body>
-</html>
+                
+                </div>
+                
+                </div>
+                </div>
+                
+                </body>
+                </html>
+                

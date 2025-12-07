@@ -88,8 +88,6 @@ class PeminjamanKendaraanController extends Controller
                 'status_perjalanan' => 'Menunggu Persetujuan',
                 'jenis_operasional' => 'Peminjaman',
                 'status_operasional' => 'Belum Ditetapkan',
-                'pengemudi_id' => null,
-                'nopol_kendaraan' => null,
             ];
 
             Log::info('Saving PeminjamanKendaraan with data:', $saveData);
@@ -122,7 +120,17 @@ class PeminjamanKendaraanController extends Controller
      */
     public function status($token)
     {
-        $perjalanan = Perjalanan::with(['wilayah', 'unitKerja', 'kendaraan', 'pengemudi'])->where('token', $token)->firstOrFail();
+        Log::info('Attempting to retrieve Perjalanan with token:', ['token' => $token]);
+        $perjalanan = Perjalanan::with(['wilayah', 'unitKerja', 'details.kendaraan', 'details.pengemudi', 'details.asisten'])->where('token', $token)->firstOrFail();
+
+        Log::info('Perjalanan found:', ['nomor_perjalanan' => $perjalanan->nomor_perjalanan, 'status_perjalanan' => $perjalanan->status_perjalanan]);
+        Log::info('Perjalanan details count:', ['count' => $perjalanan->details->count()]);
+        if ($perjalanan->details->isNotEmpty()) {
+            Log::info('First detail record:', ['detail' => $perjalanan->details->first()->toArray()]);
+        } else {
+            Log::warning('No details found for Perjalanan record with token:', ['token' => $token]);
+        }
+
 
         return view('peminjaman-status', [
             'perjalanan' => $perjalanan,

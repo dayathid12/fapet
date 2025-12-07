@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class Perjalanan extends Model
 {
     use HasFactory;
@@ -41,9 +43,6 @@ class Perjalanan extends Model
         'uraian_singkat_kegiatan',
         'catatan_keterangan_tambahan',
         'token',
-        'pengemudi_id',
-        'asisten_id',
-        'nopol_kendaraan',
         'tujuan_wilayah_id',
         'unit_kerja_id',
     ];
@@ -76,19 +75,13 @@ class Perjalanan extends Model
         return $this->belongsTo(Wilayah::class, 'tujuan_wilayah_id', 'wilayah_id');
     }
 
-    public function kendaraan()
+    /**
+     * Get all of the details for the Perjalanan
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function details(): HasMany
     {
-        return $this->belongsTo(Kendaraan::class, 'nopol_kendaraan', 'nopol_kendaraan');
+        return $this->hasMany(PerjalananKendaraan::class, 'perjalanan_id');
     }
-
-    public function pengemudi()
-    {
-        return $this->belongsTo(Staf::class, 'pengemudi_id', 'staf_id');
-    }
-
-    public function asisten()
-    {
-        return $this->belongsTo(Staf::class, 'asisten_id', 'staf_id');
-    }
-
 }
