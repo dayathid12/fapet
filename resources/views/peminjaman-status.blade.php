@@ -238,8 +238,8 @@
 
         /* Active/Completed Step Styles */
         .step-item.completed .step-circle {
-            background: var(--primary);
-            border-color: var(--primary);
+            background: var(--success);
+            border-color: var(--success);
             color: white;
         }
 
@@ -355,7 +355,7 @@
                 <div>
                     <span class="badge-corp">Universitas Padjadjaran</span>
                     <h1 class="page-title">Pelacakan Permohonan</h1>
-                    <p class="page-subtitle">ID Referensi: <span class="ref-code">{{ $perjalanan->nomor_perjalanan }}</span></p>
+                    <p class="page-subtitle">Nomor Perjalanana: <span class="ref-code">{{ $perjalanan->nomor_perjalanan }}</span></p>
                 </div>
             </div>
             <div>
@@ -434,37 +434,40 @@
                                 $step3Icon = '3';
                                 $step3Text = '';
 
-                                $today = \Carbon\Carbon::today();
+                                // --- More robust date handling ---
+                                $now = \Carbon\Carbon::now();
+                                $waktuKeberangkatan = \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan);
+                                $waktuKepulangan = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                                $status = $perjalanan->status_perjalanan;
 
-                                if ($perjalanan->status_perjalanan === 'Menunggu Persetujuan') {
-                                    $step1Text = '<p class="pulse-text">Permohonan sedang diproses</p>';
+                                // --- Logic for Step 2 & 3 based on status ---
+
+                                if ($status === 'Menunggu Persetujuan') {
                                     $step2Class = 'active';
                                     $step2Text = '<p class="pulse-text">Sedang diproses...</p>';
-                                } elseif ($perjalanan->status_perjalanan === 'Terjadwal') {
+                                } elseif ($status === 'Ditolak') {
+                                    $step2Class = 'error';
+                                    $step2Icon = '<i class="fas fa-times"></i>';
+                                    $step2Text = '<p class="final-text">Permohonan ditolak</p>';
+                                } else { // Status is 'Terjadwal' or 'Selesai'
                                     $step2Class = 'completed';
                                     $step2Icon = '<i class="fas fa-check"></i>';
                                     $step2Text = '<p style="color: var(--success); font-weight: 600;">Permohonan Disetujui</p>';
 
-                                    // Check for Penugasan logic
-                                    $departureDate = \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->toDateString();
-                                    $returnDate = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan)->toDateString() : null;
-
-                                    if ($departureDate === $today->toDateString()) {
+                                    // Logic for Step 3
+                                    if ($waktuKepulangan && $waktuKepulangan->isPast()) {
                                         $step3Class = 'completed';
-                                        $step3Icon = '<i class="fas fa-check" style="color: var(--success);"></i>';
-                                        $step3Text = '<p style="color: var(--success); font-weight: 600;">Sedang melakukan pelayanan</p>';
-                                    } elseif ($returnDate && $returnDate >= $today->toDateString()) {
-                                        $step3Class = 'completed';
-                                        $step3Icon = '<i class="fas fa-clipboard-check" style="color: var(--primary);"></i>';
-                                        $step3Text = '<p style="color: var(--primary); font-weight: 600;">Pelayanan selesai</p>';
-                                    } else {
+                                        $step3Icon = '<i class="fas fa-clipboard-check"></i>';
+                                        $step3Text = '<p style="color: var(--success); font-weight: 600;">Pelayanan Selesai</p>';
+                                    } elseif ($waktuKeberangkatan->isPast()) {
                                         $step3Class = 'active';
-                                        $step3Text = '<p class="pulse-text">Sedang diproses...</p>';
+                                        $step3Icon = '<i class="fas fa-shipping-fast"></i>'; // A 'running' icon
+                                        $step3Text = '<p class="pulse-text">Sedang Dalam Pelayanan</p>';
+                                    } else { // Departure is in the future
+                                        $step3Class = 'active';
+                                        $step3Icon = '3';
+                                        $step3Text = '<p class="pulse-text">Menunggu Jadwal</p>';
                                     }
-                                } elseif ($perjalanan->status_perjalanan === 'Ditolak') {
-                                    $step2Class = 'error';
-                                    $step2Icon = '<i class="fas fa-times" style="color: var(--danger);"></i>';
-                                    $step2Text = '<p class="final-text">Permohonan ditolak</p>';
                                 }
                             @endphp
 
@@ -538,20 +541,21 @@
                                                 @php
                                                     $departure = \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan);
                                                     $return = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
-                                                    $daysDiff = $return ? $departure->diffInDays($return) : null;
                                                 @endphp
 
-                                                @if($return && $daysDiff <= 1)
+                                                @if($return && $departure->isSameDay($return))
+                                                    {{-- Same day trip --}}
                                                     {{ $departure->locale('id')->isoFormat('dddd, D MMM YYYY') }}<br>
                                                     {{ $departure->format('H:i') }} WIB - {{ $return->format('H:i') }} WIB
                                                 @else
+                                                    {{-- Multi-day or one-way trip --}}
                                                     {{ $departure->locale('id')->isoFormat('dddd, D MMM YYYY') }}<br>
                                                     {{ $departure->format('H:i') }} WIB
                                                     @if($return)
-                                                        <br><span style="font-size: 0.75rem; font-weight: 400; color: var(--slate-600); opacity: 0.75;">
+                                                        <div style="margin-top: 0.75rem; font-weight: 400; font-size: 0.9em; color: var(--slate-600);">
                                                             {{ $return->locale('id')->isoFormat('dddd, D MMM YYYY') }}<br>
                                                             {{ $return->format('H:i') }} WIB
-                                                        </span>
+                                                        </div>
                                                     @endif
                                                 @endif
                                             </div>

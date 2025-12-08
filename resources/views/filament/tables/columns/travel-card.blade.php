@@ -104,6 +104,11 @@
             {{-- Decorative Corner Stripe --}}
             <div class="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br {{ $theme['stripe'] }} to-transparent rounded-tl-[1.75rem]"></div>
 
+            {{-- Nomor Perjalanan --}}
+            <span class="absolute top-3 left-5 text-xs font-bold text-slate-400 tracking-wider">
+                #{{ str_pad($record->nomor_perjalanan, 6, '0', STR_PAD_LEFT) }}
+            </span>
+
             {{-- Last Updated Text --}}
             @if($updatedAtDiff)
                 <span class="absolute top-3 right-5 text-[10px] font-medium text-slate-400">

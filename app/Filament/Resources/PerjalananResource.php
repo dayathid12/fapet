@@ -25,6 +25,8 @@ class PerjalananResource extends Resource
     protected static ?string $navigationGroup = 'Poll Kendaraan';
     protected static ?int $navigationSort = 0;
 
+    protected static bool $hasViewAction = false;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -331,6 +333,7 @@ class PerjalananResource extends Resource
                 'xl' => 2,
             ])
             ->striped()
+            ->recordAction('edit')
             ->columns([
                 Tables\Columns\Layout\View::make('filament.tables.columns.travel-card'),
             ])
@@ -364,13 +367,7 @@ class PerjalananResource extends Resource
                         );
                     }),
             ])
-            ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make()->color('info'),
-                    Tables\Actions\EditAction::make()->color('warning'),
-                    Tables\Actions\DeleteAction::make()->color('danger'),
-                ])->icon('heroicon-m-ellipsis-vertical')->color('gray'),
-            ])
+            ->actions([])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
