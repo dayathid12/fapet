@@ -8,6 +8,7 @@ use Filament\Widgets;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Navigation\NavigationGroup;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\View\View;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
@@ -40,6 +41,10 @@ class AppPanelProvider extends PanelProvider
             ->brandLogo(asset('images/Unpad_logo.png'))
             ->brandLogoHeight('2.2rem')
             ->viteTheme('resources/css/filament/app/theme.css')
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">',
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

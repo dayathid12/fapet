@@ -16,6 +16,8 @@ class ListPerjalanans extends ListRecords
 {
     protected static string $resource = PerjalananResource::class;
 
+    protected static ?string $title = 'Pelayanan Perjalanan';
+
     protected function getHeaderWidgets(): array
     {
         return [

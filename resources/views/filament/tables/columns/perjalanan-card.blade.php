@@ -44,21 +44,21 @@
     $asisten = $detail?->asisten;
 @endphp
 
-<div class="w-full p-4 space-y-4">
+<div class="w-full p-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-[1.005] space-y-4">
     {{-- HEADER --}}
-    <div class="flex flex-wrap items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-3">
             <div class="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-gray-200">
                 <x-filament::icon icon="heroicon-o-identification" class="w-5 h-5 text-gray-400" />
                 <span>{{ $record->nomor_perjalanan ?? "ID: {$record->id}" }}</span>
             </div>
             <span
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold {{ $badgeClasses }}">
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold {{ $badgeClasses }}">
                 <x-filament::icon :icon="$iconSvg" class="w-4 h-4" />
                 {{ $effectiveStatus }}
             </span>
         </div>
-        <div class="text-xs text-gray-500 dark:text-gray-400">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
             Pembaruan: {{ $record->updated_at->diffForHumans() }}
         </div>
     </div>
@@ -71,28 +71,34 @@
             <div class="space-y-4">
                 <div class="flex items-center gap-3">
                     <x-filament::icon icon="heroicon-o-calendar-days" class="w-6 h-6 text-gray-500 dark:text-gray-400" />
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200">Jadwal & Rute</h3>
+                    <h3 class="text-xl font-extrabold text-gray-800 dark:text-gray-200">Jadwal & Rute</h3>
                 </div>
                 <div class="space-y-3 text-sm">
-                    <div class="flex items-start gap-2">
-                        <x-filament::icon icon="heroicon-m-arrow-long-right" class="w-5 h-5 mt-1 text-success-500" />
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 rounded-full bg-success-50 dark:bg-success-900/20">
+                            <x-filament::icon icon="heroicon-m-arrow-long-right" class="w-6 h-6 text-success-600 dark:text-success-400" />
+                        </div>
                         <div>
-                            <p class="font-semibold text-gray-700 dark:text-gray-300">{{ $start->translatedFormat('d M Y, H:i') }}</p>
-                            <p class="text-xs text-gray-500">{{ $record->lokasi_keberangkatan }}</p>
+                            <p class="font-bold text-gray-800 dark:text-gray-200">{{ $start->translatedFormat('d M Y, H:i') }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ $record->lokasi_keberangkatan }}</p>
                         </div>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <x-filament::icon icon="heroicon-m-arrow-long-left" class="w-5 h-5 mt-1 text-danger-500" />
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 rounded-full bg-danger-50 dark:bg-danger-900/20">
+                            <x-filament::icon icon="heroicon-m-arrow-long-left" class="w-6 h-6 text-danger-600 dark:text-danger-400" />
+                        </div>
                         <div>
-                            <p class="font-semibold text-gray-700 dark:text-gray-300">{{ $endString }}</p>
-                            <p class="text-xs text-gray-500">{{ $record->wilayah?->nama_wilayah ?? 'Tujuan' }}</p>
+                            <p class="font-bold text-gray-800 dark:text-gray-200">{{ $endString }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ $record->wilayah?->nama_wilayah ?? 'Tujuan' }}</p>
                         </div>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <x-filament::icon icon="heroicon-o-clock" class="w-5 h-5 mt-1 text-primary-500" />
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 rounded-full bg-primary-50 dark:bg-primary-900/20">
+                            <x-filament::icon icon="heroicon-o-clock" class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                        </div>
                         <div>
-                            <p class="font-semibold text-gray-700 dark:text-gray-300">{{ $duration }}</p>
-                            <p class="text-xs text-gray-500">Durasi Perjalanan</p>
+                            <p class="font-bold text-gray-800 dark:text-gray-200">{{ $duration }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Durasi Perjalanan</p>
                         </div>
                     </div>
                 </div>
@@ -102,28 +108,34 @@
             <div class="space-y-4">
                 <div class="flex items-center gap-3">
                     <x-filament::icon icon="heroicon-o-user-group" class="w-6 h-6 text-gray-500 dark:text-gray-400" />
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200">Pengguna & Kegiatan</h3>
+                    <h3 class="text-xl font-extrabold text-gray-800 dark:text-gray-200">Pengguna & Kegiatan</h3>
                 </div>
                 <div class="space-y-3 text-sm">
-                    <div class="flex items-start gap-2">
-                        <x-filament::icon icon="heroicon-s-user" class="w-5 h-5 mt-1 text-indigo-500" />
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/20">
+                            <x-filament::icon icon="heroicon-s-user" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                        </div>
                         <div>
-                            <p class="font-semibold text-gray-700 dark:text-gray-300">{{ $record->nama_pengguna }}</p>
-                            <p class="text-xs text-gray-500">PIC</p>
+                            <p class="font-bold text-gray-800 dark:text-gray-200">{{ $record->nama_pengguna }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">PIC</p>
                         </div>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <x-filament::icon icon="heroicon-s-building-office-2" class="w-5 h-5 mt-1 text-indigo-500" />
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/20">
+                            <x-filament::icon icon="heroicon-s-building-office-2" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                        </div>
                         <div>
-                            <p class="font-semibold text-gray-700 dark:text-gray-300">{{ $record->unitKerja?->nama_unit_kerja ?? '-' }}</p>
-                            <p class="text-xs text-gray-500">Unit Kerja</p>
+                            <p class="font-bold text-gray-800 dark:text-gray-200">{{ $record->unitKerja?->nama_unit_kerja ?? '-' }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Unit Kerja</p>
                         </div>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <x-filament::icon icon="heroicon-s-clipboard-document-list" class="w-5 h-5 mt-1 text-indigo-500" />
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/20">
+                            <x-filament::icon icon="heroicon-s-clipboard-document-list" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                        </div>
                         <div>
-                            <p class="font-semibold text-gray-700 dark:text-gray-300">{{ $record->nama_kegiatan }}</p>
-                            <p class="text-xs text-gray-500">Jenis Kegiatan</p>
+                            <p class="font-bold text-gray-800 dark:text-gray-200">{{ $record->nama_kegiatan }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Jenis Kegiatan</p>
                         </div>
                     </div>
                 </div>
@@ -133,37 +145,47 @@
             <div class="space-y-4">
                 <div class="flex items-center gap-3">
                     <x-filament::icon icon="heroicon-o-truck" class="w-6 h-6 text-gray-500 dark:text-gray-400" />
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200">Kendaraan & Tim</h3>
+                    <h3 class="text-xl font-extrabold text-gray-800 dark:text-gray-200">Kendaraan & Tim</h3>
                 </div>
                 <div class="space-y-3 text-sm">
                     {{-- Kendaraan --}}
-                    <div class="p-3 bg-gray-50 rounded-lg dark:bg-gray-800">
-                         <p class="font-mono text-lg font-bold text-primary-600 dark:text-primary-400">{{ $detail?->kendaraan?->nopol_kendaraan ?? 'Belum Ditentukan' }}</p>
-                         <p class="text-xs text-gray-600 dark:text-gray-300">{{ $detail?->kendaraan?->merk_type ?? '-' }}</p>
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 mb-3">
+                        <div class="p-2 rounded-full bg-primary-50 dark:bg-primary-900/20">
+                            <x-filament::icon icon="heroicon-o-truck" class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                        </div>
+                        <div>
+                            <p class="font-bold text-lg text-primary-600 dark:text-primary-400">{{ $detail?->kendaraan?->nopol_kendaraan ?? 'Belum Ditentukan' }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">{{ $detail?->kendaraan?->merk_type ?? '-' }}</p>
+                        </div>
                     </div>
                     {{-- Tim --}}
                     <div class="space-y-2">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200 ease-in-out">
                             @if ($pengemudi)
-                                <div class="flex-shrink-0 w-8 h-8 font-bold text-white bg-blue-500 rounded-full flex items-center justify-center">
+                                <div class="flex-shrink-0 w-9 h-9 font-bold text-white bg-blue-500 rounded-full flex items-center justify-center text-lg">
                                     {{ strtoupper(substr($pengemudi->nama_staf, 0, 1)) }}
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-gray-700 dark:text-gray-300">{{ $pengemudi->nama_staf }}</p>
-                                    <p class="text-xs text-gray-500">Pengemudi</p>
+                                    <p class="font-bold text-gray-800 dark:text-gray-200">{{ $pengemudi->nama_staf }}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Pengemudi</p>
                                 </div>
                             @else
-                                <p class="text-sm text-gray-500">Pengemudi belum ditugaskan.</p>
+                                <div class="flex-shrink-0 w-9 h-9 flex items-center justify-center text-gray-400 dark:text-gray-600">
+                                    <x-filament::icon icon="heroicon-o-user-minus" class="w-7 h-7" />
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Pengemudi belum ditugaskan.</p>
+                                </div>
                             @endif
                         </div>
                         @if ($asisten)
-                            <div class="flex items-center gap-2">
-                                <div class="flex-shrink-0 w-8 h-8 font-bold text-white bg-orange-500 rounded-full flex items-center justify-center">
+                            <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200 ease-in-out">
+                                <div class="flex-shrink-0 w-9 h-9 font-bold text-white bg-orange-500 rounded-full flex items-center justify-center text-lg">
                                     {{ strtoupper(substr($asisten->nama_staf, 0, 1)) }}
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-gray-700 dark:text-gray-300">{{ $asisten->nama_staf }}</p>
-                                    <p class="text-xs text-gray-500">Asisten</p>
+                                    <p class="font-bold text-gray-800 dark:text-gray-200">{{ $asisten->nama_staf }}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Asisten</p>
                                 </div>
                             </div>
                         @endif

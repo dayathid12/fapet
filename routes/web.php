@@ -34,4 +34,3 @@ Route::get('/PeminjamanKendaraanUnpad', [PeminjamanKendaraanController::class, '
 Route::post('/PeminjamanKendaraanUnpad/submit', [PeminjamanKendaraanController::class, 'submit'])->name('peminjaman.submit');
 Route::get('/peminjaman/sukses/{token}', [PeminjamanKendaraanController::class, 'success'])->name('peminjaman.success');
 Route::get('/peminjaman/status/{token}', [PeminjamanKendaraanController::class, 'status'])->name('peminjaman.status');
-Route::get('/view-document/{encodedPath}', [PerjalananController::class, 'showFile'])->name('view.document');

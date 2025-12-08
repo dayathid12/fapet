@@ -326,13 +326,13 @@ class PerjalananResource extends Resource
     {
         return $table
             ->contentGrid([
-                'md' => 1,
-                'xl' => 1,
+                'sm' => 1,
+                'md' => 2,
+                'xl' => 3,
             ])
+            ->striped()
             ->columns([
-                Tables\Columns\ViewColumn::make('id')
-                    ->label('Detail Perjalanan')
-                    ->view('filament.tables.columns.perjalanan-card'),
+                Tables\Columns\Layout\View::make('filament.tables.columns.travel-card'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status_perjalanan')
@@ -340,13 +340,16 @@ class PerjalananResource extends Resource
                         'Menunggu Persetujuan' => 'Menunggu Persetujuan',
                         'Terjadwal' => 'Terjadwal',
                         'Ditolak' => 'Ditolak',
-                    ]),
+                        'Selesai' => 'Selesai',
+                    ])
+                    ->label('Status'),
 
                 Tables\Filters\SelectFilter::make('jenis_operasional')
                     ->options([
                         'Peminjaman' => 'Peminjaman',
                         'Operasional' => 'Operasional',
-                    ]),
+                    ])
+                    ->label('Jenis Operasional'),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -362,7 +365,7 @@ class PerjalananResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->poll('30s')
-            ->selectable(false) // Optional: jika tidak ingin ada checkbox
+            ->selectable(false)
             ->emptyStateHeading('Tidak ada data perjalanan')
             ->emptyStateIcon('heroicon-o-truck');
     }
@@ -379,6 +382,7 @@ class PerjalananResource extends Resource
         return [
             'index' => Pages\ListPerjalanans::route('/'),
             'create' => Pages\CreatePerjalanan::route('/create'),
+            'view' => Pages\ViewPerjalanan::route('/{record}'),
             'edit' => Pages\EditPerjalanan::route('/{record}/edit'),
         ];
     }
