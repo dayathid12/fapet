@@ -28,16 +28,7 @@
                         @endforeach
                     </select>
 
-                    {{-- Driver Filter Dropdown --}}
-                    <div class="relative w-full sm:w-64">
-                        <select wire:model.live="selectedDriverId" class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-gray-700/50 border border-slate-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm placeholder:text-slate-400">
-                            <option value="">Semua Pengemudi</option>
-                            @foreach ($allDrivers as $driver)
-                                <option value="{{ $driver->staf_id }}">{{ $driver->nama_staf }}</option>
-                            @endforeach
-                        </select>
-                        <x-heroicon-o-user class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5" />
-                    </div>
+
                 </div>
             </div>
 
@@ -106,7 +97,7 @@
                                             </div>
                                         @empty
                                             <div class="text-center text-gray-400 dark:text-gray-600 italic text-xs h-full flex items-center justify-center">
-                                                Tidak ada perjalanan
+                                                Kosong
                                             </div>
                                         @endforelse
                                     </td>
