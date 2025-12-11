@@ -88,19 +88,28 @@ class JadwalPengemudiCalendar extends Component
         // Populate perjalanansByDriverAndDate
         foreach ($perjalanans as $perjalanan) {
             if ($perjalanan->pengemudi->isNotEmpty() && $perjalanan->kendaraan->isNotEmpty()) {
+                $startDate = Carbon::parse($perjalanan->waktu_keberangkatan)->startOfDay();
+                $endDate = Carbon::parse($perjalanan->waktu_kepulangan)->endOfDay(); // Use endOfDay to include the end day
+
                 foreach ($perjalanan->pengemudi as $pengemudi) {
                     $driverId = $pengemudi->staf_id;
-                    $date = Carbon::parse($perjalanan->waktu_keberangkatan)->format('Y-m-d');
 
-                    if (isset($this->perjalanansByDriverAndDate[$driverId][$date])) {
-                        $this->perjalanansByDriverAndDate[$driverId][$date][] = [
-                            'nomor_perjalanan' => $perjalanan->nomor_perjalanan,
-                            'merk_type' => $perjalanan->kendaraan->first()->merk_type ?? 'N/A',
-                            'nopol_kendaraan' => $perjalanan->kendaraan->first()->nopol_kendaraan ?? 'N/A',
-                            'waktu_keberangkatan' => Carbon::parse($perjalanan->waktu_keberangkatan)->format('d M Y H:i'),
-                            'waktu_kepulangan' => Carbon::parse($perjalanan->waktu_kepulangan)->format('d M Y H:i'),
-                            'kota_kabupaten' => $perjalanan->wilayah->nama_wilayah ?? $perjalanan->alamat_tujuan,
-                        ];
+                    $currentPerjalananDay = $startDate->copy();
+                    while ($currentPerjalananDay->lte($endDate)) {
+                        $dateKey = $currentPerjalananDay->format('Y-m-d');
+
+                        // Ensure the date is within the currently displayed month and the driver exists
+                        if (isset($this->perjalanansByDriverAndDate[$driverId][$dateKey])) {
+                            $this->perjalanansByDriverAndDate[$driverId][$dateKey][] = [
+                                'nomor_perjalanan' => $perjalanan->nomor_perjalanan,
+                                'merk_type' => $perjalanan->kendaraan->first()->merk_type ?? 'N/A',
+                                'nopol_kendaraan' => $perjalanan->kendaraan->first()->nopol_kendaraan ?? 'N/A',
+                                'waktu_keberangkatan' => Carbon::parse($perjalanan->waktu_keberangkatan)->format('d M Y H:i'),
+                                'waktu_kepulangan' => Carbon::parse($perjalanan->waktu_kepulangan)->format('d M Y H:i'),
+                                'kota_kabupaten' => $perjalanan->wilayah->nama_wilayah ?? $perjalanan->alamat_tujuan,
+                            ];
+                        }
+                        $currentPerjalananDay->addDay();
                     }
                 }
             }
