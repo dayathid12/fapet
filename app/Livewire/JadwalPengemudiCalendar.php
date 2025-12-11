@@ -35,9 +35,10 @@ class JadwalPengemudiCalendar extends Component
     #[On('update-staf-sort')]
     public function updateStafSort($newOrder)
     {
+        foreach ($newOrder as $index => $stafId) {
+            Staf::where('staf_id', $stafId)->update(['sort_order' => $index]);
+        }
         $this->manualSortOrder = $newOrder;
-        // Optionally, persist this order to the database if needed
-        // For now, it just reorders the current view
         $this->loadPerjalananData();
     }
 
@@ -76,25 +77,17 @@ class JadwalPengemudiCalendar extends Component
             ->when($this->search, function ($query) { // Added this section for search
                 $query->where('nama_staf', 'like', '%' . $this->search . '%');
             })
+            ->orderBy('sort_order') // Order by the new sort_order column
+            ->orderBy('nama_staf')  // Secondary sort for consistency
             ->get();
 
-        // Apply manual sort order if it exists, otherwise sort by nama_staf
-        if (!empty($this->manualSortOrder)) {
-            $this->drivers = collect($this->manualSortOrder)
-                ->map(function ($stafId) use ($queriedDrivers) {
-                    return $queriedDrivers->firstWhere('staf_id', $stafId);
-                })
-                ->filter() // Remove nulls if some IDs in manualSortOrder are not found
-                ->map(function ($staf) {
-                    return ['staf_id' => $staf->staf_id, 'nama_staf' => $staf->nama_staf];
-                })->values();
-        } else {
-            $this->drivers = $queriedDrivers
-                ->sortBy('nama_staf')
-                ->map(function ($staf) {
-                    return ['staf_id' => $staf->staf_id, 'nama_staf' => $staf->nama_staf];
-                })->values();
-        }
+        $this->drivers = $queriedDrivers
+            ->map(function ($staf) {
+                return ['staf_id' => $staf->staf_id, 'nama_staf' => $staf->nama_staf];
+            })->values();
+        
+        // Initialize manualSortOrder from the fetched database order
+        $this->manualSortOrder = $queriedDrivers->pluck('staf_id')->toArray();
         
         // Fetch Perjalanan records for the selected month/year
         $perjalanans = Perjalanan::query()
