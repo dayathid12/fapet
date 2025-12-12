@@ -13,10 +13,8 @@
         {{-- Header Section --}}
         <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-6 animate-fade-in-up">
             <div>
-                <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-fuchsia-600 dark:from-indigo-400 dark:to-fuchsia-400 mb-2">
-                    Jadwal Operasional
-                </h1>
-                <p class="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl leading-relaxed">
+
+                <p class="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl leading-relaxed text-center md:text-left">
                     Platform manajemen mobilitas staf. Kelola rute dan waktu secara efisien.
                 </p>
             </div>
@@ -60,9 +58,7 @@
                         placeholder="Cari nama atau NIP..."
                         class="block w-full pl-10 pr-4 py-3 text-sm font-medium text-slate-700 dark:text-white bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl placeholder-slate-400 focus:ring-4 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 transition-all duration-200 ease-in-out"
                     >
-                    <div class="absolute inset-y-0 left-0 flex items-center px-3 pointer-events-none text-slate-400 group-focus-within:text-fuchsia-500 transition-colors">
-                         <x-heroicon-o-magnifying-glass class="w-5 h-5" />
-                    </div>
+
                 </div>
             </div>
 
@@ -73,7 +69,7 @@
                     init() {
                         new Sortable(this.$refs.stafTableBody, {
                             animation: 200,
-                            ghostClass: 'bg-indigo-100',
+                            ghostClass: 'bg-teal-50/50', // Ghost color teal
                             handle: '.drag-handle',
                             onEnd: (evt) => {
                                 this.stafOrder = Array.from(this.$refs.stafTableBody.children).map(row => row.dataset.stafId);
@@ -82,10 +78,11 @@
                         });
                     }
                 }"
-                class="flex-grow overflow-auto custom-scrollbar"
+                class="flex-grow custom-scrollbar"
             >
-                <table class="w-max min-w-full border-separate border-spacing-0">
-                    <thead class="sticky top-0 z-40 shadow-sm">
+                <div class="max-h-[400px] overflow-y-auto">
+                    <table class="w-max min-w-full border-separate border-spacing-0">
+                        <thead class="sticky top-0 z-40 shadow-sm">
                         <tr>
                             {{-- Sticky Driver Header --}}
                             <th class="sticky left-0 z-50 p-4 min-w-[320px] bg-slate-100 dark:bg-slate-800 border-b border-r border-slate-300 dark:border-slate-600 text-left">
@@ -228,6 +225,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
             {{-- Footer --}}
