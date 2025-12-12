@@ -92,6 +92,7 @@ class JadwalPengemudiCalendar extends Component
         // Fetch Perjalanan records for the selected month/year
         $perjalanans = Perjalanan::query()
             ->whereBetween('waktu_keberangkatan', [$startOfMonth, $endOfMonth])
+            ->whereIn('status_perjalanan', ['Terjadwal', 'Selesai']) // Added this filter
             ->with(['pengemudi', 'kendaraan', 'wilayah'])
             ->get();
 

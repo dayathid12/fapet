@@ -9,10 +9,11 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
+use Carbon\Carbon;
 
 class JadwalPengemudiResource extends Resource
 {
-    protected static ?string $model = JadwalPengemudi::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
@@ -41,7 +42,21 @@ class JadwalPengemudiResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('status_jadwal')
+                    ->options([
+                        'terjadwal' => 'Terjadwal',
+                        'selesai' => 'Selesai',
+                    ])
+                    ->query(function ($query, array $data) {
+                        if (array_key_exists('value', $data) && $data['value'] !== null) {
+                            $today = Carbon::today();
+                            if ($data['value'] === 'terjadwal') {
+                                $query->whereDate('tanggal_jadwal', '>=', $today);
+                            } elseif ($data['value'] === 'selesai') {
+                                $query->whereDate('tanggal_jadwal', '<', $today);
+                            }
+                        }
+                    })
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

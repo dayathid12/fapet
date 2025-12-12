@@ -80,7 +80,8 @@ class BookingKendaraanCalendar extends Component
         // Eager load 'kendaraan' relationship to access details
         $perjalanans = Perjalanan::query()
             ->whereBetween('waktu_keberangkatan', [$startOfMonth, $endOfMonth])
-            ->with(['kendaraan', 'wilayah']) // Ensure 'kendaraan' is loaded
+            ->whereIn('status_perjalanan', ['Terjadwal', 'Selesai'])
+            ->with(['kendaraan', 'wilayah'])
             ->get();
 
         // Initialize perjalanansByVehicleAndDate
