@@ -18,6 +18,7 @@ class BookingKendaraanCalendar extends Component
     public $vehicles = []; // Changed from $drivers
     public $dates = [];
     public $perjalanansByVehicleAndDate = []; // Changed from $perjalanansByDriverAndDate
+    public $manualSortOrder = []; // New property for manual sorting
 
     public function mount()
     {
@@ -44,6 +45,16 @@ class BookingKendaraanCalendar extends Component
         $this->loadPerjalananData();
     }
 
+    #[On('update-kendaraan-sort')]
+    public function updateKendaraanSort($newOrder)
+    {
+        foreach ($newOrder as $index => $nopol) {
+            Kendaraan::where('nopol_kendaraan', $nopol)->update(['sort_order' => $index]);
+        }
+        $this->manualSortOrder = $newOrder;
+        $this->loadPerjalananData();
+    }
+
     public function loadPerjalananData()
     {
         $startOfMonth = Carbon::create($this->selectedYear, $this->selectedMonth, 1)->startOfDay();
@@ -63,7 +74,8 @@ class BookingKendaraanCalendar extends Component
                 $query->where('merk_type', 'like', '%' . $this->search . '%')
                       ->orWhere('nopol_kendaraan', 'like', '%' . $this->search . '%');
             })
-            ->orderBy('merk_type')
+            ->orderBy('sort_order') // Order by the new sort_order column
+            ->orderBy('merk_type')  // Secondary sort for consistency
             ->orderBy('nopol_kendaraan')
             ->get();
 
@@ -75,6 +87,9 @@ class BookingKendaraanCalendar extends Component
                     'jenis_kendaraan' => $vehicle->jenis_kendaraan,
                 ];
             })->values();
+
+        // Initialize manualSortOrder from the fetched database order
+        $this->manualSortOrder = $queriedVehicles->pluck('nopol_kendaraan')->toArray();
 
         // Fetch Perjalanan records for the selected month/year
         // Eager load 'kendaraan' relationship to access details

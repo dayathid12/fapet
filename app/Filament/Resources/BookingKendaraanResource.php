@@ -21,6 +21,11 @@ class BookingKendaraanResource extends Resource
 
     protected static ?string $navigationLabel = 'Booking Kendaraan'; // Changed navigation label
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     public static function form(Form $form): Form
     {
         return $form

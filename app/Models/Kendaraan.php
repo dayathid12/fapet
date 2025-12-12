@@ -25,6 +25,7 @@ class Kendaraan extends Model
         'lokasi_kendaraan',
         'penggunaan',
         'foto_kendaraan',
+        'sort_order',
     ];
 
     public function perjalanans()
