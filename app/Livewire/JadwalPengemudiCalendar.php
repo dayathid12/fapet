@@ -83,7 +83,7 @@ class JadwalPengemudiCalendar extends Component
 
         $this->drivers = $queriedDrivers
             ->map(function ($staf) {
-                return ['staf_id' => $staf->staf_id, 'nama_staf' => $staf->nama_staf];
+                return ['staf_id' => $staf->staf_id, 'nama_staf' => $staf->nama_staf, 'nip' => $staf->nip_staf];
             })->values();
         
         // Initialize manualSortOrder from the fetched database order
