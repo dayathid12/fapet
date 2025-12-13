@@ -12,6 +12,8 @@ use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Card;
 
 
+use Illuminate\Support\Facades\Log;
+
 class ListPerjalanans extends ListRecords
 {
     protected static string $resource = PerjalananResource::class;
@@ -34,6 +36,20 @@ class ListPerjalanans extends ListRecords
     public function getMaxContentWidth(): ?string
     {
         return MaxWidth::Screen->value;
+    }
+
+    protected function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        // Update status_perjalanan to 'Selesai' if waktu_kepulangan has passed and status is 'Terjadwal'
+        $updatedRows = $query->getModel()::where('status_perjalanan', 'Terjadwal')
+            ->where('waktu_kepulangan', '<=', \Carbon\Carbon::now())
+            ->update(['status_perjalanan' => 'Selesai']);
+
+        Log::info("Perjalanan status update: {$updatedRows} rows updated to 'Selesai'.");
+
+        return $query;
     }
 
     public function getTabs(): array

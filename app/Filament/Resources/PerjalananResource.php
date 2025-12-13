@@ -71,6 +71,20 @@ class PerjalananResource extends Resource
                                             ->placeholder('Masukkan nomor telepon/WA')
                                             ->maxLength(255),
                                     ]),
+
+                                Forms\Components\Toggle::make('copy_user_data')
+                                    ->label('Gunakan data pengguna untuk perwakilan')
+                                    ->live()
+                                    ->onIcon('heroicon-m-check-badge')
+                                    ->offIcon('heroicon-m-x-circle')
+                                    ->afterStateUpdated(function ($state, $get, $set) {
+                                        if ($state) {
+                                            $set('nama_personil_perwakilan', $get('nama_pengguna'));
+                                            $set('kontak_pengguna_perwakilan', $get('kontak_pengguna'));
+                                        }
+                                    })
+                                    ->columnSpanFull(),
+
                                 Forms\Components\Grid::make(2)
                                     ->schema([
                                         Forms\Components\TextInput::make('nama_personil_perwakilan')
@@ -214,16 +228,6 @@ class PerjalananResource extends Resource
                 Forms\Components\Section::make('Kendaraan & Staf')
                     ->description('Informasi kendaraan dan pengemudi yang bertugas')
                     ->icon('heroicon-o-truck')
-                    ->headerActions([
-                        \Filament\Forms\Components\Actions\Action::make('back')
-                            ->label('Kembali')
-                            ->icon('heroicon-o-arrow-left')
-                            ->color('gray')
-                            ->url(route('filament.app.resources.perjalanans.index')),
-                        \Filament\Forms\Components\Actions\Action::make('edit')
-                            ->label('Edit')
-                            ->url(fn ($record) => route('filament.app.resources.perjalanans.edit', $record)),
-                    ])
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
