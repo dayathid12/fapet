@@ -16,7 +16,6 @@ class EditPerjalanan extends BaseEditRecord
     protected function getHeaderActions(): array
     {
         return [
-
             Action::make('copyLink')
                 ->label('Copy Link Pelacakan')
                 ->view('filament.resources.perjalanan-resource.actions.copy-link', ['record' => $this->record]),

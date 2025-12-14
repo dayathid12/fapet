@@ -9,13 +9,16 @@ use App\Models\Kendaraan;
 use App\Models\Perjalanan;
 use App\Models\Wilayah;
 use Carbon\Carbon;
+use Filament\Actions;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 
@@ -228,6 +231,16 @@ class PerjalananResource extends Resource
                 Forms\Components\Section::make('Kendaraan & Staf')
                     ->description('Informasi kendaraan dan pengemudi yang bertugas')
                     ->icon('heroicon-o-truck')
+                    ->headerActions([
+                        FormAction::make('edit')
+                            ->label('Edit')
+                            ->action(fn ($record) => redirect(PerjalananResource::getUrl('edit', ['record' => $record]))),
+                        FormAction::make('back')
+                            ->label('Kembali')
+                            ->icon('heroicon-o-arrow-left')
+                            ->color('')
+                            ->action(fn () => redirect(PerjalananResource::getUrl('index'))),
+                    ])
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
