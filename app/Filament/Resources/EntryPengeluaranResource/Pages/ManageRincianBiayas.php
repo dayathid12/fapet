@@ -22,6 +22,7 @@ use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -29,6 +30,7 @@ use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasForms, \Filament\Tables\Contracts\HasTable, \Filament\Infolists\Contracts\HasInfolists
 {
@@ -61,7 +63,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
 
         if (!$perjalanan) {
             return $infolist->state([])->schema([
-                Section::make('Data Perjalanan Tidak Lengkap')
+                \Filament\Infolists\Components\Section::make('Data Perjalanan Tidak Lengkap')
                     ->description('Tidak dapat memuat detail perjalanan yang terkait.')
                     ->schema([
                         TextEntry::make('error')->default('Silakan periksa kembali data Rincian Pengeluaran.')
@@ -82,7 +84,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
             ])
             ->schema([
                 Grid::make(3)->schema([
-                    Section::make()->schema([
+                    \Filament\Infolists\Components\Section::make()->schema([
                         TextEntry::make('nomor_perjalanan')
                             ->label('Nomor Perjalanan')
                             ->weight(FontWeight::Bold)
@@ -97,7 +99,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                             ->icon('heroicon-o-truck'),
                     ])->columnSpan(1),
 
-                    Section::make()->schema([
+                    \Filament\Infolists\Components\Section::make()->schema([
                         TextEntry::make('alamat_tujuan')
                             ->label('Alamat Tujuan')
                             ->icon('heroicon-o-map-pin'),
@@ -109,7 +111,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                             ->icon('heroicon-o-calendar-days'),
                     ])->columnSpan(1),
 
-                    Section::make()->schema([
+                    \Filament\Infolists\Components\Section::make()->schema([
                         TextEntry::make('unit_kerja')
                             ->label('Unit Kerja/Fakultas/UKM')
                             ->icon('heroicon-o-building-office-2'),
@@ -137,12 +139,21 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
             ->query(RincianBiaya::where('rincian_pengeluaran_id', $this->rincianPengeluaran->id))
             ->columns([
                 TextColumn::make('tipe')
+                    ->label('Kategori')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->formatStateUsing(function (string $state): string {
+                        return match ($state) {
+                            'bbm' => 'BBM',
+                            'toll' => 'Toll',
+                            'parkir' => 'Parkir',
+                            default => ucfirst($state),
+                        };
+                    })
                     ->color(fn (string $state): string => match ($state) {
                         'bbm' => 'success',
                         'toll' => 'warning',
                         'parkir' => 'info',
+                        default => 'gray',
                     }),
                 TextColumn::make('biaya')->money('IDR')->weight(FontWeight::Bold)->summarize(Sum::make()->label('Total Biaya')),
                 TextColumn::make('deskripsi')->searchable(),
@@ -150,7 +161,8 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                 TextColumn::make('volume')->suffix(' Ltr'),
             ])
             ->actions([
-                EditAction::make()->form(fn(Form $form) => $this->getBiayaForm($form)),
+                EditAction::make()
+                    ->form(fn(Form $form) => $this->getBiayaForm($form)),
                 DeleteAction::make(),
             ])
             ->striped();
@@ -159,34 +171,48 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
     private function getBiayaForm(Form $form): Form
     {
         return $form->schema([
-            Tabs::make('Tipe Biaya')->tabs([
-                Tab::make('BBM')
-                    ->icon('heroicon-o-beaker')
-                    ->schema([
-                        TextInput::make('tipe')->default('bbm')->hidden(),
-                        TextInput::make('biaya')->label('Jumlah BBM')->numeric()->prefix('Rp'),
-                        Select::make('jenis_bbm')->options(['Dexlite' => 'Dexlite', 'Pertamax' => 'Pertamax', 'Lainnya' => 'Lainnya']),
-                        TextInput::make('volume')->label('Volume (Liter)')->numeric(),
-                        TextInput::make('deskripsi')->label('Kode ATM/Keterangan'),
-                        FileUpload::make('bukti_path')->label('Upload Struk BBM')->directory('struk-bbm'),
-                    ]),
-                Tab::make('Toll')
-                    ->icon('heroicon-o-ticket')
-                    ->schema([
-                        TextInput::make('tipe')->default('toll')->hidden(),
-                        TextInput::make('biaya')->label('Jumlah Toll')->numeric()->prefix('Rp'),
-                        TextInput::make('deskripsi')->label('Kode Kartu Toll/Gerbang'),
-                        FileUpload::make('bukti_path')->label('Upload Struk Toll')->directory('struk-toll'),
-                    ]),
-                Tab::make('Parkir')
-                    ->icon('heroicon-o-currency-dollar')
-                    ->schema([
-                        TextInput::make('tipe')->default('parkir')->hidden(),
-                        TextInput::make('biaya')->label('Jumlah Parkir')->numeric()->prefix('Rp'),
-                        TextInput::make('deskripsi')->label('Lokasi Parkir'),
-                        FileUpload::make('bukti_path')->label('Upload Bukti Parkir')->directory('bukti-parkir'),
-                    ]),
-            ])->columnSpanFull(),
+            Select::make('tipe')
+                ->label('Kategori')
+                ->options([
+                    'bbm' => 'BBM',
+                    'toll' => 'Toll',
+                    'parkir' => 'Parkir',
+                ])
+                ->required()
+                ->reactive()
+                ->afterStateUpdated(function ($state, callable $set) {
+                    // Clear fields when tipe changes
+                    if ($state !== 'bbm') {
+                        $set('jenis_bbm', null);
+                        $set('volume', null);
+                    }
+                }),
+
+            \Filament\Forms\Components\Section::make('Detail BBM')
+                ->visible(fn ($get) => $get('tipe') === 'bbm')
+                ->schema([
+                    TextInput::make('biaya')->label('Jumlah BBM')->numeric()->prefix('Rp')->required(),
+                    Select::make('jenis_bbm')->label('Jenis BBM')->options(['Dexlite' => 'Dexlite', 'Pertamax' => 'Pertamax', 'Lainnya' => 'Lainnya'])->required(),
+                    TextInput::make('volume')->label('Volume (Liter)')->numeric()->required(),
+                    TextInput::make('deskripsi')->label('Kode ATM/Keterangan')->required(),
+                    FileUpload::make('bukti_path')->label('Upload Struk BBM')->directory('struk-bbm'),
+                ]),
+
+            \Filament\Forms\Components\Section::make('Detail Toll')
+                ->visible(fn ($get) => $get('tipe') === 'toll')
+                ->schema([
+                    TextInput::make('biaya')->label('Jumlah Toll')->numeric()->prefix('Rp')->required(),
+                    TextInput::make('deskripsi')->label('Kode Kartu Toll/Gerbang')->required(),
+                    FileUpload::make('bukti_path')->label('Upload Struk Toll')->directory('struk-toll'),
+                ]),
+
+            \Filament\Forms\Components\Section::make('Detail Parkir')
+                ->visible(fn ($get) => $get('tipe') === 'parkir')
+                ->schema([
+                    TextInput::make('biaya')->label('Jumlah Parkir')->numeric()->prefix('Rp')->required(),
+                    TextInput::make('deskripsi')->label('Lokasi Parkir')->required(),
+                    FileUpload::make('bukti_path')->label('Upload Bukti Parkir')->directory('bukti-parkir'),
+                ]),
         ]);
     }
 }
