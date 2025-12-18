@@ -46,23 +46,23 @@ class JadwalPengemudiResource extends Resource
                     ->searchable()
                     ->sortable(),
             ])
-            ->filters([
-                SelectFilter::make('status_jadwal')
-                    ->options([
-                        'terjadwal' => 'Terjadwal',
-                        'selesai' => 'Selesai',
-                    ])
-                    ->query(function ($query, array $data) {
-                        if (array_key_exists('value', $data) && $data['value'] !== null) {
-                            $today = Carbon::today();
-                            if ($data['value'] === 'terjadwal') {
-                                $query->whereDate('tanggal_jadwal', '>=', $today);
-                            } elseif ($data['value'] === 'selesai') {
-                                $query->whereDate('tanggal_jadwal', '<', $today);
-                            }
-                        }
-                    })
-            ])
+            // ->filters([
+            //     SelectFilter::make('status_jadwal')
+            //         ->options([
+            //             'terjadwal' => 'Terjadwal',
+            //             'selesai' => 'Selesai',
+            //         ])
+            //         ->query(function ($query, array $data) {
+            //             if (array_key_exists('value', $data) && $data['value'] !== null) {
+            //                 $today = Carbon::today();
+            //                 if ($data['value'] === 'terjadwal') {
+            //                     $query->whereDate('tanggal_jadwal', '>=', $today);
+            //                 } elseif ($data['value'] === 'selesai') {
+            //                     $query->whereDate('tanggal_jadwal', '<', $today);
+            //                 }
+            //             }
+            //         })
+            // ])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

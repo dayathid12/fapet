@@ -183,7 +183,6 @@ class RincianPengeluaranRelationManager extends RelationManager
                         'record' => $this->getOwnerRecord()->id,
                         'rincianPengeluaranId' => $record->id,
                     ])),
-                EditAction::make(),
                 DeleteAction::make(),
             ])
             ->bulkActions([
