@@ -34,3 +34,8 @@ Route::get('/PeminjamanKendaraanUnpad', [PeminjamanKendaraanController::class, '
 Route::post('/PeminjamanKendaraanUnpad/submit', [PeminjamanKendaraanController::class, 'submit'])->name('peminjaman.submit');
 Route::get('/peminjaman/sukses/{token}', [PeminjamanKendaraanController::class, 'success'])->name('peminjaman.success');
 Route::get('/peminjaman/status/{token}', [PeminjamanKendaraanController::class, 'status'])->name('peminjaman.status');
+
+Route::delete('/biaya/{id}', function ($id) {
+    \App\Models\RincianBiaya::findOrFail($id)->delete();
+    return redirect()->back()->with('success', 'Item berhasil dihapus');
+})->name('biaya.delete');
