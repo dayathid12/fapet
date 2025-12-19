@@ -48,7 +48,7 @@
 
     // --- 3. STATUS COLOR THEME CONFIGURATION ---
     // Mapping status string ke key tema
-    $statusKey = match ($record->status_perjalanan) {
+    $statusKey = match ($record->dynamic_status) {
         'Terjadwal', 'Berjalan', 'Selesai' => 'active',
         'Menunggu Persetujuan' => 'pending',
         'Ditolak', 'Dibatalkan' => 'danger',
@@ -129,7 +129,7 @@
                                 @endif
                                 <span class="relative inline-flex rounded-full h-2 w-2 {{ $theme['dot_color'] }}"></span>
                             </span>
-                            {{ $record->status_perjalanan ?? 'Draft' }}
+                            {{ $record->dynamic_status ?? 'Draft' }}
                         </span>
                         
                         {{-- Nama Kegiatan (Truncated) --}}

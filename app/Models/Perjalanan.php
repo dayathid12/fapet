@@ -131,4 +131,13 @@ class Perjalanan extends Model
     {
         return $this->belongsTo(EntryPengeluaran::class, 'entry_pengeluaran_id');
     }
+
+    public function getDynamicStatusAttribute(): string
+    {
+        if ($this->status_perjalanan === 'Terjadwal' && $this->waktu_kepulangan && $this->waktu_kepulangan->isPast()) {
+            return 'Selesai';
+        }
+
+        return $this->status_perjalanan;
+    }
 }
