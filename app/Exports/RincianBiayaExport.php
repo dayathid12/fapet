@@ -19,17 +19,15 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
 {
     protected $entryPengeluaran;
     protected $nomorBerkas; // Will be set dynamically
+    protected $totalBBM;
+    protected $totalTol;
+    protected $totalParkir;
 
     public function __construct(EntryPengeluaran $entryPengeluaran)
     {
         $this->entryPengeluaran = $entryPengeluaran;
-        // Attempt to get nomor berkas from the first related RincianPengeluaran's Perjalanan
-        // Handle cases where rincianPengeluarans or its relations might be empty
-        $this->nomorBerkas = $entryPengeluaran->rincianPengeluarans
-                                ->first()
-                                ->perjalananKendaraan
-                                ->perjalanan
-                                ->nomor_perjalanan ?? 'N/A';
+        // Use the nomor_berkas from the EntryPengeluaran itself
+        $this->nomorBerkas = $entryPengeluaran->nomor_berkas ?? 'N/A';
     }
 
     public function startCell(): string
@@ -60,6 +58,10 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
 
     public function collection(): Collection
     {
+        $this->totalBBM = 0;
+        $this->totalTol = 0;
+        $this->totalParkir = 0;
+
         return $this->entryPengeluaran->rincianPengeluarans()
             ->with([
                 'perjalananKendaraan.perjalanan.unitKerja',
@@ -95,6 +97,11 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                         $totalParkir += $biaya->biaya;
                     }
                 }
+
+                // Accumulate grand totals
+                $this->totalBBM += $totalBBM;
+                $this->totalTol += $totalTol;
+                $this->totalParkir += $totalParkir;
 
                 // Attach aggregated data and relationships directly to the rincianPengeluaran object for easier mapping
                 $rincianPengeluaran->aggregated_total_bbm = $totalBBM;
@@ -229,16 +236,16 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 // Styling Bold Header Rekap
                 $sheet->getStyle('L' . $rekapHeaderRow . ':N' . $rekapHeaderRow)->getFont()->setBold(true);
 
-                // Rumus SUM Total
+                // Set Total Values
                 // Total BBM (Kolom L)
-                $sheet->setCellValue('L' . $rekapValueRow, '=SUM(L5:L' . $lastRow . ')');
+                $sheet->setCellValue('L' . $rekapValueRow, $this->totalBBM);
 
                 // Total Tol (Kolom N di data, tapi ditaruh di M di rekap sesuai gambar layout visual)
                 // Perhatikan: Data Tol ada di kolom N, tapi kotak rekap Tol ada di kolom M
-                $sheet->setCellValue('M' . $rekapValueRow, '=SUM(N5:N' . $lastRow . ')');
+                $sheet->setCellValue('M' . $rekapValueRow, $this->totalTol);
 
                 // Total Parkir (Kolom O di data, tapi ditaruh di N di rekap sesuai gambar layout visual)
-                $sheet->setCellValue('N' . $rekapValueRow, '=SUM(O5:O' . $lastRow . ')');
+                $sheet->setCellValue('N' . $rekapValueRow, $this->totalParkir);
 
                 // Formatting Rupiah/Accounting (Opsional)
                 $sheet->getStyle('L' . $rekapValueRow . ':N' . $rekapValueRow)
