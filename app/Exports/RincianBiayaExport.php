@@ -48,7 +48,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
             'Unit Kerja/UKM',
             'Nopol Kendaraan',
             'Pengemudi',
-            'Kode AT', 
+            'Kode AT',
             'Jenis BBM',
             'Volume (liter)',
             'Biaya BBM (Rp.)',
@@ -88,12 +88,10 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                         if (empty($volumeBBM) && !empty($biaya->volume)) {
                             $volumeBBM = $biaya->volume;
                         }
-                    } elseif ($biaya->tipe === 'tol') {
+                    } elseif ($biaya->tipe === 'toll') { // Mengubah 'tol' menjadi 'toll'
                         $totalTol += $biaya->biaya;
-                        // Try to get dynamic kode_kartu_tol, otherwise default to 'm'
-                        // This assumes a 'kode_kartu_tol' field exists on RincianBiaya model for tol entries
-                        $kodeKartuTol = $biaya->kode_kartu_tol ?? 'm'; 
-                    } elseif ($biaya->tipe === 'parkir_lainnya') {
+                        $kodeKartuTol = $biaya->deskripsi ?? '-'; // Menggunakan kolom deskripsi
+                    } elseif ($biaya->tipe === 'parkir') { // Mengubah 'parkir_lainnya' menjadi 'parkir'
                         $totalParkir += $biaya->biaya;
                     }
                 }
@@ -133,7 +131,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
             $unitKerja->nama_unit_kerja ?? '',
             $kendaraan->nopol_kendaraan ?? '',
             $pengemudi->nama_staf ?? '',
-            $row->aggregated_kode_at, 
+            $row->aggregated_kode_at,
             $row->aggregated_jenis_bbm,
             $row->aggregated_volume_bbm,
             $row->aggregated_total_bbm,
@@ -148,9 +146,9 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet;
-                
+
                 // --- 1. SETUP JUDUL (HEADER ATAS) ---
-                
+
                 // Baris 1: Judul Utama
                 $sheet->mergeCells('A1:O1');
                 $sheet->setCellValue('A1', 'Tanda Terima SPJ BBM dan Tol Th. 2025');
@@ -163,22 +161,22 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 $sheet->mergeCells('A2:O2');
                 $sheet->setCellValue('A2', 'Nomor Berkas: ' . $this->nomorBerkas);
                 $sheet->getStyle('A2')->applyFromArray([
-                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER], 'size' => 15,
                 ]);
 
                 // Baris 3: Tanggal (Rata Kanan)
                 // Mengambil tanggal hari ini atau tanggal spesifik
-                $tanggalCetak = \Carbon\Carbon::now()->translatedFormat('d F Y'); 
+                $tanggalCetak = \Carbon\Carbon::now()->translatedFormat('d F Y');
                 $sheet->setCellValue('O3', $tanggalCetak);
                 $sheet->getStyle('O3')->applyFromArray([
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT]
                 ]);
 
                 // --- 2. STYLING TABEL DATA ---
-                
+
                 // Mencari baris terakhir data
                 $lastRow = $sheet->getHighestRow();
-                
+
                 // Style Header Tabel (Baris 4)
                 $sheet->getStyle('A4:O4')->applyFromArray([
                     'font' => ['bold' => true],
@@ -191,14 +189,22 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
 
+                // Formatting Rupiah/Accounting untuk kolom data Biaya BBM, Biaya Tol, dan Biaya Parkir
+                $sheet->getStyle('L5:L' . $lastRow) // Kolom Biaya BBM
+                      ->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->getStyle('N5:N' . $lastRow) // Kolom Biaya Tol
+                      ->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->getStyle('O5:O' . $lastRow) // Kolom Biaya Parkir/Lainnya
+                      ->getNumberFormat()->setFormatCode('#,##0');
+
 
                 // --- 3. FOOTER (TANDA TANGAN & REKAPITULASI) ---
-                
+
                 $footerRow = $lastRow + 2; // Memberi jarak 1 baris kosong
 
                 // Tanda Tangan Kiri
                 $sheet->setCellValue('B' . $footerRow, 'Diserahkan Oleh:');
-                
+
                 // Tanda Tangan Tengah
                 $sheet->setCellValue('D' . $footerRow, 'Diterima Oleh:');
 
@@ -206,7 +212,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 // Layout disesuaikan dengan gambar:
                 // Judul rekap ada di baris footerRow
                 // Nilai rekap ada di baris footerRow + 1
-                
+
                 $rekapHeaderRow = $footerRow;
                 $rekapValueRow = $footerRow + 1;
 
@@ -226,7 +232,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 // Rumus SUM Total
                 // Total BBM (Kolom L)
                 $sheet->setCellValue('L' . $rekapValueRow, '=SUM(L5:L' . $lastRow . ')');
-                
+
                 // Total Tol (Kolom N di data, tapi ditaruh di M di rekap sesuai gambar layout visual)
                 // Perhatikan: Data Tol ada di kolom N, tapi kotak rekap Tol ada di kolom M
                 $sheet->setCellValue('M' . $rekapValueRow, '=SUM(N5:N' . $lastRow . ')');

@@ -31,6 +31,8 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
     use InteractsWithInfolists;
     use InteractsWithForms;
 
+    protected static ?string $title = 'Tambah Rincian Biaya';
+
     protected static string $resource = EntryPengeluaranResource::class;
 
     protected static string $view = 'filament.resources.entry-pengeluaran-resource.pages.manage-rincian-biayas';

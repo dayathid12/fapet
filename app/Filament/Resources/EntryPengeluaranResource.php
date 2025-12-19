@@ -34,12 +34,8 @@ class EntryPengeluaranResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->default(function () {
-                        $currentDate = Carbon::now();
-                        $dd = $currentDate->format('d');
-                        $yy = $currentDate->format('y');
-
-                        // Query for the latest entry for today's date and year
-                        $latestEntry = EntryPengeluaran::where('nomor_berkas', 'like', $dd . $yy . '-%')
+                        // Query for the latest entry with prefix '1925-'
+                        $latestEntry = EntryPengeluaran::where('nomor_berkas', 'like', '1925-%')
                                                         ->orderByDesc('nomor_berkas') // Order by the full string to get the highest suffix
                                                         ->first();
 
@@ -51,7 +47,7 @@ class EntryPengeluaranResource extends Resource
                                 $sequence = (int) end($parts) + 1;
                             }
                         }
-                        return $dd . $yy . '-' . $sequence;
+                        return '1925-' . $sequence;
                     }),
                 TextInput::make('nama_berkas')
                     ->label('Nama Berkas')
