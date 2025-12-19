@@ -123,7 +123,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
 
 
         return [
-            $no++,
+            sprintf('%03d', $no++),
             $perjalanan->nomor_perjalanan ?? '',
             $wilayah->nama_wilayah ?? '',
             $perjalanan->alamat_tujuan ?? '',
@@ -222,9 +222,9 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 $sheet->getStyle('K' . $rekapHeaderRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 // Header Kotak Rekapitulasi
-                $sheet->setCellValue('L' . $rekapHeaderRow, 'BBM (Rp.)');
-                $sheet->setCellValue('M' . $rekapHeaderRow, 'Biaya Tol (Rp.)');
-                $sheet->setCellValue('N' . $rekapHeaderRow, 'Biaya Parkir/Lainnya (Rp.)'); // Perhatikan di gambar ini geser ke kiri (Kolom N, bukan O)
+                $sheet->setCellValue('L' . $rekapHeaderRow, 'Jumlah BBM (Rp.)');
+                $sheet->setCellValue('M' . $rekapHeaderRow, 'Jumlah Biaya Tol (Rp.)');
+                $sheet->setCellValue('N' . $rekapHeaderRow, 'Jumlah Biaya Parkir/Lainnya (Rp.)'); // Perhatikan di gambar ini geser ke kiri (Kolom N, bukan O)
 
                 // Styling Bold Header Rekap
                 $sheet->getStyle('L' . $rekapHeaderRow . ':N' . $rekapHeaderRow)->getFont()->setBold(true);

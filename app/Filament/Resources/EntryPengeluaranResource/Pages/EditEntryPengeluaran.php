@@ -26,13 +26,6 @@ class EditEntryPengeluaran extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('downloadExcel')
-                ->label('Download Excel')
-                ->color('success')
-                ->icon('heroicon-o-document-arrow-down')
-                ->action(function () {
-                    return Excel::download(new RincianBiayaExport($this->record), 'rincian-biaya-' . $this->record->id . '.xlsx');
-                }),
         ];
     }
 

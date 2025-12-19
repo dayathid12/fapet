@@ -10,6 +10,11 @@ class ListEntryPengeluarans extends ListRecords
 {
     protected static string $resource = EntryPengeluaranResource::class;
 
+    public function getTitle(): string
+    {
+        return static::getResource()::getNavigationLabel();
+    }
+
     protected function getHeaderActions(): array
     {
         return [

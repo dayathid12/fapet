@@ -20,6 +20,7 @@ class EntryPengeluaranResource extends Resource
 {
 
     protected static ?string $navigationLabel = 'Entry Pengeluaran';
+    
     protected static ?string $navigationGroup = 'Poll Kendaraan';
     protected static ?int $navigationSort = 0;
 
@@ -31,23 +32,19 @@ class EntryPengeluaranResource extends Resource
                 TextInput::make('nomor_berkas')
                     ->label('Nomor Berkas')
                     ->disabled()
+                    ->dehydrated()
                     ->required()
                     ->maxLength(255)
                     ->default(function () {
-                        // Query for the latest entry with prefix '1925-'
-                        $latestEntry = EntryPengeluaran::where('nomor_berkas', 'like', '1925-%')
-                                                        ->orderByDesc('nomor_berkas') // Order by the full string to get the highest suffix
-                                                        ->first();
-
-                        $sequence = 1;
-                        if ($latestEntry) {
-                            $parts = explode('-', $latestEntry->nomor_berkas);
-                            // Ensure the suffix is an integer and increment it
-                            if (count($parts) > 1 && is_numeric(end($parts))) {
-                                $sequence = (int) end($parts) + 1;
-                            }
+                        // Get the highest 'nomor_berkas'
+                        $latestEntry = EntryPengeluaran::orderByRaw('CAST(nomor_berkas AS UNSIGNED) DESC')->first();
+                        
+                        $newSequence = 1;
+                        if ($latestEntry && is_numeric($latestEntry->nomor_berkas)) {
+                            $newSequence = (int)$latestEntry->nomor_berkas + 1;
                         }
-                        return '1925-' . $sequence;
+
+                        return str_pad($newSequence, 4, '0', STR_PAD_LEFT);
                     }),
                 TextInput::make('nama_berkas')
                     ->label('Nama Berkas')
@@ -64,7 +61,8 @@ class EntryPengeluaranResource extends Resource
                 TextColumn::make('nomor_berkas')
                     ->label('Nomor Berkas')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state): string => str_pad($state, 4, '0', STR_PAD_LEFT)),
                 TextColumn::make('nama_berkas')
                     ->label('Nama Berkas')
                     ->searchable()

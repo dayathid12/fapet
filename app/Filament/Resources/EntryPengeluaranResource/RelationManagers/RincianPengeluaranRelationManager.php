@@ -18,6 +18,7 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\Action; // Import Action class
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
@@ -25,6 +26,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Maatwebsite\Excel\Facades\Excel; // Import Excel facade
+use App\Exports\RincianBiayaExport; // Import your Export class
 
 class RincianPengeluaranRelationManager extends RelationManager
 {
@@ -194,7 +197,13 @@ class RincianPengeluaranRelationManager extends RelationManager
                     ->icon('heroicon-o-arrow-left')
                     ->color('gray')
                     ->url('/app/entry-pengeluarans'),
-                ExportAction::make('export'),
+                Action::make('downloadExcel')
+                    ->label('Download Excel')
+                    ->color('success')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(function () {
+                        return Excel::download(new RincianBiayaExport($this->getOwnerRecord()), 'rincian-biaya-' . $this->getOwnerRecord()->id . '.xlsx');
+                    }),
                 Tables\Actions\CreateAction::make(),
             ])
             ->actions([
