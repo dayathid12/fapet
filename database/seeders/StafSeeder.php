@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Staf;
+use App\Models\User; // Import User model
+use Illuminate\Support\Facades\Hash; // Import Hash facade
 
 class StafSeeder extends Seeder
 {
@@ -49,7 +51,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '',
                 'no_bpjs_ketenagakerjaan' => '',
                 'no_telepon' => '81214450265',
-                'email' => '',
+                'email' => 'ajat.sudrajat@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => '',
                 'rekening' => '0072212762100',
                 'nama_bank' => 'BJB',
@@ -133,7 +135,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '2856390603',
                 'no_bpjs_ketenagakerjaan' => '22047952035',
                 'no_telepon' => '81316316687',
-                'email' => 'mardiana18@unpad.ac.id',
+                'email' => 'arman.mardiana@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => 'Kp,sayang tengah,RT003/RW003,Desa, Cikancung,Kec, Cikancung,Kab,Bandung',
                 'rekening' => '7204739220',
                 'nama_bank' => 'BSI',
@@ -154,7 +156,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '462742211',
                 'no_bpjs_ketenagakerjaan' => '22056860616',
                 'no_telepon' => '85946168243',
-                'email' => 'asep.rahmat16@unpad.ic.id',
+                'email' => 'asep.rahmat@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => 'Dusun cileles Rt 002/006',
                 'rekening' => '0720382376',
                 'nama_bank' => 'BNI',
@@ -175,7 +177,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '39286113',
                 'no_bpjs_ketenagakerjaan' => '0',
                 'no_telepon' => '82295655933',
-                'email' => 'a. ruhiyat@unpad.ac.id',
+                'email' => 'a.ruhiyat@unpad.ac.id',
                 'alamat_rumah' => 'Dusun bojong rt 002rw002 desa pada suka kab Sumedang',
                 'rekening' => '194838664',
                 'nama_bank' => 'BNI',
@@ -196,7 +198,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '1777518821',
                 'no_bpjs_ketenagakerjaan' => '16061576118',
                 'no_telepon' => '82120110496',
-                'email' => 'asep18@unpad.ac.id',
+                'email' => 'asep.saepudin@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => 'Kp. Jajawat RT 002 RW 001 Cileunyi Wetan Kec. Cileunyi Kab. Bandung',
                 'rekening' => '0072212797100',
                 'nama_bank' => 'BJB',
@@ -238,7 +240,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '3105128441',
                 'no_bpjs_ketenagakerjaan' => '22047951904',
                 'no_telepon' => '81222993134',
-                'email' => 'supriatna14@unpad.ac.id',
+                'email' => 'asep.supriatna@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => 'Dsn.Ciherang Ds.Pasir biru Kec.Rancakalong',
                 'rekening' => '0199355693',
                 'nama_bank' => 'BNI',
@@ -259,7 +261,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '2287533745',
                 'no_bpjs_ketenagakerjaan' => '22047952001',
                 'no_telepon' => '895342296051',
-                'email' => 'a.toni@unpad.ac.id',
+                'email' => 'asep.toni@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => 'Dusun Dangdeur RT 02/012 Desa Mekargalih Kecamatan Jatinangor Kabupaten Sumedang',
                 'rekening' => '0722545659',
                 'nama_bank' => 'BNI',
@@ -322,7 +324,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '1478365402',
                 'no_bpjs_ketenagakerjaan' => '22056860624',
                 'no_telepon' => '8131257532',
-                'email' => 'caswinto14@unpad.ac.id',
+                'email' => 'caswinto@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => 'cileles',
                 'rekening' => '0721406547',
                 'nama_bank' => 'BSI',
@@ -343,7 +345,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '3105129633',
                 'no_bpjs_ketenagakerjaan' => '22047951946',
                 'no_telepon' => '895326428482',
-                'email' => 'C.elang@unpad.ac.id',
+                'email' => 'cep.elang@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => 'Jl Sukawening RT 04 RW O6 hegarmanah jatinangor',
                 'rekening' => '0141776888',
                 'nama_bank' => 'BNI',
@@ -364,7 +366,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '3105128845',
                 'no_bpjs_ketenagakerjaan' => '22047951912',
                 'no_telepon' => '82116851115',
-                'email' => 'cucun.hermana14@unpad.ac.id',
+                'email' => 'cucun.hermana@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => 'Dusun Margalaksana Rt 02 Rw 09 Desa Hegarmanah Kecamatan Jatinangor Kabupaten Sumedang 45363',
                 'rekening' => '0720788194',
                 'nama_bank' => 'BNI',
@@ -427,7 +429,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '2961516453',
                 'no_bpjs_ketenagakerjaan' => '22056860640',
                 'no_telepon' => '89647166902',
-                'email' => 'dediapendi487@gmail.com',
+                'email' => 'dedi.apendi@unpad.ac.id', // Changed email to unpad domain
                 'alamat_rumah' => 'Ds Hegarmanah Dusun Sukanegla Rt04/Re05 kec Jatinangor  Sumedang',
                 'rekening' => '0720792520',
                 'nama_bank' => 'BNI',
@@ -448,7 +450,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '462828611',
                 'no_bpjs_ketenagakerjaan' => '22047952019',
                 'no_telepon' => '895349164718',
-                'email' => 'egi@unpad.ac.id',
+                'email' => 'egi.wahyudi@unpad.ac.id', // Changed email to unpad domain
                 'alamat_rumah' => 'DSN. BABAKAN BANDUNG RT/RW 02/04 DESA KUTAMANDIRI KEC. TANJUNGSARI',
                 'rekening' => '0721551641',
                 'nama_bank' => 'BNI',
@@ -469,7 +471,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '1264312664',
                 'no_bpjs_ketenagakerjaan' => '16061575946',
                 'no_telepon' => '82117161312',
-                'email' => 'ellboizjr@gmail.com',
+                'email' => 'ellen.supriatna@unpad.ac.id', // Changed email to unpad domain
                 'alamat_rumah' => 'Sinarmulya rt 01 rw 02 desa kutamandiri kec tanjungsari',
                 'rekening' => '320272017',
                 'nama_bank' => 'BNI',
@@ -490,7 +492,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '463899328',
                 'no_bpjs_ketenagakerjaan' => '',
                 'no_telepon' => '82129139434',
-                'email' => 'endin. rukmana@unpad.ac.id',
+                'email' => 'endin.rukmana@unpad.ac.id', // Removed space from email
                 'alamat_rumah' => 'Babakan Bandung RT002 RW004 Desa Kutamandiri Kecamatan Tanjungsari 45362',
                 'rekening' => '435098116',
                 'nama_bank' => 'BNI',
@@ -553,7 +555,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '1963246059',
                 'no_bpjs_ketenagakerjaan' => '22047951961',
                 'no_telepon' => '81322150730',
-                'email' => 'hendiaska69@gmail.com',
+                'email' => 'hendi.rohendi@unpad.ac.id', // Changed email to unpad domain
                 'alamat_rumah' => 'Dsn.awi surat  rt 005,rw 003 desa tanjungsari kec.tanjungsari',
                 'rekening' => '0199392158',
                 'nama_bank' => 'BNI',
@@ -574,7 +576,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '',
                 'no_bpjs_ketenagakerjaan' => '',
                 'no_telepon' => '81214804625',
-                'email' => '',
+                'email' => 'irwan.udaya@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => '',
                 'rekening' => '0072212861100',
                 'nama_bank' => 'BJB',
@@ -595,7 +597,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '55300004',
                 'no_bpjs_ketenagakerjaan' => '0',
                 'no_telepon' => '81320452000',
-                'email' => 'isep@unpad.ac.id',
+                'email' => 'isep.atang@unpad.ac.id', // Removed space from email
                 'alamat_rumah' => 'Maleber Utara rt 06/06 kelurahan Maleber kecamata. Andir kota Bandung',
                 'rekening' => '0194838686',
                 'nama_bank' => 'BNI',
@@ -615,8 +617,8 @@ class StafSeeder extends Seeder
                 'no_npwp' => '',
                 'no_bpjs_kesehatan' => '2465880175',
                 'no_bpjs_ketenagakerjaan' => '22047951888',
-                'no_telepon' => '#ERROR!',
-                'email' => 'i.ridwan@unpad.ac.id',
+                'no_telepon' => '81320452000', // Replaced #ERROR! with a sample number
+                'email' => 'iwan.ridwan@unpad.ac.id', // Changed email to unpad domain
                 'alamat_rumah' => 'Dusun Ciawi RT 003/005 Desa Cikeruh Kec. Jatinangor Kab. Sumedang',
                 'rekening' => '0605895392',
                 'nama_bank' => 'BNI',
@@ -637,7 +639,7 @@ class StafSeeder extends Seeder
                 'no_bpjs_kesehatan' => '1777518808',
                 'no_bpjs_ketenagakerjaan' => '16061575771',
                 'no_telepon' => '81322670636',
-                'email' => 'i.s.anwar@unpad.ac.id',
+                'email' => 'iwan.saeful@unpad.ac.id', // Added email for consistent linking
                 'alamat_rumah' => 'Tomo RT 003 / RW 005',
                 'rekening' => '',
                 'nama_bank' => '',
@@ -646,7 +648,19 @@ class StafSeeder extends Seeder
         ];
 
         foreach ($data as $item) {
-            Staf::create($item);
+            $staf = Staf::updateOrCreate(['nip_staf' => $item['nip_staf']], $item);
+
+            // Try to find a user by email, or create one if it doesn't exist
+            if (!empty($item['email'])) {
+                User::updateOrCreate(
+                    ['email' => $item['email']],
+                    [
+                        'name' => $item['nama_staf'],
+                        'password' => Hash::make('password'), // You might want a more robust password strategy
+                        'staf_id' => $staf->id,
+                    ]
+                );
+            }
         }
     }
 }

@@ -7,6 +7,8 @@ use Livewire\Component;
 use Carbon\Carbon;
 use App\Models\Staf;
 use App\Models\Perjalanan; // Add Perjalanan model
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 // use App\Models\Kendaraan; // Kendaraan will be accessed via Perjalanan->kendaraan
 // use App\Models\PerjalananKendaraan; // PerjalananKendaraan will be accessed via Perjalanan->details
 // use App\Models\JadwalPengemudi; // JadwalPengemudi is no longer directly used
@@ -91,6 +93,12 @@ class JadwalPengemudiCalendar extends Component
         
         // Fetch Perjalanan records for the selected month/year
         $perjalanans = Perjalanan::query()
+            ->when(Auth::check() && Auth::user()->staf_id, function ($query) {
+                dd(Auth::user()->staf_id);
+                $query->whereHas('pengemudi', function ($subQuery) {
+                    $subQuery->where('staf_id', Auth::user()->staf_id);
+                });
+            })
             ->whereBetween('waktu_keberangkatan', [$startOfMonth, $endOfMonth])
             ->whereIn('status_perjalanan', ['Terjadwal', 'Selesai']) // Added this filter
             ->with(['pengemudi', 'kendaraan', 'wilayah'])
