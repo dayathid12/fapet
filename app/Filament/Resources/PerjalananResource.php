@@ -314,11 +314,13 @@ class PerjalananResource extends Resource
                                     ->label('Waktu Keberangkatan')
                                     ->required()
                                     ->displayFormat('d/m/Y H:i')
-                                    ->native(false),
+                                    ->native(false)
+                                    ->live(onBlur: true),
                                 Forms\Components\DateTimePicker::make('waktu_kepulangan')
                                     ->label('Waktu Kepulangan')
                                     ->displayFormat('d/m/Y H:i')
-                                    ->native(false),
+                                    ->native(false)
+                                    ->live(onBlur: true),
                             ]),
 
                         \Filament\Forms\Components\Repeater::make('details')
@@ -327,14 +329,55 @@ class PerjalananResource extends Resource
                             ->schema([
                                 \Filament\Forms\Components\Select::make('kendaraan_nopol')
                                     ->label('Nomor Polisi Kendaraan')
-                                    ->options(\App\Models\Kendaraan::all()->mapWithKeys(function ($kendaraan) {
-                                        $label = implode(' - ', array_filter([
-                                            $kendaraan->nopol_kendaraan,
-                                            $kendaraan->jenis_kendaraan,
-                                            $kendaraan->merk_type,
-                                        ]));
-                                        return [$kendaraan->nopol_kendaraan => $label];
-                                    }))
+                                    ->options(function (Forms\Get $get, ?Model $record) {
+                                        $startTime = $get('../../waktu_keberangkatan');
+                                        $endTime = $get('../../waktu_kepulangan');
+
+                                        // If no time range, return all vehicles
+                                        if (!$startTime || !$endTime) {
+                                            return Kendaraan::all()->mapWithKeys(function ($kendaraan) {
+                                                $label = implode(' - ', array_filter([
+                                                    $kendaraan->nopol_kendaraan,
+                                                    $kendaraan->jenis_kendaraan,
+                                                    $kendaraan->merk_type,
+                                                ]));
+                                                return [$kendaraan->nopol_kendaraan => $label];
+                                            });
+                                        }
+
+                                        $currentPerjalananId = null;
+                                        if ($record && $record->perjalanan) {
+                                            $currentPerjalananId = $record->perjalanan->id;
+                                        } else if ($record && $record->getKey()) {
+                                            $currentPerjalananId = $record->getKey();
+                                        }
+
+
+                                        // Get NOPOLs of vehicles that are already scheduled and overlap
+                                        $unavailableNopols = Perjalanan::query()
+                                            ->where('status_perjalanan', 'Terjadwal')
+                                            ->when($currentPerjalananId, fn ($query) => $query->where('perjalanans.id', '!=', $currentPerjalananId))
+                                            ->where(function ($query) use ($startTime, $endTime) {
+                                                $query->where('waktu_keberangkatan', '<', $endTime)
+                                                      ->where('waktu_kepulangan', '>', $startTime);
+                                            })
+                                            ->join('perjalanan_kendaraans', 'perjalanans.id', '=', 'perjalanan_kendaraans.perjalanan_id')
+                                            ->pluck('perjalanan_kendaraans.kendaraan_nopol')
+                                            ->unique()
+                                            ->toArray();
+
+                                        // Return all vehicles that are not in the unavailable list
+                                        return Kendaraan::whereNotIn('nopol_kendaraan', $unavailableNopols)
+                                            ->get()
+                                            ->mapWithKeys(function ($kendaraan) {
+                                                $label = implode(' - ', array_filter([
+                                                    $kendaraan->nopol_kendaraan,
+                                                    $kendaraan->jenis_kendaraan,
+                                                    $kendaraan->merk_type,
+                                                ]));
+                                                return [$kendaraan->nopol_kendaraan => $label];
+                                            });
+                                    })
                                     ->searchable()
                                     ->required()
                                     ->placeholder('Pilih nomor polisi...'),
