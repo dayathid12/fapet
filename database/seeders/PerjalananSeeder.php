@@ -29,6 +29,8 @@ class PerjalananSeeder extends Seeder
                     'no_surat_tugas' => 'ST-1001/2025',
                     'nama_pengguna' => 'John Doe',
                     'kontak_pengguna' => '08123456789',
+                    'nama_personil_perwakilan' => 'Alice Cooper',
+                    'kontak_pengguna_perwakilan' => '08123456790',
                     'tujuan_wilayah_id' => 1,
                     'unit_kerja_id' => 1,
                 ],
@@ -52,6 +54,8 @@ class PerjalananSeeder extends Seeder
                     'no_surat_tugas' => 'ST-2002/2025',
                     'nama_pengguna' => 'Jane Smith',
                     'kontak_pengguna' => '08198765432',
+                    'nama_personil_perwakilan' => 'Charlie Brown',
+                    'kontak_pengguna_perwakilan' => '08198765433',
                     'tujuan_wilayah_id' => 2,
                     'unit_kerja_id' => 2,
                 ],
@@ -75,6 +79,8 @@ class PerjalananSeeder extends Seeder
                     'no_surat_tugas' => 'ST-3003/2025',
                     'nama_pengguna' => 'Bob Johnson',
                     'kontak_pengguna' => '08134567890',
+                    'nama_personil_perwakilan' => 'Diana Prince',
+                    'kontak_pengguna_perwakilan' => '08134567891',
                     'tujuan_wilayah_id' => 3,
                     'unit_kerja_id' => 3,
                 ],
@@ -87,16 +93,21 @@ class PerjalananSeeder extends Seeder
         ];
 
         foreach ($data as $item) {
-            // Buat perjalanan terlebih dahulu
-            $perjalanan = Perjalanan::create($item['perjalanan_data']);
+            // Update or create perjalanan
+            $perjalanan = Perjalanan::updateOrCreate(
+                ['no_surat_tugas' => $item['perjalanan_data']['no_surat_tugas']],
+                $item['perjalanan_data']
+            );
 
-            // Kemudian buat detail kendaraan terkait
-            PerjalananKendaraan::create([
-                'perjalanan_id' => $perjalanan->id,
-                'kendaraan_nopol' => $item['kendaraan_data']['kendaraan_nopol'],
-                'pengemudi_id' => $item['kendaraan_data']['pengemudi_id'],
-                'asisten_id' => $item['kendaraan_data']['asisten_id'],
-            ]);
+            // Update or create detail kendaraan terkait
+            PerjalananKendaraan::updateOrCreate(
+                ['perjalanan_id' => $perjalanan->id],
+                [
+                    'kendaraan_nopol' => $item['kendaraan_data']['kendaraan_nopol'],
+                    'pengemudi_id' => $item['kendaraan_data']['pengemudi_id'],
+                    'asisten_id' => $item['kendaraan_data']['asisten_id'],
+                ]
+            );
         }
     }
 }

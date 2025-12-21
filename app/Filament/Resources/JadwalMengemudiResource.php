@@ -36,7 +36,15 @@ class JadwalMengemudiResource extends Resource
                     ->label('Nama Pengemudi')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('kendaraan.nopol') // Nomor Polisi Kendaraan dari relasi Kendaraan
+                Tables\Columns\TextColumn::make('waktu_keberangkatan')
+                    ->label('Waktu Berangkat')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('waktu_kepulangan')
+                    ->label('Waktu Kepulangan')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('kendaraan.nopol_kendaraan') // Nomor Polisi Kendaraan dari relasi Kendaraan
                     ->label('Nomor Polisi Kendaraan')
                     ->searchable()
                     ->sortable(),
@@ -54,9 +62,11 @@ class JadwalMengemudiResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('nama_personil_perwakilan') // Nama Perwakilan dari model Perjalanan
                     ->label('Nama Perwakilan')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('kontak_pengguna_perwakilan') // Kontak Perwakilan dari model Perjalanan
-                    ->label('Kontak Perwakilan'),
+                    ->label('Kontak Perwakilan')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('lokasi_keberangkatan') // Lokasi Keberangkatan dari model Perjalanan
                     ->label('Lokasi Keberangkatan')
                     ->searchable(),
