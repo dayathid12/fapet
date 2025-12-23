@@ -23,26 +23,31 @@ class KondisiBanResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $schema = [];
+
+        if (!filled(request()->query('nopol_kendaraan'))) {
+            $schema[] = Forms\Components\Select::make('nopol_kendaraan')
+                ->relationship('kendaraan', 'nopol_kendaraan')
+                ->searchable()
+                ->preload()
+                ->required();
+        }
+
+        $schema = array_merge($schema, [
+            Forms\Components\TextInput::make('ban_depan_kiri')
+                ->maxLength(255),
+            Forms\Components\TextInput::make('ban_depan_kanan')
+                ->maxLength(255),
+            Forms\Components\TextInput::make('ban_belakang_kiri')
+                ->maxLength(255),
+            Forms\Components\TextInput::make('ban_belakang_kanan')
+                ->maxLength(255),
+            Forms\Components\TextInput::make('odo_terbaru')
+                ->numeric(),
+        ]);
+
         return $form
-            ->schema([
-                Forms\Components\Select::make('nopol_kendaraan')
-                    ->relationship('kendaraan', 'nopol_kendaraan')
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->hidden(fn () => filled(request()->query('nopol_kendaraan')))
-                    ->default(fn () => request()->query('nopol_kendaraan')),
-                Forms\Components\TextInput::make('ban_depan_kiri')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('ban_depan_kanan')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('ban_belakang_kiri')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('ban_belakang_kanan')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('odo_terbaru')
-                    ->numeric(),
-            ]);
+            ->schema($schema);
     }
 
     public static function table(Table $table): Table
