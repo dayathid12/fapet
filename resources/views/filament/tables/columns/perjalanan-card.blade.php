@@ -18,15 +18,20 @@
         'Menunggu Persetujuan' => 'bg-yellow-500 text-white animate-pulse',
         'Ditolak' => 'bg-danger-500 text-white',
         'Selesai' => 'bg-success-500 text-white',
-        default => 'bg-gray-400 text-white',
+        default => 'bg-red-500 text-white',
     };
     $iconSvg = match ($effectiveStatus) {
         'Terjadwal' => 'heroicon-o-check-circle',
         'Selesai' => 'heroicon-o-check-badge',
         'Menunggu Persetujuan' => 'heroicon-o-clock',
         'Ditolak' => 'heroicon-o-x-circle',
-        default => 'heroicon-o-question-mark-circle',
+        default => 'heroicon-o-exclamation-triangle',
     };
+
+    // If the status is unknown, display "Status Perjalanan"
+    if (!in_array($effectiveStatus, ['Terjadwal', 'Menunggu Persetujuan', 'Ditolak', 'Selesai'])) {
+        $effectiveStatus = 'Status Perjalanan';
+    }
 
     // Duration
     if ($end) {
