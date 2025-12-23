@@ -144,6 +144,14 @@ class KendaraanResource extends Resource
                     ->circular()
                     ->defaultImageUrl('/images/logo-universitas.png')
                     ->size(60),
+                Tables\Columns\TextColumn::make('kondisi_ban')
+                    ->label('Kondisi Ban')
+                    ->badge()
+                    ->color('success')
+                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->formatStateUsing(fn () => 'Kelola')
+                    ->url(fn ($record) => route('filament.app.resources.kondisi-bans.index', ['tableFilters[nopol_kendaraan][value]' => $record->nopol_kendaraan]))
+                    ->openUrlInNewTab(false),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('jenis_kendaraan')
