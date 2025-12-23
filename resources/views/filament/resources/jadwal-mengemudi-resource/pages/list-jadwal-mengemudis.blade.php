@@ -1,421 +1,229 @@
-<x-filament-panels::page class="relative min-h-screen overflow-x-hidden bg-white font-jakarta antialiased">
-    {{-- Inject Styles & Fonts --}}
+<x-filament-panels::page class="min-h-screen bg-slate-50/50 font-jakarta antialiased">
+    {{-- Inject Styles --}}
     @push('styles')
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
         <style>
-            .background-wrapper {
-                font-family: 'Poppins', sans-serif;
-                background-color: #ffffff;
-                background-image: linear-gradient(
-                    45deg,
-                    #f8f8f8 25%,
-                    transparent 25%,
-                    transparent 50%,
-                    #f8f8f8 50%,
-                    #f8f8f8 75%,
-                    transparent 75%,
-                    transparent
-                );
-                background-repeat: repeat;
-                background-position: 0 0;
-                background-size: 20px 20px;
-                position: relative;
-                min-height: 100vh;
-                padding: 20px;
-            }
-            .background-wrapper::before {
-                content: "";
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(255, 255, 255, 0.7);
-                z-index: 1;
-            }
-            .content-wrapper {
-                position: relative;
-                z-index: 2;
-            }
             .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
-            .border-spacing-y-4 { border-spacing: 0 1rem; }
-
-            /* Custom Scrollbar */
-            ::-webkit-scrollbar { width: 8px; height: 8px; }
-            ::-webkit-scrollbar-track { background: transparent; }
-            ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-            ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+            .timeline-dashed::before {
+                content: '';
+                position: absolute;
+                left: 7px;
+                top: 24px;
+                bottom: 24px;
+                border-left: 2px dashed #e2e8f0;
+                z-index: 0;
+            }
         </style>
     @endpush
 
-    <div class="background-wrapper">
-        <div class="content-wrapper">
-
     @php
-        // Data comes from the $dataRecords public property on the component
-        $totalTrip = $dataRecords->total();
-        $totalJam = $totalTrip * 4; // Dummy logic
-        $onDutyCount = $dataRecords->where('status_perjalanan', 'berangkat')->count();
+        $totalTrip = isset($dataRecords) ? $dataRecords->total() : 0;
+        $totalJam = $totalTrip * 4;
+        $onDutyCount = isset($dataRecords) ? $dataRecords->where('status_perjalanan', 'berangkat')->count() : 0;
     @endphp
 
-    <div class="w-full text-slate-800 dark:text-slate-200 -mt-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto py-6 pb-20">
 
-
-
-        {{-- Summary Cards --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <!-- Card 1 -->
-            <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md p-5 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700 group">
-                <div class="flex justify-between items-start">
+        {{-- 1. HEADER & STATS SECTION --}}
+        {{-- PERBAIKAN: Ditambahkan 'mb-10' di sini untuk mendorong Filter Bar ke bawah --}}
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="relative overflow-hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 rounded-full bg-blue-50 blur-xl opacity-50"></div>
+                <div class="relative flex justify-between items-start">
                     <div>
-                        <div class="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Total Trip</div>
-                        <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ $totalTrip }}</div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">TOTAL TRIP</p>
+                        <h3 class="text-3xl font-extrabold text-slate-800">{{ $totalTrip }}</h3>
                     </div>
-                    <div class="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100/50 flex items-center justify-center text-blue-600">
                         <i class="fas fa-route"></i>
                     </div>
                 </div>
             </div>
-            <!-- Card 2 -->
-            <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md p-5 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700 group">
-                <div class="flex justify-between items-start">
+
+            <div class="relative overflow-hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 rounded-full bg-indigo-50 blur-xl opacity-50"></div>
+                <div class="relative flex justify-between items-start">
                     <div>
-                        <div class="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Jam Kerja</div>
-                        <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ $totalJam }}<span class="text-lg text-gray-400 font-normal">h</span></div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">TOTAL JAM</p>
+                        <h3 class="text-3xl font-extrabold text-slate-800">{{ $totalJam }}<span class="text-sm text-slate-400 font-medium ml-1">Jam</span></h3>
                     </div>
-                    <div class="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-100/50 flex items-center justify-center text-indigo-600">
                         <i class="fas fa-clock"></i>
                     </div>
                 </div>
             </div>
-            <!-- Card 3 -->
-            <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md p-5 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700 group">
-                <div class="flex justify-between items-start">
+
+            <div class="relative overflow-hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 rounded-full bg-amber-50 blur-xl opacity-50"></div>
+                <div class="relative flex justify-between items-start">
                     <div>
-                        <div class="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Rating</div>
-                        <div class="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                            4.9 <span class="text-sm text-yellow-500"><i class="fas fa-star"></i></span>
-                        </div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">RATING</p>
+                        <h3 class="text-3xl font-extrabold text-slate-800 flex items-center gap-1">
+                            4.9 <i class="fas fa-star text-amber-400 text-lg"></i>
+                        </h3>
                     </div>
-                    <div class="p-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-lg group-hover:bg-yellow-500 group-hover:text-white transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100/50 flex items-center justify-center text-amber-600">
                         <i class="fas fa-award"></i>
                     </div>
                 </div>
             </div>
-            <!-- Card 4 -->
-            <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md p-5 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700 group">
-                <div class="flex justify-between items-start">
+
+            <div class="relative overflow-hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 rounded-full bg-emerald-50 blur-xl opacity-50"></div>
+                <div class="relative flex justify-between items-start">
                     <div>
-                        <div class="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Status</div>
-                        <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{{ $onDutyCount > 0 ? 'On Duty' : 'Standby' }}</div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">STATUS</p>
+                        <h3 class="text-3xl font-extrabold text-emerald-600">{{ $onDutyCount > 0 ? 'On Duty' : 'Standby' }}</h3>
                     </div>
-                    <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100/50 flex items-center justify-center text-emerald-600">
                         <i class="fas fa-toggle-on"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Filter / Search Bar --}}
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4 bg-white/70 dark:bg-gray-800/70 p-2 rounded-2xl backdrop-blur-md border border-gray-200 dark:border-gray-700 shadow-sm">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-white pl-4 w-full sm:w-auto flex items-center gap-2">
-                <i class="fas fa-calendar-alt text-blue-600"></i> Jadwal Penugasan
-            </h2>
-            <div class="flex gap-2 w-full sm:w-auto p-1">
-
-               
+        {{-- 2. FILTER BAR SECTION --}}
+        {{-- PERBAIKAN: Ditambahkan 'mb-10' di sini untuk mendorong List Jadwal ke bawah --}}
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-3 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4 px-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-slate-800 leading-tight">Jadwal Perjalanan</h2>
+                    <p class="text-xs text-slate-500">Kelola dan pantau armada</p>
+                </div>
             </div>
+
+
         </div>
 
-        @if ($dataRecords->count() > 0)
-            {{-- Desktop Table View (Separated Rows) --}}
-            <div class="hidden md:block overflow-x-auto pb-4">
-                <table class="min-w-full border-separate border-spacing-y-3 px-1">
-                    <thead>
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider w-[40%] sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-tl-xl rounded-bl-xl">Jadwal & Rute</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md">Armada</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md">Perwakilan, Unit & Kontak</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md">Status</th>
-                            <th scope="col" class="relative px-6 py-3 sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-tr-xl rounded-br-xl"><span class="sr-only">Detail</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($dataRecords as $record)
-                            @php
-                                $namaDriver = $record->pengemudi?->first()?->nama_staf ?? 'N/A';
-                                $nipDriver = $record->pengemudi?->first()?->nip ?? '-';
+        {{-- 3. CONTENT LIST SECTION --}}
+        <div>
+            @if ($dataRecords->count() > 0)
+                <div class="flex flex-col gap-6">
+                    @foreach ($dataRecords as $record)
+                        @php
+                            $start = \Carbon\Carbon::parse($record->waktu_keberangkatan);
+                            $end = \Carbon\Carbon::parse($record->waktu_kepulangan);
+                            $diffInDays = $start->diffInDays($end);
+                            $days = $diffInDays + 1;
+                            $nights = $diffInDays;
+                            $durationText = $nights === 0 ? "$days Hari" : "$days Hari $nights Malam";
+                            $kendaraan = $record->kendaraan?->first();
+                            $statusLabel = match($record->status_perjalanan) {
+                                'berangkat' => 'ON DUTY',
+                                'menunggu' => 'STANDBY',
+                                'selesai' => 'FINISHED',
+                                default => 'UNKNOWN',
+                            };
+                        @endphp
 
-                                $kendaraan = $record->kendaraan?->first();
-                                $nopol = $kendaraan?->nopol_kendaraan ?? '-';
-                                $namaKendaraan = $kendaraan?->nama_kendaraan ?? 'Kendaraan';
-                                $jenisKendaraan = $kendaraan?->jenis_kendaraan ?? 'Operasional';
-
-                                $start = \Carbon\Carbon::parse($record->waktu_keberangkatan);
-                                $end = \Carbon\Carbon::parse($record->waktu_kepulangan);
-                                $diffInDays = $start->diffInDays($end);
-                                $days = $diffInDays + 1;
-                                $nights = $diffInDays;
-                                $durationText = $nights === 0 ? "$days Hari" : "$days Hari $nights Malam";
-
-                                // Format Phone to WhatsApp
-                                $phone = $record->no_telepon_perwakilan;
-                                $waLink = '#';
-                                if($phone) {
-                                    $clean = preg_replace('/\\D/', '', $phone);
-                                    if(str_starts_with($clean, '0')) $clean = '62' . substr($clean, 1);
-                                    $waLink = "https://wa.me/$clean";
-                                }
-                            @endphp
-
-                            <tr class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group rounded-xl relative border border-gray-200 dark:border-gray-700">
-
-                                {{-- 1. Jadwal & Rute --}}
-                                <td class="px-6 py-4 align-top first:rounded-l-xl border-y first:border-l border-gray-200/50 dark:border-gray-700">
-                                    <div class="flex gap-8">
-                                        {{-- Waktu --}}
-                                        <div class="w-44 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 pr-6 relative">
-                                            <div class="absolute right-0 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
-                                            <div class="flex flex-col gap-4">
-                                                <div>
-                                                    <div class="flex items-center gap-2 mb-1">
-                                                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-50 dark:ring-emerald-900/30"></div>
-                                                        <span class="text-[10px] font-bold text-gray-400 tracking-wider">BERANGKAT</span>
-                                                    </div>
-                                                    <div class="pl-5">
-                                                        <div class="text-base font-bold text-gray-800 dark:text-white">{{ $start->format('H:i') }}</div>
-                                                        <div class="text-xs font-medium text-gray-500">{{ $start->isoFormat('D MMM YYYY') }}</div>
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <div class="flex items-center gap-2 mb-1">
-                                                        <div class="w-2.5 h-2.5 rounded-full bg-rose-500 ring-4 ring-rose-50 dark:ring-rose-900/30"></div>
-                                                        <span class="text-[10px] font-bold text-gray-400 tracking-wider">PULANG</span>
-                                                    </div>
-                                                    <div class="pl-5">
-                                                        <div class="text-base font-bold text-gray-800 dark:text-white">{{ $end->format('H:i') }}</div>
-                                                        <div class="text-xs font-medium text-gray-500">{{ $end->isoFormat('D MMM YYYY') }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="pl-5 pt-1">
-                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800">
-                                                        <i class="fas fa-moon mr-1.5 text-indigo-500"></i> {{ $durationText }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- Rute --}}
-                                        <div class="flex-grow pt-1">
-                                            <div class="flex flex-col gap-5 relative">
-                                                <div class="absolute left-[8px] top-3 bottom-3 w-[2px] border-l-2 border-dashed border-gray-200 dark:border-gray-700"></div>
-
-                                                <div class="flex gap-4 relative">
-                                                    <div class="w-4 mt-1 flex flex-col items-center z-10">
-                                                        <div class="w-4 h-4 rounded-full bg-white dark:bg-gray-800 border-[3px] border-blue-500 shadow-md"></div>
-                                                    </div>
-                                                    <div>
-                                                        <span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider block mb-0.5">Lokasi Jemput</span>
-                                                        <div class="text-sm text-gray-800 dark:text-white font-semibold leading-tight hover:text-blue-600 transition-colors">{{ $record->lokasi_keberangkatan }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="flex gap-4 relative">
-                                                    <div class="w-4 mt-1 flex flex-col items-center z-10">
-                                                        <div class="w-4 h-4 rounded-full bg-white dark:bg-gray-800 border-[3px] border-rose-500 shadow-md"></div>
-                                                    </div>
-                                                    <div>
-                                                        <span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider block mb-0.5">Tujuan</span>
-                                                        <div class="text-sm text-gray-800 dark:text-white font-semibold leading-tight hover:text-rose-600 transition-colors">{{ $record->alamat_tujuan }}</div>
-                                                        <div class="mt-2 inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-gray-100 text-gray-600 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700">
-                                                            <i class="fas fa-map-marker-alt mr-1.5 text-gray-400"></i> {{ $record->wilayah?->nama_wilayah ?? 'Luar Kota' }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                        <div class="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100 hover:shadow-lg transition-all duration-300 p-6">
+                            <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                                {{-- Timeline --}}
+                                <div class="lg:w-1/5 flex-shrink-0 flex flex-col justify-between timeline-dashed relative">
+                                    <div class="relative z-10 pl-6 mb-8">
+                                        <div class="absolute left-0 top-1.5 w-4 h-4 rounded-full border-[3px] border-blue-500 bg-white shadow-sm"></div>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">BERANGKAT</span>
+                                        <div class="font-extrabold text-slate-800 text-2xl leading-none mb-1">{{ $start->format('H:i') }}</div>
+                                        <div class="text-xs text-slate-500 font-medium">{{ $start->translatedFormat('d M Y') }}</div>
                                     </div>
-                                </td>
 
-                                {{-- 2. Pengemudi & Armada --}}
-                                <td class="px-6 py-4 whitespace-nowrap align-top border-y border-gray-200/50 dark:border-gray-700">
-                                    <div class="flex flex-col gap-4">
-                                        <div class="flex items-center gap-3 pl-1">
-                                            <div class="flex-shrink-0 h-8 w-8 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center shadow-sm border border-blue-100 dark:border-blue-800">
-                                                <i class="fas fa-car text-sm"></i>
+                                    <div class="relative z-10 pl-6 mb-4">
+                                        <div class="absolute left-0 top-1.5 w-4 h-4 rounded-full border-[3px] border-slate-300 bg-white shadow-sm"></div>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">PULANG</span>
+                                        <div class="font-extrabold text-slate-800 text-2xl leading-none mb-1">{{ $end->format('H:i') }}</div>
+                                        <div class="text-xs text-slate-500 font-medium">{{ $end->translatedFormat('d M Y') }}</div>
+                                    </div>
+
+                                    <div>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-[11px] font-bold text-indigo-600">
+                                            <i class="fas fa-moon"></i> {{ $durationText }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Route --}}
+                                <div class="lg:w-2/5 flex flex-col justify-center gap-8 py-2">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                                            <i class="fas fa-circle text-blue-200 text-[8px] mr-1"></i> LOKASI JEMPUT
+                                        </span>
+                                        <h4 class="font-bold text-slate-800 text-lg leading-tight">{{ $record->lokasi_keberangkatan }}</h4>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                                            <i class="fas fa-map-marker-alt text-slate-800 text-[10px] mr-1"></i> TUJUAN
+                                        </span>
+                                        <h4 class="font-bold text-slate-800 text-lg leading-tight">{{ $record->alamat_tujuan }}</h4>
+                                        <span class="inline-block mt-2 bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-1 rounded border border-slate-200">
+                                            {{ $record->wilayah?->nama_wilayah ?? 'Bandung' }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Vehicle & Actions --}}
+                                <div class="lg:w-2/5 flex flex-col justify-between h-full">
+                                    <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                                        <div class="flex items-start gap-4 mb-5">
+                                            <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600 shadow-sm flex-shrink-0">
+                                                <i class="fas fa-car-side"></i>
+                                            </div>
+                                            <div class="flex-grow">
+                                                <div class="font-bold text-slate-800 text-sm leading-tight">
+                                                    {{ $kendaraan->merk_type ?? 'Toyota Kijang Innova' }}
+                                                </div>
+                                                <div class="flex items-center gap-2 mt-1">
+                                                    <span class="text-[10px] font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300">
+                                                        {{ $kendaraan->nopol_kendaraan ?? 'D 1234 ABC' }}
+                                                    </span>
+                                                    <span class="text-[10px] text-slate-400">{{ $kendaraan->jenis_kendaraan ?? 'Minibus' }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="h-px bg-slate-200 w-full border-t border-dashed border-slate-300 mb-5"></div>
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600 shadow-sm flex-shrink-0">
+                                                <i class="fas fa-user-tie"></i>
                                             </div>
                                             <div>
-                                                <div class="text-sm font-bold text-gray-800 dark:text-white">{{ $kendaraan->merk_type ?? 'N/A' }}</div>
-                                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $kendaraan->nopol_kendaraan ?? 'N/A' }}</div>
-                                                <div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded inline-block mt-0.5 border border-gray-200 dark:border-gray-700">{{ $kendaraan->jenis_kendaraan ?? 'N/A' }}</div>
+                                                <div class="font-bold text-slate-800 text-sm leading-tight">{{ $record->nama_personil_perwakilan }}</div>
+                                                <div class="text-xs text-slate-500 mt-0.5">{{ $record->unitKerja->nama_unit_kerja ?? 'Staff' }}</div>
                                             </div>
                                         </div>
                                     </div>
-                                </td>
 
-                                {{-- 3. Perwakilan & Kontak --}}
-                                <td class="px-6 py-4 align-top border-y border-gray-200/50 dark:border-gray-700">
-                                    <div class="flex flex-col gap-1">
-                                        <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Perwakilan</div>
-                                        <div class="text-sm font-bold text-gray-800 dark:text-white">{{ $record->nama_personil_perwakilan }}</div>
-                                    </div>
-                                    <div class="flex flex-col gap-1 mt-3">
-
-                                        <div class="text-sm text-gray-800 dark:text-white font-semibold">{{ $record->unitKerja->nama_unit_kerja ?? 'N/A' }}</div>
-                                    </div>
-                                    <div class="flex flex-col gap-1 mt-3">
-                                        <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Kontak Perwakilan</div>
-                                        @if($record->no_telepon_perwakilan)
-                                            <a href="{{ $waLink }}" target="_blank" class="group/btn inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-xs font-bold border border-emerald-100 dark:border-emerald-800 hover:bg-emerald-500 hover:text-white hover:border-emerald-600 transition-all shadow-sm max-w-min">
-                                                <i class="fab fa-whatsapp text-sm group-hover/btn:scale-110 transition-transform"></i> <span>{{ $record->no_telepon_perwakilan }}</span>
-                                            </a>
-                                        @else
-                                            <span class="text-xs text-gray-500 italic">Tidak ada kontak</span>
-                                        @endif
-                                    </div>
-                                </td>
-
-                                {{-- 4. Status --}}
-                                <td class="px-6 py-4 whitespace-nowrap align-top border-y border-gray-200/50 dark:border-gray-700">
-                                    @php
-                                        $statusClass = match($record->status_perjalanan) {
-                                            'berangkat' => 'bg-blue-100 text-blue-700 border-blue-200',
-                                            'menunggu' => 'bg-amber-100 text-amber-700 border-amber-200',
-                                            'selesai' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                                            'dibatalkan' => 'bg-red-100 text-red-700 border-red-200',
-                                            default => 'bg-gray-100 text-gray-700 border-gray-200',
-                                        };
-                                        $statusIcon = match($record->status_perjalanan) {
-                                            'berangkat' => 'fa-steering-wheel',
-                                            'menunggu' => 'fa-clock',
-                                            'selesai' => 'fa-check-circle',
-                                            'dibatalkan' => 'fa-times-circle',
-                                            default => 'fa-question-circle',
-                                        };
-                                        $statusLabel = match($record->status_perjalanan) {
-                                            'berangkat' => 'Jalan',
-                                            'menunggu' => 'Menunggu',
-                                            'selesai' => 'Selesai',
-                                            'dibatalkan' => 'Batal',
-                                            default => $record->status_perjalanan,
-                                        };
-                                    @endphp
-                                    <span class="px-2.5 py-1 inline-flex items-center text-xs leading-5 font-bold uppercase tracking-wide rounded-full border shadow-sm {{ $statusClass }}">
-                                        <i class="fas {{ $statusIcon }} mr-1.5"></i> {{ $statusLabel }}
-                                    </span>
-                                </td>
-
-                                {{-- 5. Action --}}
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium align-top last:rounded-r-xl border-y last:border-r border-gray-200/50 dark:border-gray-700">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ route('perjalanan.pdf', $record->nomor_perjalanan) }}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-1 rounded-md transition-all flex items-center gap-1 text-xs font-medium">
-                                            <i class="fas fa-file-pdf"></i> Surat Jalan
+                                    <div class="flex justify-end items-center gap-2 mt-4 lg:mt-0 pt-2">
+                                        <div class="px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-600 flex items-center gap-2 cursor-help shadow-sm">
+                                            <i class="fas fa-question-circle text-slate-400 text-xs"></i>
+                                            <span class="text-[10px] font-bold uppercase">{{ $statusLabel }}</span>
+                                        </div>
+                                        <a href="#" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-300 text-slate-500 hover:text-blue-600 transition-all shadow-sm">
+                                            <i class="fas fa-file-pdf"></i>
                                         </a>
-                                        <button class="text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 w-8 h-8 rounded-full transition-all flex items-center justify-center">
-                                            <i class="fas fa-ellipsis-v"></i>
+                                        <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all shadow-md">
+                                            <i class="fas fa-ellipsis-h"></i>
                                         </button>
                                     </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            {{-- Mobile Card View --}}
-            <div class="md:hidden space-y-5 pb-8">
-                 @foreach ($dataRecords as $record)
-                    @php
-                        $start = \Carbon\Carbon::parse($record->waktu_keberangkatan);
-                        $end = \Carbon\Carbon::parse($record->waktu_kepulangan);
-                        $namaDriverMobile = $record->pengemudi?->first()?->nama_staf ?? 'N/A';
-                        $nipDriverMobile = $record->pengemudi?->first()?->nip ?? '-';
-                        $unitMobile = $record->kendaraan?->first()?->nama_kendaraan ?? 'N/A';
-                        $typeMobile = $record->kendaraan?->first()?->jenis_kendaraan ?? 'N/A';
-
-                        $statusLabelMobile = match($record->status_perjalanan) {
-                            'berangkat' => 'Jalan',
-                            'menunggu' => 'Menunggu',
-                            'selesai' => 'Selesai',
-                            'dibatalkan' => 'Batal',
-                            default => $record->status_perjalanan,
-                        };
-                    @endphp
-                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md p-5 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 relative overflow-hidden group">
-                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-purple-400"></div>
-
-                        <div class="flex justify-between items-start mb-4 border-b border-gray-200 dark:border-gray-700 pb-3">
-                             <div class="flex flex-col gap-3 w-full">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100"></div>
-                                        <span class="text-xs font-bold text-emerald-700">BERANGKAT</span>
-                                    </div>
-                                    <span class="text-xs font-bold text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">{{ $start->format('d M • H:i') }}</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-2 h-2 rounded-full bg-rose-500 ring-2 ring-rose-100"></div>
-                                        <span class="text-xs font-bold text-rose-700">PULANG</span>
-                                    </div>
-                                    <span class="text-xs font-bold text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">{{ $end->format('d M • H:i') }}</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="absolute top-5 right-5">
-                             <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-gray-100 text-gray-700 border border-gray-200">
-                                {{ $statusLabelMobile }}
-                             </span>
-                        </div>
-
-                        <div class="space-y-4 pt-1">
-                             <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fas fa-car"></i></div>
-                                    <div>
-                                        <div class="text-sm font-bold text-gray-900 dark:text-white">{{ $kendaraan->merk_type ?? 'N/A' }}</div>
-                                        <div class="text-[10px] text-gray-500 mb-1">{{ $kendaraan->nopol_kendaraan ?? 'N/A' }}</div>
-                                        <div class="text-[10px] text-gray-500">{{ $kendaraan->jenis_kendaraan ?? 'N/A' }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700 mt-3">
-                                <div class="flex flex-col gap-1 mb-2 border-b border-gray-200 dark:border-gray-700 pb-2">
-                                    <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Perwakilan</div>
-                                    <div class="text-sm font-bold text-gray-800 dark:text-white">{{ $record->nama_personil_perwakilan }}</div>
-                                </div>
-                                <div class="flex flex-col gap-1 mb-2 border-b border-gray-200 dark:border-gray-700 pb-2">
-                                    <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Unit Kerja/Fakultas/UKM</div>
-                                    <div class="text-sm text-gray-800 dark:text-white font-semibold">{{ $record->unitKerja->nama_unit_kerja ?? 'N/A' }}</div>
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Kontak Perwakilan</div>
-                                    @if($record->no_telepon_perwakilan)
-                                        <a href="{{ $waLink }}" target="_blank" class="group/btn inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-xs font-bold border border-emerald-100 dark:border-emerald-800 hover:bg-emerald-500 hover:text-white hover:border-emerald-600 transition-all shadow-sm max-w-min">
-                                            <i class="fab fa-whatsapp text-sm group-hover/btn:scale-110 transition-transform"></i> <span>{{ $record->no_telepon_perwakilan }}</span>
-                                        </a>
-                                    @else
-                                        <span class="text-xs text-gray-500 italic">Tidak ada kontak</span>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                 @endforeach
-            </div>
-
-            <div class="mt-8">
-                {{ $dataRecords->links() }}
-            </div>
-        @else
-            <div class="flex flex-col items-center justify-center px-6 py-16 text-center bg-white/70 dark:bg-gray-800/70 border border-gray-200 border-dashed shadow-sm dark:border-gray-700 rounded-2xl">
-                 <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-500">
-                    <i class="fas fa-calendar-alt text-2xl"></i>
+                    @endforeach
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Jadwal Kosong</h3>
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm">Belum ada jadwal perjalanan yang terdaftar.</p>
-            </div>
-        @endif
+                <div class="mt-8">
+                    {{ $dataRecords->links() }}
+                </div>
+            @else
+                <div class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
+                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-wind text-3xl text-slate-300"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Tidak ada jadwal</h3>
+                    <p class="text-slate-500 text-sm">Belum ada data perjalanan yang ditemukan.</p>
+                </div>
+            @endif
+        </div>
     </div>
 </x-filament-panels::page>
