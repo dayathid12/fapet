@@ -178,6 +178,12 @@
                                             <div>
                                                 <div class="font-bold text-slate-800 text-sm leading-tight">{{ $record->nama_personil_perwakilan }}</div>
                                                 <div class="text-xs text-slate-500 mt-0.5">{{ $record->unitKerja->nama_unit_kerja ?? 'Staff' }}</div>
+                                                @php
+                                                    $driverNip = $record->details->first()?->pengemudi?->nip_staf;
+                                                @endphp
+                                                @if ($driverNip)
+                                                    <div class="text-xs text-slate-500 mt-0.5">NIP: {{ $driverNip }}</div>
+                                                @endif
                                                 <div class="text-xs text-slate-500 mt-0.5">
                                                     Kontak: <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $record->kontak_pengguna_perwakilan) }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">{{ $record->kontak_pengguna_perwakilan }}</a>
                                                 </div>
