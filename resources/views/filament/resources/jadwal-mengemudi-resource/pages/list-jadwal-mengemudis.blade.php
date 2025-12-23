@@ -19,7 +19,7 @@
 
     @php
         $totalTrip = isset($dataRecords) ? $dataRecords->total() : 0;
-        $totalJam = $totalTrip * 4;
+        $totalJam = isset($totalJam) ? $totalJam : 0;
         $onDutyCount = isset($dataRecords) ? $dataRecords->where('status_perjalanan', 'berangkat')->count() : 0;
     @endphp
 
@@ -74,7 +74,8 @@
                 <div class="relative flex justify-between items-start">
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">STATUS</p>
-                        <h3 class="text-3xl font-extrabold text-emerald-600">{{ $onDutyCount > 0 ? 'On Duty' : 'Standby' }}</h3>
+                        <h3 class="text-xl font-extrabold text-emerald-600">{{ $userName ?? 'Unknown' }}</h3>
+                        <p class="text-xs text-slate-500 mt-1">NIP: {{ $userNip ?? 'N/A' }}</p>
                     </div>
                     <div class="w-10 h-10 rounded-xl bg-emerald-100/50 flex items-center justify-center text-emerald-600">
                         <i class="fas fa-toggle-on"></i>
@@ -96,6 +97,7 @@
                             $days = $diffInDays + 1;
                             $nights = $diffInDays;
                             $durationText = $nights === 0 ? "$days Hari" : "$days Hari $nights Malam";
+                            $totalHours = $start->diffInHours($end);
                             $kendaraan = $record->kendaraan?->first();
                             $statusLabel = match($record->status_perjalanan) {
                                 'berangkat' => ['label' => 'ON DUTY', 'class' => 'bg-blue-50 text-blue-600 border-blue-200'],
@@ -150,8 +152,8 @@
                                 </div>
 
                                 {{-- Vehicle & Actions --}}
-                                <div class="lg:w-2/5 flex flex-col justify-between h-full">
-                                    <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                                <div class="lg:w-2/5 flex flex-row gap-4 h-full">
+                                    <div class="flex-grow bg-slate-50 rounded-xl p-5 border border-slate-100">
                                         <div class="flex items-start gap-4 mb-5">
                                             <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600 shadow-sm flex-shrink-0">
                                                 <i class="fas fa-car-side"></i>
@@ -176,21 +178,16 @@
                                             <div>
                                                 <div class="font-bold text-slate-800 text-sm leading-tight">{{ $record->nama_personil_perwakilan }}</div>
                                                 <div class="text-xs text-slate-500 mt-0.5">{{ $record->unitKerja->nama_unit_kerja ?? 'Staff' }}</div>
+                                                <div class="text-xs text-slate-500 mt-0.5">
+                                                    Kontak: <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $record->kontak_pengguna_perwakilan) }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">{{ $record->kontak_pengguna_perwakilan }}</a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="flex justify-end items-center gap-2 mt-4 lg:mt-0 pt-2">
-                                        <div class="px-3 py-1.5 rounded-full {{ $statusLabel['class'] }} flex items-center gap-2 cursor-help shadow-sm">
-                                            <i class="fas fa-question-circle text-slate-400 text-xs"></i>
-                                            <span class="text-[10px] font-bold uppercase">{{ $statusLabel['label'] }}</span>
-                                        </div>
+                                    <div class="flex flex-col gap-2 justify-start">
                                         <a href="#" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-300 text-slate-500 hover:text-blue-600 transition-all shadow-sm">
                                             <i class="fas fa-file-pdf"></i>
                                         </a>
-                                        <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all shadow-md">
-                                            <i class="fas fa-ellipsis-h"></i>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
