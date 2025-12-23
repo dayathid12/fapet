@@ -83,21 +83,6 @@
             </div>
         </div>
 
-        {{-- 2. FILTER BAR SECTION --}}
-        {{-- PERBAIKAN: Ditambahkan 'mb-10' di sini untuk mendorong List Jadwal ke bawah --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-3 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-4 px-4">
-                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                    <i class="fas fa-calendar-check"></i>
-                </div>
-                <div>
-                    <h2 class="font-bold text-slate-800 leading-tight">Jadwal Perjalanan</h2>
-                    <p class="text-xs text-slate-500">Kelola dan pantau armada</p>
-                </div>
-            </div>
-
-
-        </div>
 
         {{-- 3. CONTENT LIST SECTION --}}
         <div>
@@ -116,7 +101,7 @@
                                 'berangkat' => ['label' => 'ON DUTY', 'class' => 'bg-blue-50 text-blue-600 border-blue-200'],
                                 'menunggu' => ['label' => 'STANDBY', 'class' => 'bg-slate-50 text-slate-600 border-slate-200'],
                                 'selesai' => ['label' => 'FINISHED', 'class' => 'bg-emerald-50 text-emerald-600 border-emerald-200'],
-                                default => ['label' => 'UNKNOWN', 'class' => 'bg-red-50 text-red-600 border-red-200'],
+                                default => ['label' => 'Status Perjalanan', 'class' => 'bg-red-50 text-red-600 border-red-200'],
                             };
                         @endphp
 
