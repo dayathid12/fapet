@@ -104,6 +104,11 @@ class JadwalMengemudiResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('surat_jalan')
+                    ->label('Surat Jalan')
+                    ->icon('heroicon-o-document')
+                    ->url(fn ($record) => route('perjalanan.pdf', $record->nomor_perjalanan))
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

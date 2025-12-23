@@ -125,22 +125,22 @@
             <tr>
                 <td class="label">Nama</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->pengemudi->nama_staf ?? 'N/A' }}</td>
+                <td class="value">{{ $perjalanan->pengemudi->first()?->nama_staf ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td class="label">NIP</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->pengemudi->nip ?? 'N/A' }}</td>
+                <td class="value">{{ $perjalanan->pengemudi->first()?->nip ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td class="label">Asisten Pengemudi</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->asisten->nama_staf ?? 'N/A' }}</td>
+                <td class="value">{{ $perjalanan->asisten->first()?->nama_staf ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td class="label">NIP</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->asisten->nip ?? 'N/A' }}</td>
+                <td class="value">{{ $perjalanan->asisten->first()?->nip ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td class="label">Nomor Kendaraan</td>
@@ -181,6 +181,11 @@
                 <td class="label">Alamat Tujuan</td>
                 <td class="separator">:</td>
                 <td class="value">{{ $perjalanan->alamat_tujuan ?? 'N/A' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Kontak Perwakilan</td>
+                <td class="separator">:</td>
+                <td class="value">{{ $perjalanan->kontak_pengguna_perwakilan ?? 'N/A' }}</td>
             </tr>
         </table>
     </div>

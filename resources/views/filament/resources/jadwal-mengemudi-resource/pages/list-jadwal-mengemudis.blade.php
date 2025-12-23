@@ -1,9 +1,44 @@
-<x-filament-panels::page class="relative min-h-screen overflow-x-hidden bg-gray-50 dark:bg-gray-950 font-jakarta antialiased">
+<x-filament-panels::page class="relative min-h-screen overflow-x-hidden bg-white font-jakarta antialiased">
     {{-- Inject Styles & Fonts --}}
     @push('styles')
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <style>
+            .background-wrapper {
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                background-image: linear-gradient(
+                    45deg,
+                    #f8f8f8 25%,
+                    transparent 25%,
+                    transparent 50%,
+                    #f8f8f8 50%,
+                    #f8f8f8 75%,
+                    transparent 75%,
+                    transparent
+                );
+                background-repeat: repeat;
+                background-position: 0 0;
+                background-size: 20px 20px;
+                position: relative;
+                min-height: 100vh;
+                padding: 20px;
+            }
+            .background-wrapper::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(255, 255, 255, 0.7);
+                z-index: 1;
+            }
+            .content-wrapper {
+                position: relative;
+                z-index: 2;
+            }
             .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
             .border-spacing-y-4 { border-spacing: 0 1rem; }
 
@@ -12,26 +47,11 @@
             ::-webkit-scrollbar-track { background: transparent; }
             ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
             ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-            /* Blob Animation */
-            @keyframes float {
-                0% { transform: translate(0px, 0px) scale(1); }
-                33% { transform: translate(30px, -50px) scale(1.1); }
-                66% { transform: translate(-20px, 20px) scale(0.9); }
-                100% { transform: translate(0px, 0px) scale(1); }
-            }
-            .animate-blob { animation: float 7s infinite; }
-            .animation-delay-2000 { animation-delay: 2s; }
-            .animation-delay-4000 { animation-delay: 4s; }
         </style>
     @endpush
 
-    {{-- Premium Background (Fixed) --}}
-    <div class="fixed inset-0 -z-10 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 pointer-events-none">
-        <div class="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob dark:bg-blue-900/20"></div>
-        <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000 dark:bg-indigo-900/20"></div>
-        <div class="absolute -bottom-32 left-20 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000 dark:bg-purple-900/20"></div>
-    </div>
+    <div class="background-wrapper">
+        <div class="content-wrapper">
 
     @php
         // Data comes from the $dataRecords public property on the component
@@ -104,15 +124,8 @@
                 <i class="fas fa-calendar-alt text-blue-600"></i> Jadwal Penugasan
             </h2>
             <div class="flex gap-2 w-full sm:w-auto p-1">
-                <div class="relative w-full sm:w-72 group">
-                    <input type="text" placeholder="Cari rute, unit, atau kontak..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border-0 bg-white dark:bg-gray-900 ring-1 ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-blue-500 transition-all text-sm shadow-sm group-hover:shadow-md dark:text-white">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500">
-                        <i class="fas fa-search"></i>
-                    </div>
-                </div>
-                <button class="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 ring-1 ring-gray-300 dark:ring-gray-600 px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-sm hover:shadow-md active:scale-95">
-                    <i class="fas fa-sliders-h mr-2"></i> Filter
-                </button>
+
+               
             </div>
         </div>
 
@@ -123,7 +136,7 @@
                     <thead>
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider w-[40%] sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-tl-xl rounded-bl-xl">Jadwal & Rute</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md">Pengemudi & Armada</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md">Armada</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md">Perwakilan, Unit & Kontak</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md">Status</th>
                             <th scope="col" class="relative px-6 py-3 sticky top-0 z-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-tr-xl rounded-br-xl"><span class="sr-only">Detail</span></th>
@@ -248,7 +261,7 @@
                                         <div class="text-sm font-bold text-gray-800 dark:text-white">{{ $record->nama_personil_perwakilan }}</div>
                                     </div>
                                     <div class="flex flex-col gap-1 mt-3">
-                                        <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Unit Kerja/Fakultas/UKM</div>
+
                                         <div class="text-sm text-gray-800 dark:text-white font-semibold">{{ $record->unitKerja->nama_unit_kerja ?? 'N/A' }}</div>
                                     </div>
                                     <div class="flex flex-col gap-1 mt-3">
@@ -295,9 +308,14 @@
 
                                 {{-- 5. Action --}}
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium align-top last:rounded-r-xl border-y last:border-r border-gray-200/50 dark:border-gray-700">
-                                    <button class="text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 w-8 h-8 rounded-full transition-all flex items-center justify-center">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="{{ route('perjalanan.pdf', $record->nomor_perjalanan) }}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-1 rounded-md transition-all flex items-center gap-1 text-xs font-medium">
+                                            <i class="fas fa-file-pdf"></i> Surat Jalan
+                                        </a>
+                                        <button class="text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 w-8 h-8 rounded-full transition-all flex items-center justify-center">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
