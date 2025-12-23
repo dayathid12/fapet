@@ -113,10 +113,10 @@
                             $durationText = $nights === 0 ? "$days Hari" : "$days Hari $nights Malam";
                             $kendaraan = $record->kendaraan?->first();
                             $statusLabel = match($record->status_perjalanan) {
-                                'berangkat' => 'ON DUTY',
-                                'menunggu' => 'STANDBY',
-                                'selesai' => 'FINISHED',
-                                default => 'UNKNOWN',
+                                'berangkat' => ['label' => 'ON DUTY', 'class' => 'bg-blue-50 text-blue-600 border-blue-200'],
+                                'menunggu' => ['label' => 'STANDBY', 'class' => 'bg-slate-50 text-slate-600 border-slate-200'],
+                                'selesai' => ['label' => 'FINISHED', 'class' => 'bg-emerald-50 text-emerald-600 border-emerald-200'],
+                                default => ['label' => 'UNKNOWN', 'class' => 'bg-red-50 text-red-600 border-red-200'],
                             };
                         @endphp
 
@@ -196,9 +196,9 @@
                                     </div>
 
                                     <div class="flex justify-end items-center gap-2 mt-4 lg:mt-0 pt-2">
-                                        <div class="px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-600 flex items-center gap-2 cursor-help shadow-sm">
+                                        <div class="px-3 py-1.5 rounded-full {{ $statusLabel['class'] }} flex items-center gap-2 cursor-help shadow-sm">
                                             <i class="fas fa-question-circle text-slate-400 text-xs"></i>
-                                            <span class="text-[10px] font-bold uppercase">{{ $statusLabel }}</span>
+                                            <span class="text-[10px] font-bold uppercase">{{ $statusLabel['label'] }}</span>
                                         </div>
                                         <a href="#" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-300 text-slate-500 hover:text-blue-600 transition-all shadow-sm">
                                             <i class="fas fa-file-pdf"></i>
