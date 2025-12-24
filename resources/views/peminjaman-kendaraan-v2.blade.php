@@ -452,8 +452,9 @@
 
                             <div class="space-y-6">
                                 <div class="group">
-                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Uraian Kegiatan</label>
-                                    <textarea name="uraian_singkat_kegiatan" rows="4" class="tech-input w-full px-4 py-3 rounded-xl text-sm font-medium text-slate-700 resize-none" placeholder="Jelaskan secara singkat agenda kegiatan..."></textarea>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Uraian Kegiatan <span class="text-red-500">*</span></label>
+                                    <textarea name="uraian_singkat_kegiatan" rows="4" class="tech-input w-full px-4 py-3 rounded-xl text-sm font-medium text-slate-700 resize-none" placeholder="Jelaskan secara singkat agenda kegiatan..." required></textarea>
+                                    <p class="text-red-500 text-[10px] mt-1 hidden error-msg">Wajib diisi</p>
                                 </div>
                                 <div class="group">
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Catatan Khusus</label>
@@ -476,6 +477,11 @@
                                     <div class="group">
                                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Dokumen Pendukung</label>
                                         <input type="file" name="dokumen_pendukung" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"/>
+                                    </div>
+                                    <div id="suratIzinContainer" class="group hidden">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Surat Izin Kegiatan <span class="text-red-500">*</span></label>
+                                        <input type="file" name="surat_izin_kegiatan" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"/>
+                                        <p class="text-red-500 text-[10px] mt-1 hidden error-msg">Wajib diisi</p>
                                     </div>
                                 </div>
 
@@ -666,7 +672,7 @@
         const requiredFields = {
             1: ['waktu_keberangkatan', 'lokasi_keberangkatan', 'jumlah_rombongan', 'alamat_tujuan', 'nama_kegiatan', 'tujuan_wilayah_id'],
             2: ['unit_kerja_id', 'nama_pengguna', 'kontak_pengguna', 'nama_personil_perwakilan', 'kontak_pengguna_perwakilan', 'status_sebagai'],
-            3: ['surat_peminjaman'],
+            3: ['surat_peminjaman', 'uraian_singkat_kegiatan'],
             4: []
         };
 
@@ -704,6 +710,31 @@
                 input.addEventListener('input', () => {
                     if(checkSameInfo.checked) {
                         checkSameInfo.dispatchEvent(new Event('change'));
+                    }
+                });
+            });
+
+            // NEW: Logic for Surat Izin Kegiatan
+            const statusRadios = document.getElementsByName('status_sebagai');
+            const suratIzinContainer = document.getElementById('suratIzinContainer');
+            const suratIzinInput = document.getElementsByName('surat_izin_kegiatan')[0];
+
+            statusRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'Mahasiswa') {
+                        suratIzinContainer.classList.remove('hidden');
+                        suratIzinInput.setAttribute('required', true);
+                        if (!requiredFields[3].includes('surat_izin_kegiatan')) {
+                            requiredFields[3].push('surat_izin_kegiatan');
+                        }
+                    } else {
+                        suratIzinContainer.classList.add('hidden');
+                        suratIzinInput.removeAttribute('required');
+                        suratIzinInput.value = ''; // Clear the file input
+                        const index = requiredFields[3].indexOf('surat_izin_kegiatan');
+                        if (index > -1) {
+                            requiredFields[3].splice(index, 1);
+                        }
                     }
                 });
             });
