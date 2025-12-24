@@ -240,22 +240,38 @@ class PerjalananResource extends Resource
                                 $fileUrl = Storage::url($filePath);
                                 $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION); // Dapatkan ekstensi file
 
+                                $fileMimeType = Storage::mimeType($filePath);
+
                                 if (!Storage::disk('public')->exists($filePath)) {
+
                                     return new HtmlString('<p>File tidak ditemukan.</p>');
+
                                 }
 
                                 if (in_array(strtolower($fileExtension), ['pdf'])) {
+
                                     return new HtmlString("
+
                                         <div style='width: 100%; height: 600px; border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden;'>
+
                                             <iframe src='{$fileUrl}' style='width: 100%; height: 100%; border: none;'></iframe>
+
                                         </div>
+
                                     ");
+
                                 } elseif (Str::contains($fileMimeType, 'image')) {
+
                                     return new HtmlString("
+
                                         <div style='width: 100%; text-align: center; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem;'>
+
                                             <img src='{$fileUrl}' alt='Gambar Surat Peminjaman' style='max-width: 100%; height: auto; display: block; margin: auto;'>
+
                                         </div>
+
                                     ");
+
                                 }
 
                                 return new HtmlString('<p>Format file tidak dapat dipratinjau langsung.</p>');
@@ -274,22 +290,38 @@ class PerjalananResource extends Resource
                                 $fileUrl = Storage::url($filePath);
                                 $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION); // Dapatkan ekstensi file
 
+                                $fileMimeType = Storage::mimeType($filePath);
+
                                 if (!Storage::disk('public')->exists($filePath)) {
+
                                     return new HtmlString('<p>File tidak ditemukan.</p>');
+
                                 }
 
                                 if (in_array(strtolower($fileExtension), ['pdf'])) {
+
                                     return new HtmlString("
+
                                         <div style='width: 100%; height: 600px; border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden;'>
+
                                             <iframe src='{$fileUrl}' style='width: 100%; height: 100%; border: none;'></iframe>
+
                                         </div>
+
                                     ");
+
                                 } elseif (Str::contains($fileMimeType, 'image')) {
+
                                     return new HtmlString("
+
                                         <div style='width: 100%; text-align: center; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem;'>
+
                                             <img src='{$fileUrl}' alt='Gambar Dokumen Pendukung' style='max-width: 100%; height: auto; display: block; margin: auto;'>
+
                                         </div>
+
                                     ");
+
                                 }
 
                                 return new HtmlString('<p>Format file tidak dapat dipratinjau langsung.</p>');

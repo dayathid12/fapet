@@ -284,6 +284,7 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
         $data['pengemudi_id'] = null; // Now nullable, so this is fine
 
         try {
+            \Log::info('Data for Perjalanan creation:', $data);
             $perjalanan = Perjalanan::create($data);
 
             $this->trackingUrl = url('/peminjaman/status/' . $perjalanan->token);
