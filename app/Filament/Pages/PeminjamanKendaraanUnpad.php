@@ -204,6 +204,13 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
                     ->required()
                     ->visible(fn () => $this->currentStep === 3),
 
+                \Filament\Forms\Components\FileUpload::make('surat_izin_kegiatan')
+                    ->label('Surat Izin Kegiatan')
+                    ->directory('surat-izin-kegiatan')
+                    ->acceptedFileTypes(['application/pdf', 'image/*'])
+                    ->maxSize(5120)
+                    ->visible(fn () => $this->currentStep === 3),
+
                 \Filament\Forms\Components\FileUpload::make('dokumen_pendukung')
                     ->label('Dokumen Pendukung')
                     ->directory('dokumen-pendukung')

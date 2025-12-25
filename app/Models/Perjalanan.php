@@ -31,6 +31,7 @@ class Perjalanan extends Model
         'upload_surat_tugas',
         'download_file',
         'surat_peminjaman_kendaraan',
+        'surat_izin_kegiatan',
         'dokumen_pendukung',
         'status_cek_1',
         'status_cek_2',
