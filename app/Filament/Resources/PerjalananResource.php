@@ -478,12 +478,14 @@ class PerjalananResource extends Resource
                                 \Filament\Forms\Components\Select::make('kendaraan_nopol')
                                     ->label('Nomor Polisi Kendaraan')
                                     ->options(function (Forms\Get $get) {
+                                        // Get values from outside and inside the repeater
                                         $startTime = $get('../../waktu_keberangkatan');
                                         $endTime = $get('../../waktu_kepulangan');
-                                        $currentPerjalananId = $get('../../id'); // Get the ID of the main Perjalanan record
+                                        $currentPerjalananId = $get('../../id');
+                                        $tipePenugasan = $get('tipe_penugasan');
 
-                                        // If no time range, return all vehicles
-                                        if (!$startTime || !$endTime) {
+                                        // Default: return all vehicles if time constraints aren't met
+                                        $showAllVehicles = function () {
                                             return Kendaraan::all()->mapWithKeys(function ($kendaraan) {
                                                 $label = implode(' - ', array_filter([
                                                     $kendaraan->nopol_kendaraan,
@@ -492,23 +494,59 @@ class PerjalananResource extends Resource
                                                 ]));
                                                 return [$kendaraan->nopol_kendaraan => $label];
                                             });
+                                        };
+
+                                        // Prepare the base query for unavailable vehicles
+                                        $unavailableQuery = Perjalanan::query()
+                                            ->where('status_perjalanan', 'Terjadwal')
+                                            ->when($currentPerjalananId, fn (Builder $query) => $query->where('perjalanans.id', '!=', $currentPerjalananId));
+
+                                        $hasTimeConstraint = false;
+
+                                        // Apply time-based filtering logic
+                                        switch ($tipePenugasan) {
+                                            case 'Antar & Jemput':
+                                                if ($startTime && $endTime) {
+                                                    $unavailableQuery->where(function (Builder $query) use ($startTime, $endTime) {
+                                                        $query->where('waktu_keberangkatan', '<', $endTime)
+                                                                ->where('waktu_kepulangan', '>', $startTime);
+                                                    });
+                                                    $hasTimeConstraint = true;
+                                                }
+                                                break;
+
+                                            case 'Antar (Keberangkatan)':
+                                                if ($startTime) {
+                                                    $unavailableQuery->where('waktu_kepulangan', '>', $startTime);
+                                                    $hasTimeConstraint = true;
+                                                }
+                                                break;
+
+                                            case 'Jemput (Kepulangan)':
+                                                if ($endTime) {
+                                                    $unavailableQuery->where('waktu_keberangkatan', '<', $endTime);
+                                                    $hasTimeConstraint = true;
+                                                }
+                                                break;
+
+                                            default:
+                                                // No assignment type selected, so no time constraints apply.
+                                                break;
                                         }
 
-                                        // Get NOPOLs of vehicles that are already scheduled and overlap
-                                        $unavailableNopols = Perjalanan::query()
-                                            ->where('status_perjalanan', 'Terjadwal')
-                                            // Exclude the current trip if it's being edited
-                                            ->when($currentPerjalananId, fn (Builder $query) => $query->where('perjalanans.id', '!=', $currentPerjalananId))
-                                            ->where(function (Builder $query) use ($startTime, $endTime) {
-                                                $query->where('waktu_keberangkatan', '<', $endTime)
-                                                      ->where('waktu_kepulangan', '>', $startTime);
-                                            })
+                                        // If no valid time constraints are set, show all vehicles.
+                                        if (!$hasTimeConstraint) {
+                                            return $showAllVehicles();
+                                        }
+
+                                        // Get the license plates of unavailable vehicles
+                                        $unavailableNopols = $unavailableQuery
                                             ->join('perjalanan_kendaraans', 'perjalanans.id', '=', 'perjalanan_kendaraans.perjalanan_id')
                                             ->pluck('perjalanan_kendaraans.kendaraan_nopol')
                                             ->unique()
                                             ->toArray();
 
-                                        // Return all vehicles that are not in the unavailable list
+                                        // Return all vehicles that are NOT in the unavailable list
                                         return Kendaraan::whereNotIn('nopol_kendaraan', $unavailableNopols)
                                             ->get()
                                             ->mapWithKeys(function ($kendaraan) {
@@ -524,6 +562,17 @@ class PerjalananResource extends Resource
                                     ->required()
                                     ->live() // Add live() instead of dependsOn()
                                     ->placeholder('Pilih nomor polisi...'),
+                                \Filament\Forms\Components\Select::make('tipe_penugasan')
+                                    ->label('Tipe Tugas')
+                                    ->options([
+                                        'Antar & Jemput' => 'Antar & Jemput',
+                                        'Antar (Keberangkatan)' => 'Antar (Keberangkatan)',
+                                        'Jemput (Kepulangan)' => 'Jemput (Kepulangan)',
+                                    ])
+                                    ->required()
+                                    ->default('Antar & Jemput')
+                                    ->live()
+                                    ->placeholder('Pilih tipe tugas...'),
                                 \Filament\Forms\Components\Select::make('pengemudi_id')
                                     ->label('Nama Pengemudi')
                                     ->options(\App\Models\Staf::all()->pluck('nama_staf', 'staf_id'))
@@ -536,7 +585,7 @@ class PerjalananResource extends Resource
                                     ->searchable()
                                     ->placeholder('Pilih asisten (opsional)...'),
                             ])
-                            ->columns(3)
+                            ->columns(4)
                             ->addActionLabel('Tambah Kendaraan & Staf')
                             ->minItems(1)
                             ->defaultItems(1)
