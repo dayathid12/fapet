@@ -93,11 +93,27 @@
                         @php
                             $start = \Carbon\Carbon::parse($record->waktu_keberangkatan);
                             $end = \Carbon\Carbon::parse($record->waktu_kepulangan);
-                            $diffInDays = $start->diffInDays($end);
+
+                            $tipePenugasan = $record->details->first()->tipe_penugasan ?? null;
+                            $waktuSelesaiPenugasan = $record->details->first()->waktu_selesai_penugasan ? \Carbon\Carbon::parse($record->details->first()->waktu_selesai_penugasan) : null;
+
+                            $startDisplay = $start;
+                            $endDisplay = $end;
+
+                            if ($tipePenugasan === 'Antar (Keberangkatan)') {
+                                $startDisplay = $start;
+                                $endDisplay = $waktuSelesaiPenugasan ?? $end;
+                            } elseif ($tipePenugasan === 'Jemput (Kepulangan)') {
+                                $startDisplay = $end; // Waktu Kepulangan menjadi Waktu Berangkat
+                                $endDisplay = $waktuSelesaiPenugasan ?? $end; // Waktu Selesai Penugasan menjadi Waktu Pulang
+                            }
+                            // Untuk 'Antar & Jemput', startDisplay dan endDisplay tetap start dan end
+                            
+                            $diffInDays = $startDisplay->diffInDays($endDisplay);
                             $days = $diffInDays + 1;
                             $nights = $diffInDays;
                             $durationText = $nights === 0 ? "$days Hari" : "$days Hari $nights Malam";
-                            $totalHours = $start->diffInHours($end);
+                            $totalHours = $startDisplay->diffInHours($endDisplay);
                             $kendaraan = $record->kendaraan?->first();
                             $statusLabel = match($record->status_perjalanan) {
                                 'berangkat' => ['label' => 'ON DUTY', 'class' => 'bg-blue-50 text-blue-600 border-blue-200'],
@@ -116,21 +132,26 @@
                                     <div class="relative z-10 pl-6 mb-8">
                                         <div class="absolute left-0 top-1.5 w-4 h-4 rounded-full border-[3px] border-blue-500 bg-white shadow-sm"></div>
                                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">BERANGKAT</span>
-                                        <div class="font-extrabold text-slate-800 text-2xl leading-none mb-1">{{ $start->format('H:i') }}</div>
-                                        <div class="text-xs text-slate-500 font-medium">{{ $start->translatedFormat('d M Y') }}</div>
+                                        <div class="font-extrabold text-slate-800 text-2xl leading-none mb-1">{{ $startDisplay->format('H:i') }}</div>
+                                        <div class="text-xs text-slate-500 font-medium">{{ $startDisplay->translatedFormat('d M Y') }}</div>
                                     </div>
 
                                     <div class="relative z-10 pl-6 mb-4">
                                         <div class="absolute left-0 top-1.5 w-4 h-4 rounded-full border-[3px] border-slate-300 bg-white shadow-sm"></div>
                                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">PULANG</span>
-                                        <div class="font-extrabold text-slate-800 text-2xl leading-none mb-1">{{ $end->format('H:i') }}</div>
-                                        <div class="text-xs text-slate-500 font-medium">{{ $end->translatedFormat('d M Y') }}</div>
+                                        <div class="font-extrabold text-slate-800 text-2xl leading-none mb-1">{{ $endDisplay->format('H:i') }}</div>
+                                        <div class="text-xs text-slate-500 font-medium">{{ $endDisplay->translatedFormat('d M Y') }}</div>
                                     </div>
 
                                     <div>
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-[11px] font-bold text-indigo-600">
                                             <i class="fas fa-moon"></i> {{ $durationText }}
                                         </span>
+                                        @if ($tipePenugasan)
+                                            <div class="items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-[11px] font-bold text-emerald-600 mt-2">
+                                                {{ $tipePenugasan }}
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
 
