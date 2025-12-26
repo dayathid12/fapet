@@ -499,90 +499,101 @@ class PerjalananResource extends Resource
                                 \Filament\Forms\Components\Select::make('kendaraan_nopol')
                                     ->label('Nomor Polisi Kendaraan')
                                     ->disabled(fn (Forms\Get $get) => !$get('tipe_penugasan'))
-                                    ->options(function (Forms\Get $get) {
-                                        $startTime = $get('../../waktu_keberangkatan');
-                                        $endTime = $get('../../waktu_kepulangan');
-                                        $waktuSelesaiPenugasan = $get('waktu_selesai_penugasan');
-                                        $currentPerjalananId = $get('../../id');
-                                        $tipePenugasan = $get('tipe_penugasan');
-                                        $statusPerjalanan = $get('../../status_perjalanan');
+                                    ->options(function (Forms\Get $get, ?Model $record) {
+                                        // --- 1. AMBIL DATA INPUT ---
+                                        $globalBerangkat = $get('../../waktu_keberangkatan');
+                                        $globalPulang    = $get('../../waktu_kepulangan');
+                                        $tipeTugas       = $get('tipe_penugasan');
+                                        $waktuSelesai    = $get('waktu_selesai_penugasan');
+                                        $currentPerjalananId = $record?->id;
 
-                                        $allVehiclesQuery = Kendaraan::query()
-                                            ->select('nopol_kendaraan', 'jenis_kendaraan', 'merk_type');
+                                        $canFilter = false;
+                                        $proposedStart = null;
+                                        $proposedEnd = null;
 
-                                        // If status is 'Selesai', just return all vehicles not currently 'Terjadwal' in other journeys
-                                        if ($statusPerjalanan === 'Selesai') {
-                                            $terjadwalNopols = PerjalananKendaraan::query()
-                                                ->join('perjalanans', 'perjalanan_kendaraans.perjalanan_id', '=', 'perjalanans.id')
-                                                ->where('perjalanans.status_perjalanan', 'Terjadwal')
-                                                ->when($currentPerjalananId, fn (Builder $query) => $query->where('perjalanans.id', '!=', $currentPerjalananId))
-                                                ->pluck('perjalanan_kendaraans.kendaraan_nopol')
-                                                ->unique()
-                                                ->toArray();
+                                        // --- 2. TENTUKAN APAKAH BISA MELAKUKAN FILTER ---
+                                        // Cek apakah semua data yang diperlukan untuk filtering sudah ada berdasarkan Tipe Tugas.
+                                        if ($tipeTugas === 'Antar & Jemput' && $globalBerangkat && $globalPulang) {
+                                            $canFilter = true;
+                                            $proposedStart = $globalBerangkat;
+                                            $proposedEnd   = $globalPulang;
+                                        } elseif ($tipeTugas === 'Antar (Keberangkatan)' && $globalBerangkat && $waktuSelesai) {
+                                            $canFilter = true;
+                                            $proposedStart = $globalBerangkat;
+                                            $proposedEnd   = $waktuSelesai;
+                                        } elseif ($tipeTugas === 'Jemput (Kepulangan)' && $globalPulang && $waktuSelesai) {
+                                            $canFilter = true;
+                                            $proposedStart = $globalPulang;
+                                            $proposedEnd   = $waktuSelesai;
+                                        }
 
-                                            return $allVehiclesQuery->whereNotIn('nopol_kendaraan', $terjadwalNopols)
-                                                ->get()
-                                                ->mapWithKeys(function ($kendaraan) {
-                                                    return [$kendaraan->nopol_kendaraan => implode(' - ', array_filter([
-                                                        $kendaraan->nopol_kendaraan,
-                                                        $kendaraan->jenis_kendaraan,
-                                                        $kendaraan->merk_type,
-                                                    ]))];
+                                        // --- 3. JIKA DATA BELUM LENGKAP, TAMPILKAN SEMUA KENDARAAN ---
+                                        if (!$canFilter) {
+                                            return Kendaraan::all()->mapWithKeys(function ($kendaraan) {
+                                                return [$kendaraan->nopol_kendaraan => implode(' - ', array_filter([
+                                                    $kendaraan->nopol_kendaraan,
+                                                    $kendaraan->jenis_kendaraan,
+                                                    $kendaraan->merk_type
+                                                ]))];
+                                            });
+                                        }
+
+                                        // --- 4. VALIDASI RENTANG WAKTU ---
+                                        // Jika data sudah lengkap tapi rentangnya tidak valid (misal: waktu selesai < waktu mulai)
+                                        if ($proposedEnd <= $proposedStart) {
+                                            return []; // Kosongkan pilihan untuk menandakan input waktu salah.
+                                        }
+
+                                        // --- 5. JALANKAN QUERY FILTERING ---
+                                        // Jika data lengkap dan valid, filter kendaraan yang bentrok jadwalnya.
+                                        return Kendaraan::whereDoesntHave('perjalananKendaraans', function (Builder $query) use ($proposedStart, $proposedEnd, $currentPerjalananId) {
+                                            $query
+                                                // Hanya periksa perjalanan yang berstatus 'Terjadwal'
+                                                ->whereHas('perjalanan', function (Builder $perjalananQuery) use ($currentPerjalananId) {
+                                                    $perjalananQuery->where('status_perjalanan', 'Terjadwal')
+                                                        // Abaikan perjalanan saat ini (untuk mode edit)
+                                                        ->when($currentPerjalananId, function ($q) use ($currentPerjalananId) {
+                                                            $q->where('id', '!=', $currentPerjalananId);
+                                                        });
+                                                })
+                                                // Terapkan logika overlap
+                                                ->where(function (Builder $overlapQuery) use ($proposedStart, $proposedEnd) {
+                                                    // Kondisi 1: Bentrok dengan jadwal 'Antar & Jemput' yang ada
+                                                    $overlapQuery->orWhere(function (Builder $subQuery) use ($proposedStart, $proposedEnd) {
+                                                        $subQuery->where('tipe_penugasan', 'Antar & Jemput')
+                                                                ->whereHas('perjalanan', function ($p) use ($proposedStart, $proposedEnd) {
+                                                                    $p->where('waktu_keberangkatan', '<', $proposedEnd)
+                                                                    ->where('waktu_kepulangan', '>', $proposedStart);
+                                                                });
+                                                    });
+
+                                                    // Kondisi 2: Bentrok dengan jadwal 'Antar (Keberangkatan)' yang ada
+                                                    $overlapQuery->orWhere(function (Builder $subQuery) use ($proposedStart, $proposedEnd) {
+                                                        $subQuery->where('tipe_penugasan', 'Antar (Keberangkatan)')
+                                                                ->where('waktu_selesai_penugasan', '>', $proposedStart)
+                                                                ->whereHas('perjalanan', function ($p) use ($proposedEnd) {
+                                                                    $p->where('waktu_keberangkatan', '<', $proposedEnd);
+                                                                });
+                                                    });
+                                                    
+                                                    // Kondisi 3: Bentrok dengan jadwal 'Jemput (Kepulangan)' yang ada
+                                                    $overlapQuery->orWhere(function (Builder $subQuery) use ($proposedStart, $proposedEnd) {
+                                                        $subQuery->where('tipe_penugasan', 'Jemput (Kepulangan)')
+                                                                ->where('waktu_selesai_penugasan', '>', $proposedStart)
+                                                                ->whereHas('perjalanan', function ($p) use ($proposedEnd) {
+                                                                    $p->where('waktu_kepulangan', '<', $proposedEnd);
+                                                                });
+                                                    });
                                                 });
-                                        }
-
-                                        // For 'Terjadwal' status, or if no essential times/type are set (return all)
-                                        if (!$startTime || !$endTime || !$tipePenugasan) {
-                                            return $allVehiclesQuery->get()->mapWithKeys(function ($kendaraan) {
-                                                return [$kendaraan->nopol_kendaraan => implode(' - ', array_filter([
-                                                    $kendaraan->nopol_kendaraan,
-                                                    $kendaraan->jenis_kendaraan,
-                                                    $kendaraan->merk_type,
-                                                ]))];
-                                            });
-                                        }
-
-                                        $unavailableNopols = PerjalananKendaraan::query()
-                                            ->join('perjalanans', 'perjalanan_kendaraans.perjalanan_id', '=', 'perjalanans.id')
-                                            ->where('perjalanans.status_perjalanan', 'Terjadwal')
-                                            ->when($currentPerjalananId, fn (Builder $query) => $query->where('perjalanans.id', '!=', $currentPerjalananId))
-                                            ->where(function (Builder $query) use ($startTime, $endTime, $tipePenugasan, $waktuSelesaiPenugasan) {
-                                                switch ($tipePenugasan) {
-                                                    case 'Antar & Jemput':
-                                                        $query->where('waktu_keberangkatan', '<', $endTime)
-                                                                ->where('waktu_kepulangan', '>', $startTime);
-                                                        break;
-                                                    case 'Antar (Keberangkatan)':
-                                                        if ($waktuSelesaiPenugasan) {
-                                                            $query->where('waktu_keberangkatan', '<', $waktuSelesaiPenugasan)
-                                                                    ->where('waktu_kepulangan', '>', $startTime);
-                                                        } else {
-                                                            $query->whereRaw('0 = 1'); // Force no results if key time is missing
-                                                        }
-                                                        break;
-                                                    case 'Jemput (Kepulangan)':
-                                                        if ($waktuSelesaiPenugasan) {
-                                                            $query->where('waktu_keberangkatan', '<', $endTime)
-                                                                    ->where('waktu_kepulangan', '>', $waktuSelesaiPenugasan);
-                                                        } else {
-                                                            $query->whereRaw('0 = 1'); // Force no results if key time is missing
-                                                        }
-                                                        break;
-                                                }
-                                            })
-                                            ->pluck('perjalanan_kendaraans.kendaraan_nopol')
-                                            ->unique()
-                                            ->toArray();
-
-                                        return $allVehiclesQuery->whereNotIn('nopol_kendaraan', $unavailableNopols)
-                                            ->get()
-                                            ->mapWithKeys(function ($kendaraan) {
-                                                return [$kendaraan->nopol_kendaraan => implode(' - ', array_filter([
-                                                    $kendaraan->nopol_kendaraan,
-                                                    $kendaraan->jenis_kendaraan,
-                                                    $kendaraan->merk_type,
-                                                ]))];
-                                            });
+                                        })
+                                        ->get()
+                                        ->mapWithKeys(function ($kendaraan) {
+                                            return [$kendaraan->nopol_kendaraan => implode(' - ', array_filter([
+                                                $kendaraan->nopol_kendaraan,
+                                                $kendaraan->jenis_kendaraan,
+                                                $kendaraan->merk_type,
+                                            ]))];
+                                        });
                                     })
                                     ->searchable()
                                     ->required()

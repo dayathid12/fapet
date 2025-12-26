@@ -32,4 +32,9 @@ class Kendaraan extends Model
     {
         return $this->hasMany(Perjalanan::class, 'nopol_kendaraan', 'nopol_kendaraan');
     }
+
+    public function perjalananKendaraans()
+    {
+        return $this->hasMany(PerjalananKendaraan::class, 'kendaraan_nopol', 'nopol_kendaraan');
+    }
 }
