@@ -209,8 +209,55 @@
                                         </div>
                                     </div>
                                     <div class="flex flex-col gap-2 justify-start">
-                                        <a href="{{ route('perjalanan.pdf', $record->nomor_perjalanan) }}" target="_blank" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-300 text-slate-500 hover:text-blue-600 transition-all shadow-sm">
+                                        <a href="{{ route('perjalanan.pdf', $record->nomor_perjalanan) }}" target="_blank" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-300 text-slate-500 hover:text-blue-600 transition-all shadow-sm" title="Cetak Surat Jalan">
                                             <i class="fas fa-file-pdf"></i>
+                                        </a>
+                                        @php
+                                            $perjalananId = $record->id;
+                                            $entryPengeluaran = \App\Models\EntryPengeluaran::whereHas('perjalanans', function ($query) use ($perjalananId) {
+                                                $query->where('id', $perjalananId);
+                                            })->first();
+
+                                            if (!$entryPengeluaran) {
+                                                $latestEntry = \App\Models\EntryPengeluaran::orderByDesc('nomor_berkas')->first();
+                                                $newSequence = 1;
+                                                if ($latestEntry && is_numeric($latestEntry->nomor_berkas)) {
+                                                    $newSequence = (int)$latestEntry->nomor_berkas + 1;
+                                                }
+                                                $nomorBerkas = str_pad($newSequence, 4, '0', STR_PAD_LEFT);
+
+                                                $entryPengeluaran = \App\Models\EntryPengeluaran::create([
+                                                    'nomor_berkas' => $nomorBerkas,
+                                                    'nama_berkas' => 'Tanda Terima SPJ BBM dan Tol Th. ' . Carbon::now()->year,
+                                                ]);
+
+                                                // Link the trip to the new EntryPengeluaran
+                                                $record->entry_pengeluaran_id = $entryPengeluaran->id;
+                                                $record->save();
+                                            }
+
+                                            $perjalananKendaraan = $record->details->first(); 
+
+                                            $rincianPengeluaran = \App\Models\RincianPengeluaran::firstOrCreate(
+                                                [
+                                                    'entry_pengeluaran_id' => $entryPengeluaran->id,
+                                                    'perjalanan_id' => $perjalananId,
+                                                ],
+                                                [
+                                                    'nomor_perjalanan' => $record->nomor_perjalanan,
+                                                    'waktu_keberangkatan' => $record->waktu_keberangkatan,
+                                                    'alamat_tujuan' => $record->alamat_tujuan,
+                                                    'nama_pengemudi' => $perjalananKendaraan->pengemudi->nama_staf ?? null,
+                                                    'nopol_kendaraan' => $perjalananKendaraan->kendaraan->nopol_kendaraan ?? null,
+                                                ]
+                                            );
+                                            $rincianBiayaUrl = \App\Filament\Resources\EntryPengeluaranResource::getUrl('rincian-biaya', [
+                                                'record' => $entryPengeluaran->id,
+                                                'rincianPengeluaranId' => $rincianPengeluaran->id,
+                                            ]);
+                                        @endphp
+                                        <a href="{{ $rincianBiayaUrl }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-green-300 text-slate-500 hover:text-green-600 transition-all shadow-sm" title="Rincian Biaya">
+                                            <i class="fas fa-money-check-dollar"></i>
                                         </a>
                                     </div>
                                 </div>
