@@ -1,3 +1,6 @@
+@php
+    use Carbon\Carbon;
+@endphp
 <x-filament-panels::page class="min-h-screen bg-slate-50/50 font-jakarta antialiased">
     {{-- Inject Styles --}}
     @push('styles')
