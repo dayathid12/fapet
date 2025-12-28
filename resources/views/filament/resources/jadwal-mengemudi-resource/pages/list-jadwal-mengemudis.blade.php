@@ -220,15 +220,8 @@
                                             $entryPengeluaran = $record->entryPengeluaran; // Attempt to retrieve existing EntryPengeluaran via relationship
 
                                             if (!$entryPengeluaran) {
-                                                $latestEntry = \App\Models\EntryPengeluaran::orderByDesc('nomor_berkas')->first();
-                                                $newSequence = 1;
-                                                if ($latestEntry && is_numeric($latestEntry->nomor_berkas)) {
-                                                    $newSequence = (int)$latestEntry->nomor_berkas + 1;
-                                                }
-                                                $nomorBerkas = str_pad($newSequence, 4, '0', STR_PAD_LEFT);
-
                                                 $entryPengeluaran = \App\Models\EntryPengeluaran::create([
-                                                    'nomor_berkas' => $nomorBerkas,
+                                                    // 'nomor_berkas' is now nullable and will be set later
                                                     'nama_berkas' => 'Tanda Terima SPJ BBM dan Tol Th. ' . Carbon::now()->year,
                                                 ]);
 
