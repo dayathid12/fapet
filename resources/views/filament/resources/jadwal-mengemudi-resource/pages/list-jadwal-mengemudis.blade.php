@@ -217,9 +217,7 @@
                                         </a>
                                         @php
                                             $perjalananId = $record->id;
-                                            $entryPengeluaran = \App\Models\EntryPengeluaran::whereHas('perjalanans', function ($query) use ($perjalananId) {
-                                                $query->where('id', $perjalananId);
-                                            })->first();
+                                            $entryPengeluaran = $record->entryPengeluaran; // Attempt to retrieve existing EntryPengeluaran via relationship
 
                                             if (!$entryPengeluaran) {
                                                 $latestEntry = \App\Models\EntryPengeluaran::orderByDesc('nomor_berkas')->first();
@@ -254,6 +252,7 @@
                                                     'nopol_kendaraan' => $perjalananKendaraan->kendaraan->nopol_kendaraan ?? null,
                                                 ]
                                             );
+
                                             $rincianBiayaUrl = \App\Filament\Resources\EntryPengeluaranResource::getUrl('rincian-biaya', [
                                                 'record' => $entryPengeluaran->id,
                                                 'rincianPengeluaranId' => $rincianPengeluaran->id,
