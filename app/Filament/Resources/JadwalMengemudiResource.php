@@ -183,47 +183,22 @@ class JadwalMengemudiResource extends Resource
                 Tables\Actions\Action::make('input_pengeluaran')
                     ->label('Rincian Biaya')
                     ->icon('heroicon-o-banknotes') // Menggunakan ikon banknotes
-                    ->action(function (Perjalanan $record): void {
-                        $entryPengeluaran = $record->entryPengeluaran;
+                    ->url(function (Perjalanan $record): ?string {
+                        // Find the associated RincianPengeluaran without creating one
+                        $rincianPengeluaran = RincianPengeluaran::where('perjalanan_id', $record->id)->first();
 
-                        if (!$entryPengeluaran) {
-                            $latestEntry = \App\Models\EntryPengeluaran::orderByDesc('nomor_berkas')->first();
-                            $newSequence = 1;
-                            if ($latestEntry && is_numeric($latestEntry->nomor_berkas)) {
-                                $newSequence = (int)$latestEntry->nomor_berkas + 1;
-                            }
-                            $nomorBerkas = str_pad($newSequence, 4, '0', STR_PAD_LEFT);
-
-                            $entryPengeluaran = \App\Models\EntryPengeluaran::create([
-                                'nomor_berkas' => $nomorBerkas,
-                                'nama_berkas' => 'Tanda Terima SPJ BBM dan Tol Th. ' . Carbon::now()->year,
+                        if ($rincianPengeluaran) {
+                            return \App\Filament\Resources\EntryPengeluaranResource::getUrl('rincian-biaya', [
+                                'record' => $rincianPengeluaran->entry_pengeluaran_id,
+                                'rincianPengeluaranId' => $rincianPengeluaran->id,
                             ]);
-
-                            $record->entry_pengeluaran_id = $entryPengeluaran->id;
-                            $record->save();
                         }
-
-                        $perjalananKendaraan = $record->details->first(); 
-
-                        $rincianPengeluaran = RincianPengeluaran::firstOrCreate(
-                            [
-                                'entry_pengeluaran_id' => $entryPengeluaran->id,
-                                'perjalanan_id' => $record->id, // Menggunakan ID Perjalanan
-                            ],
-                            [
-                                'nomor_perjalanan' => $record->nomor_perjalanan,
-                                'waktu_keberangkatan' => $record->waktu_keberangkatan,
-                                'alamat_tujuan' => $record->alamat_tujuan,
-                                'nama_pengemudi' => $perjalananKendaraan->pengemudi->nama_staf ?? null,
-                                'nopol_kendaraan' => $perjalananKendaraan->kendaraan->nopol_kendaraan ?? null,
-                                // Default other fields if necessary
-                            ]
-                        );
-
-                        redirect()->to(\App\Filament\Resources\EntryPengeluaranResource::getUrl('rincian-biaya', [
-                            'record' => $entryPengeluaran->id, // This is entry_pengeluaran_id
-                            'rincianPengeluaranId' => $rincianPengeluaran->id, // This is the ID of RincianPengeluaran
-                        ]));
+                        
+                        return null;
+                    })
+                    ->visible(function (Perjalanan $record): bool {
+                        // The button is only visible if a corresponding RincianPengeluaran exists.
+                        return RincianPengeluaran::where('perjalanan_id', $record->id)->exists();
                     })
             ])
             ->bulkActions([
