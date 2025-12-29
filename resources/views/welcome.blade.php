@@ -71,10 +71,10 @@
         }
 
         .site-header.scrolled {
-            background-color: rgba(10, 95, 56, 0.6); /* Semi-transparan primary green */
+            background-color: rgba(255, 255, 255, 0.2); /* Sangat terang, putih semi-transparan */
             backdrop-filter: blur(10px); /* Efek blur untuk glassmorphism */
             box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Bayangan setelah di-scroll */
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Border tipis */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4); /* Border tipis, sedikit lebih jelas */
         }
 
         .header-container {
@@ -241,21 +241,19 @@
         }
 
         .hero h1 {
-            font-size: 3rem; /* Disesuaikan agar teks panjang muat (sebelumnya 4.5rem) */
-            font-weight: 900;
-            font-style: italic;
+            /* font-size: 3rem; Disesuaikan agar teks panjang muat (sebelumnya 4.5rem) */
+            /* font-weight: 900; */
             line-height: 1.2;
             margin-bottom: 25px;
             text-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            letter-spacing: -1px;
-            text-transform: uppercase; /* Agar terlihat tegas */
+            /* letter-spacing: -1px; */
         }
 
         .hero-details {
             display: flex;
             justify-content: center;
             gap: 40px;
-            font-size: 1.3rem;
+            /* font-size: 1.3rem; */
             font-weight: 600;
             margin-bottom: 50px;
             text-shadow: 0 2px 5px rgba(0,0,0,0.3);
@@ -435,7 +433,7 @@
 
             .hero { height: auto; min-height: 500px; padding: 100px 0 100px 0; }
             /* Penyesuaian font size H1 di mobile agar tidak terlalu besar */
-            .hero h1 { font-size: 2rem; margin-bottom: 15px; }
+            /* .hero h1 { font-size: 2rem; margin-bottom: 15px; } */
             .hero-details { flex-direction: column; gap: 15px; font-size: 1.1rem; margin-bottom: 30px; }
             .hero-actions { flex-direction: column; gap: 15px; width: 80%; margin: 0 auto; }
 
@@ -478,7 +476,7 @@
                     <ul id="menu-header" class="header-menu">
                         <li id="menu-item-home" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#home" class="active">Home</a></li>
                         <li id="menu-item-about" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#about">Profil Pimpinan</a></li>
-                        <li id="menu-item-race-info" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#race-info">Lokasi Kampus Unpad</a></li>
+                        <li id="menu-item-race-info" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="/PeminjamanKendaraanUnpad">Peminjaman Kendaraan</a></li>
                         <li id="menu-item-prizes" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#prizes">PK3L</a></li>
                                                <li id="menu-item-faq-tnc" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#faq-tnc">Toga Unpad</a></li>
                     </ul>
@@ -487,7 +485,7 @@
                 <!-- Buy Ticket Button (Desktop) -->
                  <!-- Buy Ticket Button (Desktop) -->
                 <div class="header-cta desktop-cta">
-                    <a href="http://127.0.0.1:8000/app/login" target="_blank" class="btn-buy-ticket">
+                    <a href="/app/login" target="_blank" class="btn-buy-ticket">
                         Login aplikasi
                     </a>
                 </div>
@@ -514,15 +512,25 @@
         <!-- HERO / BANNER UTAMA -->
         <section class="hero" id="home">
             <div class="container hero-content">
-                <h1>DPASP<br>Direktorat Pengelolaan Aset dan Sarana Prasarana</h1>
+                <h1 class="text-6xl lg:text-8xl font-extrabold leading-tight mb-4 tracking-tight">
+                    Selamat Datang
+                </h1>
+                <div class="max-w-4xl mx-auto">
+                    <p class="text-4xl lg:text-7xl font-bold tracking-tight mb-2 uppercase whitespace-nowrap overflow-hidden text-ellipsis">
+                        Direktorat Pengelolaan Aset dan Sarana Prasarana
+                    </p>
+                    <p class="text-2xl lg:text-4xl font-semibold opacity-90">
+                        Universitas Padjadjaran
+                    </p>
+                </div>
 
                 <div class="hero-details">
-                    <span><i class="fas fa-map-marker-alt"></i> Monumen Perjuangan</span>
+                    <span class="text-3xl lg:text-4xl"><i class="fas fa-map-marker-alt"></i> Monumen Perjuangan</span>
                 </div>
 
                 <div class="hero-actions">
                     <a href="#" class="btn-outline">BAUR PHOTOS 2025</a>
-                    <a href="#" class="btn-outline">RACE RESULT</a>
+                    <a href="/PeminjamanKendaraanUnpad" class="btn-outline">PEMINJAMAN KENDARAAN</a>
                 </div>
             </div>
         </section>
@@ -530,6 +538,8 @@
     <div class="container countdown-wrapper">
         <div class="countdown-bar">
             <div class="countdown-text">
+                <h3>SEDANG DALAM TAHAP PERBAIKAN</h3>
+                <p>Akan siap dalam</p>
             </div>
 
             <div class="timer">
@@ -555,9 +565,8 @@
 
     <!-- SCRIPT -->
     <script>
-        // Tanggal target acara (Desember 21, 2025)
-        const targetDate = new Date("Dec 21, 2025 06:00:00").getTime();
 
+        const targetDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).getTime();
         function updateCountdown() {
             const now = new Date().getTime();
             const gap = targetDate - now;
