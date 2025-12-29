@@ -78,10 +78,7 @@
         }
 
         .site-header.scrolled {
-            background-color: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            /* Styles moved to .header-inner-custom.scrolled */
         }
 
         .header-container {
@@ -95,7 +92,16 @@
             justify-content: space-between;
             align-items: center;
             height: 90px;
-            padding: 10px 0;
+            padding: 10px 30px; /* Adjusted padding */
+            border-radius: 50px; /* Added border-radius */
+            transition: all 0.3s ease; /* Add transition for smooth effect */
+        }
+
+        .header-inner-custom.scrolled {
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
         }
 
         /* Logo Styling */
@@ -627,12 +633,19 @@
 
         // Script untuk Header Transparan saat Scroll
         const siteHeader = document.getElementById('site-header');
+        const headerInnerCustom = document.querySelector('.header-inner-custom'); // Get the inner custom header element
 
         window.addEventListener('scroll', () => {
             if (window.scrollY > 50) {
-                siteHeader.classList.add('scrolled');
+                siteHeader.classList.add('scrolled'); // Keep this if siteHeader still needs 'scrolled' class for other styles (e.g. z-index)
+                if (headerInnerCustom) {
+                    headerInnerCustom.classList.add('scrolled');
+                }
             } else {
                 siteHeader.classList.remove('scrolled');
+                if (headerInnerCustom) {
+                    headerInnerCustom.classList.remove('scrolled');
+                }
             }
         });
     </script>
