@@ -88,9 +88,9 @@
             /* padding: 0 20px; Moved to header-container for internal spacing */
             border-radius: 50px; /* Apply border-radius here */
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Initial shadow, subtle */
-            background-color: rgba(255, 255, 255, 0.2); /* Initial background */
-            backdrop-filter: blur(5px); /* Initial blur */
+            box-shadow: none; /* No shadow when not scrolled */
+            background-color: transparent; /* Fully transparent when not scrolled */
+            backdrop-filter: none; /* No blur when not scrolled */
             overflow: hidden; /* Ensure content respects border-radius */
         }
 
