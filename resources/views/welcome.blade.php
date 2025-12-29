@@ -86,7 +86,7 @@
             max-width: 1350px; /* Limit the width of the visible header */
             margin: 20px auto 0 auto; /* Add margin-top and center it */
             /* padding: 0 20px; Moved to header-container for internal spacing */
-            border-radius: 14px; /* Apply border-radius here */
+            border-radius: 44px; /* Apply border-radius here */
             transition: all 0.3s ease;
             box-shadow: none; /* No shadow when not scrolled */
             background-color: transparent; /* Fully transparent when not scrolled */
