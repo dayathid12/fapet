@@ -67,22 +67,41 @@
 
         /* --- HEADER STYLES --- */
         .site-header {
-            background-color: transparent;
+            background-color: transparent; /* Ensure the fixed container is transparent */
             position: fixed;
             top: 0;
             left: 0;
             z-index: 1000;
             width: 100%;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
             box-shadow: none;
         }
 
         .site-header.scrolled {
-            /* Styles moved to .header-inner-custom.scrolled */
+            /* Styles for the overall fixed header when scrolled, if any are needed for `site-header` itself */
+            /* For example, if you want a subtle top shadow for the entire fixed area, not just the inner wrapper */
+        }
+
+        .header-wrapper {
+            max-width: 1350px; /* Limit the width of the visible header */
+            margin: 20px auto 0 auto; /* Add margin-top and center it */
+            /* padding: 0 20px; Moved to header-container for internal spacing */
+            border-radius: 50px; /* Apply border-radius here */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Initial shadow, subtle */
+            background-color: rgba(255, 255, 255, 0.2); /* Initial background */
+            backdrop-filter: blur(5px); /* Initial blur */
+            overflow: hidden; /* Ensure content respects border-radius */
+        }
+
+        .header-wrapper.scrolled {
+            background-color: rgba(255, 255, 255, 0.8); /* More solid on scroll */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-top: 10px; /* Slightly reduce margin-top on scroll for a subtle effect */
         }
 
         .header-container {
-            max-width: 1350px;
+            max-width: 100%; /* Now header-wrapper handles max-width */
             margin: 0 auto;
             padding: 0 20px;
         }
@@ -93,15 +112,14 @@
             align-items: center;
             height: 90px;
             padding: 10px 30px; /* Adjusted padding */
-            border-radius: 50px; /* Added border-radius */
+            border-radius: 0; /* Remove border-radius, now handled by header-wrapper */
             transition: all 0.3s ease; /* Add transition for smooth effect */
+            background-color: transparent; /* Ensure it's transparent */
         }
 
         .header-inner-custom.scrolled {
-            background-color: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            /* No need for background-color, backdrop-filter, box-shadow, border-bottom here.
+               These are now handled by .header-wrapper.scrolled. */
         }
 
         /* Logo Styling */
@@ -486,12 +504,13 @@
 <body>
 
     <header id="site-header" class="site-header baur-header menu-dropdown-tablet">
-        <div class="header-container">
-            <div class="header-inner-custom">
+        <div class="header-wrapper">
+            <div class="header-container">
+                <div class="header-inner-custom">
                 <!-- Logo Section -->
                 <div class="site-branding">
                     <div class="site-logo">
-                        <a href="https://baurrun.com/" class="custom-logo-link" rel="home" aria-current="page">
+                        <a href="#" class="custom-logo-link" rel="home" aria-current="page">
                             <img src="/images/Unpad_logo.png" class="custom-logo" alt="Unpad Logo">
                         </a>
                     </div>
@@ -500,11 +519,11 @@
                 <!-- Desktop Navigation -->
                 <nav class="site-navigation desktop-navigation" aria-label="Main menu">
                     <ul id="menu-header" class="header-menu">
-                        <li id="menu-item-home" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#home" class="active">Home</a></li>
-                        <li id="menu-item-about" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#about">Profil Pimpinan</a></li>
+                        <li id="menu-item-home" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#" class="active">Home</a></li>
+                        <li id="menu-item-about" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#">Profil Pimpinan</a></li>
                         <li id="menu-item-race-info" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="/PeminjamanKendaraanUnpad">Peminjaman Kendaraan</a></li>
                         <li id="menu-item-prizes" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="https://pk3l.unpad.ac.id/">PK3L</a></li>
-                        <li id="menu-item-faq-tnc" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#faq-tnc">Toga Unpad</a></li>
+                        <li id="menu-item-faq-tnc" class="menu-item menu-item-type-custom menu-item-object-custom"><a href="#">Toga Unpad</a></li>
                     </ul>
                 </nav>
 
@@ -530,10 +549,10 @@
                         </span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </header>
-
+                            </div>
+                        </div>
+                    </div>
+                </header>
     <!-- HERO / BANNER UTAMA -->
     <section class="hero" id="home">
         <div class="container hero-content">
@@ -633,18 +652,18 @@
 
         // Script untuk Header Transparan saat Scroll
         const siteHeader = document.getElementById('site-header');
-        const headerInnerCustom = document.querySelector('.header-inner-custom'); // Get the inner custom header element
+        const headerWrapper = document.querySelector('.header-wrapper'); // Get the new header wrapper element
 
         window.addEventListener('scroll', () => {
             if (window.scrollY > 50) {
-                siteHeader.classList.add('scrolled'); // Keep this if siteHeader still needs 'scrolled' class for other styles (e.g. z-index)
-                if (headerInnerCustom) {
-                    headerInnerCustom.classList.add('scrolled');
+                // siteHeader.classList.add('scrolled'); // Optional: Add if siteHeader itself needs a 'scrolled' class
+                if (headerWrapper) {
+                    headerWrapper.classList.add('scrolled');
                 }
             } else {
-                siteHeader.classList.remove('scrolled');
-                if (headerInnerCustom) {
-                    headerInnerCustom.classList.remove('scrolled');
+                // siteHeader.classList.remove('scrolled'); // Optional: Remove if siteHeader itself needs a 'scrolled' class
+                if (headerWrapper) {
+                    headerWrapper.classList.remove('scrolled');
                 }
             }
         });
