@@ -95,11 +95,19 @@
         }
 
         .header-wrapper.scrolled {
-            background-color: rgba(255, 255, 255, 0.75); /* Increased opacity for more noticeable translucency (within 0.7-0.85 range) */
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);    /* Softer shadow */
+            /* 2. Warna Putih Transparan (Alpha diturunkan ke 0.3 agar lebih tembus pandang) */
+            background-color: rgba(255, 255, 255, 0.3);
+            /* Bayangan yang lebih lembut (opacity diturunkan jadi 0.05) */
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
             margin-top: 10px; /* Slightly reduce margin-top on scroll for a subtle effect */
-            backdrop-filter: blur(10px);               /* Reduced blur for a smoother glass effect */
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border for glass edge */
+            /* 3. Efek Blur 8px sesuai permintaan */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(10px); /* Dukungan untuk Safari */
+            /* Kosmetik tambahan: Border tipis transparan untuk kilau kaca */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            border-left: none; /* Ensure no left/right border */
+            border-right: none; /* Ensure no left/right border */
         }
 
         .header-container {
