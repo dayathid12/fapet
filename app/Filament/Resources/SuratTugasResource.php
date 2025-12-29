@@ -101,6 +101,38 @@ class SuratTugasResource extends Resource
                     ->label('Waktu Kepulangan')
                     ->dateTime()
                     ->sortable(),
+                TextColumn::make('tanggal_awal_tugas')
+                    ->label('Tanggal Awal Tugas')
+                    ->formatStateUsing(function (string $state, \App\Models\PerjalananKendaraan $record): string {
+                        $tipePenugasan = $record->tipe_penugasan;
+                        $waktuKeberangkatan = $record->perjalanan->waktu_keberangkatan ?? '';
+                        $waktuSelesaiPenugasan = $record->waktu_selesai_penugasan ?? '';
+
+                        if ($tipePenugasan === 'Antar & Jemput' || $tipePenugasan === 'Antar (Keberangkatan)') {
+                            return $waktuKeberangkatan ? \Carbon\Carbon::parse($waktuKeberangkatan)->format('Y-m-d H:i:s') : '';
+                        } elseif ($tipePenugasan === 'Jemput (Kepulangan)') {
+                            return $waktuSelesaiPenugasan ? \Carbon\Carbon::parse($waktuSelesaiPenugasan)->format('Y-m-d H:i:s') : '';
+                        }
+                        return '';
+                    })
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('tanggal_akhir_tugas')
+                    ->label('Tanggal Akhir Tugas')
+                    ->formatStateUsing(function (string $state, \App\Models\PerjalananKendaraan $record): string {
+                        $tipePenugasan = $record->tipe_penugasan;
+                        $waktuKepulangan = $record->perjalanan->waktu_kepulangan ?? '';
+                        $waktuSelesaiPenugasan = $record->waktu_selesai_penugasan ?? '';
+
+                        if ($tipePenugasan === 'Antar & Jemput' || $tipePenugasan === 'Jemput (Kepulangan)') {
+                            return $waktuKepulangan ? \Carbon\Carbon::parse($waktuKepulangan)->format('Y-m-d H:i:s') : '';
+                        } elseif ($tipePenugasan === 'Antar (Keberangkatan)') {
+                            return $waktuSelesaiPenugasan ? \Carbon\Carbon::parse($waktuSelesaiPenugasan)->format('Y-m-d H:i:s') : '';
+                        }
+                        return '';
+                    })
+                    ->sortable()
+                    ->searchable(),
             ])
             ->filters([
                 SelectFilter::make('jenis_kegiatan')
