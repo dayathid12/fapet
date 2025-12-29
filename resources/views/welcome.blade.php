@@ -95,7 +95,7 @@
         }
 
         .header-wrapper.scrolled {
-            background-color: rgba(255, 255, 255, 0.8); /* More solid on scroll */
+            background-color: rgba(255, 255, 255, 0.5); /* Reduced opacity for better Glassmorphism effect */
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             margin-top: 10px; /* Slightly reduce margin-top on scroll for a subtle effect */
             backdrop-filter: blur(10px); /* Glassmorphism effect */
