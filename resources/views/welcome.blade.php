@@ -95,7 +95,7 @@
         }
 
         .header-wrapper.scrolled {
-            background-color: rgba(255, 255, 255, 0.7); /* Adjusted opacity for optimal frosted glass effect based on user's recommendations */
+            background-color: rgba(255, 255, 255, 0.84); /* Reduced transparency by 20% (from 0.7) for a better Glassmorphism effect */
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             margin-top: 10px; /* Slightly reduce margin-top on scroll for a subtle effect */
             backdrop-filter: blur(15px); /* Increased blur for a more prominent Glassmorphism effect */
