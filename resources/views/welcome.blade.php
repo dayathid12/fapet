@@ -95,10 +95,10 @@
         }
 
         .header-wrapper.scrolled {
-            background-color: rgba(255, 255, 255, 0.6); /* 60% opaque for the "kaca buram" effect */
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background-color: rgba(255, 255, 255, 0.75); /* Increased opacity for more noticeable translucency (within 0.7-0.85 range) */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);    /* Softer shadow */
             margin-top: 10px; /* Slightly reduce margin-top on scroll for a subtle effect */
-            backdrop-filter: blur(20px); /* Further increased blur for a more pronounced "kaca buram" effect */
+            backdrop-filter: blur(10px);               /* Reduced blur for a smoother glass effect */
             border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border for glass edge */
         }
 
