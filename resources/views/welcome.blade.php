@@ -98,7 +98,8 @@
             background-color: rgba(255, 255, 255, 0.7); /* Adjusted opacity for optimal frosted glass effect based on user's recommendations */
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             margin-top: 10px; /* Slightly reduce margin-top on scroll for a subtle effect */
-            backdrop-filter: blur(10px); /* Glassmorphism effect */
+            backdrop-filter: blur(15px); /* Increased blur for a more prominent Glassmorphism effect */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border for glass edge */
         }
 
         .header-container {
