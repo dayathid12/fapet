@@ -87,21 +87,12 @@ class JadwalMengemudiResource extends Resource
                     ->sortable(),
             ])
             ->modifyQueryUsing(function (Builder $query) {
-                if (auth()->check()) {
-                    $user = auth()->user();
-                    // Filter berdasarkan nama_lengkap dari relasi 'pengemudi' (Staf)
-                    $query->whereHas('pengemudi', function (Builder $pengemudiQuery) use ($user) {
-                        $pengemudiQuery->where('stafs.nama_staf', $user->name);
-                    });
-                }
                 return $query;
             })
             ->filters([
                 Tables\Filters\SelectFilter::make('status_perjalanan')
                     ->options([
-                        'Menunggu Persetujuan' => 'Menunggu Persetujuan',
                         'Terjadwal' => 'Terjadwal',
-                        'Ditolak' => 'Ditolak',
                         'Selesai' => 'Selesai',
                     ])
                     ->label('Filter Status'),
@@ -219,10 +210,9 @@ class JadwalMengemudiResource extends Resource
                 $query->where('pengemudi_id', $user->staf->id);
             });
         }
-        // Tambahkan logika lain jika ada peran admin atau yang bisa melihat semua
-        // if ($user && $user->hasRole('admin')) {
-        //     return parent::getEloquentQuery(); // Admin melihat semua
-        // }
+
+        // Tambahkan filter default untuk status_perjalanan agar hanya menampilkan 'Terjadwal' dan 'Selesai'
+        $query->whereIn('status_perjalanan', ['Terjadwal', 'Selesai']);
 
         return $query;
     }
