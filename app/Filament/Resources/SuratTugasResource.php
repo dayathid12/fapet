@@ -17,6 +17,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -130,9 +131,48 @@ class SuratTugasResource extends Resource
                     ->searchable(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->label('Selanjutnya')
-                    ->icon('heroicon-o-arrow-right'),
+                Tables\Actions\Action::make('edit_perjalanan_kendaraan')
+                    ->label('Lihat')
+                    ->icon('heroicon-o-eye')
+                    ->modal()
+                    ->fillForm(fn (\App\Models\PerjalananKendaraan $record): array => [
+                        'perjalanan_id' => $record->perjalanan_id,
+                        'pengemudi_id' => $record->pengemudi_id,
+                        'kendaraan_nopol' => $record->kendaraan_nopol,
+                        'asisten_id' => $record->asisten_id,
+                        'tipe_penugasan' => $record->tipe_penugasan,
+                        'waktu_selesai_penugasan' => $record->waktu_selesai_penugasan,
+                    ])
+                    ->form([
+                        Select::make('perjalanan_id')
+                            ->label('Nomor Perjalanan / Surat Tugas')
+                            ->options(Perjalanan::all()->pluck('no_surat_tugas', 'id'))
+                            ->searchable()
+                            ->required(),
+                        Select::make('pengemudi_id')
+                            ->label('Pengemudi')
+                            ->options(Staf::all()->pluck('nama_staf', 'staf_id'))
+                            ->searchable()
+                            ->required(),
+                        Select::make('kendaraan_nopol')
+                            ->label('Nomor Polisi Kendaraan')
+                            ->options(Kendaraan::all()->pluck('nopol_kendaraan', 'nopol_kendaraan'))
+                            ->searchable()
+                            ->required(),
+                        Select::make('asisten_id')
+                            ->label('Asisten')
+                            ->options(Staf::all()->pluck('nama_staf', 'staf_id'))
+                            ->searchable()
+                            ->nullable(),
+                        TextInput::make('tipe_penugasan')
+                            ->maxLength(255)
+                            ->nullable(),
+                        DateTimePicker::make('waktu_selesai_penugasan')
+                            ->nullable(),
+                    ])
+                    ->action(function (\App\Models\PerjalananKendaraan $record, array $data) {
+                        $record->update($data);
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
