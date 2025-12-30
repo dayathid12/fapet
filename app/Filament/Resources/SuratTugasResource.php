@@ -103,42 +103,37 @@ class SuratTugasResource extends Resource
                     ->sortable(),
                 TextColumn::make('tanggal_awal_tugas')
                     ->label('Tanggal Awal Tugas')
-                    ->getStateUsing(function ($record) {
-                        // Handle both 'Antar (Keberangkatan)' and 'Antar & Jemput'
-                        if ($record->tipe_penugasan === 'Antar (Keberangkatan)' || $record->tipe_penugasan === 'Antar & Jemput') {
-                            $waktuKeberangkatan = $record->perjalanan?->waktu_keberangkatan;
-                            return $waktuKeberangkatan;
+                    ->getStateUsing(function (\App\Models\PerjalananKendaraan $record): ?string {
+                        switch ($record->tipe_penugasan) {
+                            case 'Antar & Jemput':
+                            case 'Antar (Keberangkatan)':
+                                return $record->perjalanan?->waktu_keberangkatan;
+                            case 'Jemput (Kepulangan)':
+                                return $record->perjalanan?->waktu_kepulangan;
+                            default:
+                                return null;
                         }
-                        return null; // Return null for all other cases
                     })
                     ->dateTime('d F Y, H:i')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('tanggal_akhir_tugas')
                     ->label('Tanggal Akhir Tugas')
-                    ->formatStateUsing(function (string $state, \App\Models\PerjalananKendaraan $record): string {
-                        $tipePenugasan = $record->tipe_penugasan;
-                        $waktuKepulangan = $record->perjalanan->waktu_kepulangan ?? '';
-                        $waktuSelesaiPenugasan = $record->waktu_selesai_penugasan ?? '';
-
-                        if ($tipePenugasan === 'Antar & Jemput' || $tipePenugasan === 'Jemput (Kepulangan)') {
-                            return $waktuKepulangan ? \Carbon\Carbon::parse($waktuKepulangan)->format('Y-m-d H:i:s') : '';
-                        } elseif ($tipePenugasan === 'Antar (Keberangkatan)') {
-                            return $waktuSelesaiPenugasan ? \Carbon\Carbon::parse($waktuSelesaiPenugasan)->format('Y-m-d H:i:s') : '';
+                    ->getStateUsing(function (\App\Models\PerjalananKendaraan $record): ?string {
+                        switch ($record->tipe_penugasan) {
+                            case 'Antar & Jemput':
+                                return $record->perjalanan?->waktu_kepulangan;
+                            case 'Antar (Keberangkatan)':
+                                return $record->waktu_selesai_penugasan;
+                            case 'Jemput (Kepulangan)':
+                                return $record->waktu_selesai_penugasan;
+                            default:
+                                return null;
                         }
-                        return '';
                     })
+                    ->dateTime('d F Y, H:i')
                     ->sortable()
                     ->searchable(),
-            ])
-            ->filters([
-                SelectFilter::make('jenis_kegiatan')
-                    ->relationship('perjalanan', 'jenis_kegiatan')
-                    ->options([
-                        'LK' => 'LK (Luar Kota)',
-                        'LB' => 'LB (Luar Biasa)',
-                    ])
-                    ->label('Jenis Kegiatan'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
