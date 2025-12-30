@@ -66,8 +66,14 @@ class SuratTugasResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->whereHas('perjalanan', function ($q) {
+                    $q->where('status_perjalanan', 'Terjadwal')
+                      ->where('jenis_kegiatan', '!=', 'DK');
+                });
+            })
             ->columns([
-                TextColumn::make('perjalanan.id')
+                TextColumn::make('perjalanan.nomor_perjalanan')
                     ->label('Nomor Perjalanan')
                     ->searchable()
                     ->sortable(),
@@ -80,27 +86,6 @@ class SuratTugasResource extends Resource
                 TextColumn::make('asisten.nama_staf')
                     ->label('Asisten Pengemudi')
                     ->searchable(),
-                TextColumn::make('tipe_penugasan')
-                    ->label('Tipe Tugas')
-                    ->searchable(),
-                TextColumn::make('kendaraan.merk_type')
-                    ->label('Merk/Tipe Kendaraan')
-                    ->searchable(),
-                TextColumn::make('kendaraan_nopol')
-                    ->label('Nomor Polisi')
-                    ->searchable(),
-                TextColumn::make('waktu_selesai_penugasan')
-                    ->label('Waktu Selesai Penugasan')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('perjalanan.waktu_keberangkatan')
-                    ->label('Waktu Keberangkatan')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('perjalanan.waktu_kepulangan')
-                    ->label('Waktu Kepulangan')
-                    ->dateTime()
-                    ->sortable(),
                 TextColumn::make('tanggal_awal_tugas')
                     ->label('Tanggal Awal Tugas')
                     ->getStateUsing(function (\App\Models\PerjalananKendaraan $record): ?string {
@@ -134,9 +119,20 @@ class SuratTugasResource extends Resource
                     ->dateTime('d F Y, H:i')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('tipe_penugasan')
+                    ->label('Tipe Tugas')
+                    ->searchable(),
+                TextColumn::make('perjalanan.jenis_kegiatan')
+                    ->label('Jenis Kegiatan')
+                    ->searchable(),
+                TextColumn::make('perjalanan.status_perjalanan')
+                    ->label('Status Perjalanan')
+                    ->searchable(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Selanjutnya')
+                    ->icon('heroicon-o-arrow-right'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
