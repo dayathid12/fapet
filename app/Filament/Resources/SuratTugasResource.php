@@ -103,18 +103,15 @@ class SuratTugasResource extends Resource
                     ->sortable(),
                 TextColumn::make('tanggal_awal_tugas')
                     ->label('Tanggal Awal Tugas')
-                    ->formatStateUsing(function (string $state, \App\Models\PerjalananKendaraan $record): string {
-                        $tipePenugasan = $record->tipe_penugasan;
-                        $waktuKeberangkatan = $record->perjalanan->waktu_keberangkatan ?? '';
-                        $waktuSelesaiPenugasan = $record->waktu_selesai_penugasan ?? '';
-
-                        if ($tipePenugasan === 'Antar & Jemput' || $tipePenugasan === 'Antar (Keberangkatan)') {
-                            return $waktuKeberangkatan ? \Carbon\Carbon::parse($waktuKeberangkatan)->format('Y-m-d H:i:s') : '';
-                        } elseif ($tipePenugasan === 'Jemput (Kepulangan)') {
-                            return $waktuSelesaiPenugasan ? \Carbon\Carbon::parse($waktuSelesaiPenugasan)->format('Y-m-d H:i:s') : '';
+                    ->getStateUsing(function ($record) {
+                        // Handle both 'Antar (Keberangkatan)' and 'Antar & Jemput'
+                        if ($record->tipe_penugasan === 'Antar (Keberangkatan)' || $record->tipe_penugasan === 'Antar & Jemput') {
+                            $waktuKeberangkatan = $record->perjalanan?->waktu_keberangkatan;
+                            return $waktuKeberangkatan;
                         }
-                        return '';
+                        return null; // Return null for all other cases
                     })
+                    ->dateTime('d F Y, H:i')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('tanggal_akhir_tugas')
