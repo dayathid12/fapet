@@ -131,6 +131,11 @@ class SuratTugasResource extends Resource
                     ->searchable(),
             ])
             ->actions([
+                Tables\Actions\IconButtonAction::make('download_surat_tugas')
+                    ->label('Surat Tugas')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn (\App\Models\PerjalananKendaraan $record): string => route('surat-tugas.pdf', ['record' => $record->perjalanan_id]))
+                    ->openUrlInNewTab(),
                 Tables\Actions\Action::make('edit_perjalanan_kendaraan')
                     ->label('Lihat')
                     ->icon('heroicon-o-eye')

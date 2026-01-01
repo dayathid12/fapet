@@ -18,7 +18,7 @@ class ListSuratTugas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            // Removed CreateAction to hide the "New perjalanan kendaraan" button
         ];
     }
 }
