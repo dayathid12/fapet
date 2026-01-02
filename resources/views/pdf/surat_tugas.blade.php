@@ -157,7 +157,7 @@
 
     <div class="title-section">
         <h3>Surat Tugas</h3>
-        <p>Nomor : {{ $perjalanan->nomor_perjalanan ?? '6675/UN6.4.2.1/KP.00/2025' }}</p>
+        <p>Nomor : {{ $perjalanan->no_surat_tugas ? $perjalanan->no_surat_tugas . '/UN6.4.2.1/KP.00/2025' : '' }}</p>
     </div>
 
     <div class="content">
@@ -174,8 +174,8 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ $perjalanan->pengemudi->first()?->nama_staf ?? 'Marius Mansjah' }}</td>
-                    <td>{{ $perjalanan->pengemudi->first()?->nip ?? '197106162019063001' }}</td>
+                    <td>{{ $perjalanan->pengemudi->first()?->nama_staf ?? 'N/A' }}</td>
+                    <td>{{ $perjalanan->pengemudi->first()?->nip ?? 'N/A' }}</td>
                 </tr>
             </tbody>
         </table>
@@ -188,7 +188,7 @@
             <tr>
                 <td class="label">Unit Kerja</td>
                 <td class="separator">:</td>
-                <td class="value">Direktorat Akademik</td> 
+                <td class="value">{{ $perjalanan->unitKerja->nama ?? 'N/A' }}</td> 
             </tr>
             <tr>
                 <td class="label">Kegiatan</td>
@@ -209,7 +209,7 @@
                 <td class="label">Tanggal</td>
                 <td class="separator">:</td>
                 <td class="value">
-                    {{ $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->translatedFormat('d F Y') : '28 December 2025' }}
+                    {{ $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->translatedFormat('d F Y') : 'N/A' }}
                 </td>
             </tr>
         </table>

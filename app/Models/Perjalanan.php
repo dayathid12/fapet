@@ -69,9 +69,6 @@ class Perjalanan extends Model
             if (empty($model->nomor_perjalanan)) {
                 $model->nomor_perjalanan = str_pad($nextId, 3, '0', STR_PAD_LEFT) . '|' . date('my');
             }
-            if (empty($model->no_surat_tugas)) {
-                $model->no_surat_tugas = 'ST-' . str_pad($nextId, 4, '0', STR_PAD_LEFT) . '/' . date('Y');
-            }
             if (empty($model->token)) {
                 $model->token = (string) \Illuminate\Support\Str::uuid();
             }
@@ -141,4 +138,5 @@ class Perjalanan extends Model
 
         return $this->status_perjalanan;
     }
+
 }

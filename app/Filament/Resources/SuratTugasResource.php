@@ -9,6 +9,8 @@ use App\Models\PerjalananKendaraan; // New base model
 use App\Models\Kendaraan;
 use App\Models\Staf;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -38,7 +40,7 @@ class SuratTugasResource extends Resource
             ->schema([
                 Select::make('perjalanan_id')
                     ->label('Nomor Perjalanan / Surat Tugas')
-                    ->options(Perjalanan::all()->pluck('no_surat_tugas', 'id'))
+                    ->options(Perjalanan::all()->pluck('nomor_perjalanan', 'id'))
                     ->searchable()
                     ->required(),
                 Select::make('pengemudi_id')
@@ -80,7 +82,8 @@ class SuratTugasResource extends Resource
                     ->sortable(),
                 TextColumn::make('perjalanan.no_surat_tugas')
                     ->label('Nomor Surat')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn (?string $state): string => $state ?? ''),
                 TextColumn::make('pengemudi.nama_staf')
                     ->label('Pengemudi')
                     ->searchable(),
@@ -131,17 +134,13 @@ class SuratTugasResource extends Resource
                     ->searchable(),
             ])
             ->actions([
-                Tables\Actions\IconButtonAction::make('download_surat_tugas')
-                    ->label('Surat Tugas')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn (\App\Models\PerjalananKendaraan $record): string => route('surat-tugas.pdf', ['record' => $record->perjalanan_id]))
-                    ->openUrlInNewTab(),
                 Tables\Actions\Action::make('edit_perjalanan_kendaraan')
                     ->label('Lihat')
                     ->icon('heroicon-o-eye')
                     ->modal()
                     ->fillForm(fn (\App\Models\PerjalananKendaraan $record): array => [
                         'perjalanan_id' => $record->perjalanan_id,
+                        'no_surat_tugas' => $record->perjalanan?->no_surat_tugas,
                         'pengemudi_id' => $record->pengemudi_id,
                         'kendaraan_nopol' => $record->kendaraan_nopol,
                         'asisten_id' => $record->asisten_id,
@@ -149,34 +148,75 @@ class SuratTugasResource extends Resource
                         'waktu_selesai_penugasan' => $record->waktu_selesai_penugasan,
                     ])
                     ->form([
-                        Select::make('perjalanan_id')
-                            ->label('Nomor Perjalanan / Surat Tugas')
-                            ->options(Perjalanan::all()->pluck('no_surat_tugas', 'id'))
-                            ->searchable()
-                            ->required(),
-                        Select::make('pengemudi_id')
-                            ->label('Pengemudi')
-                            ->options(Staf::all()->pluck('nama_staf', 'staf_id'))
-                            ->searchable()
-                            ->required(),
-                        Select::make('kendaraan_nopol')
-                            ->label('Nomor Polisi Kendaraan')
-                            ->options(Kendaraan::all()->pluck('nopol_kendaraan', 'nopol_kendaraan'))
-                            ->searchable()
-                            ->required(),
-                        Select::make('asisten_id')
-                            ->label('Asisten')
-                            ->options(Staf::all()->pluck('nama_staf', 'staf_id'))
-                            ->searchable()
-                            ->nullable(),
-                        TextInput::make('tipe_penugasan')
+                        Placeholder::make('Detail Perjalanan')
+                            ->label('Detail Perjalanan'),
+                        Grid::make(2)
+                            ->schema([
+                                Select::make('perjalanan_id')
+                                    ->label('Nomor Perjalanan')
+                                    ->options(Perjalanan::all()->pluck('nomor_perjalanan', 'id'))
+                                    ->searchable()
+                                    ->required()
+                                    ->disabled(),
+                                Select::make('pengemudi_id')
+                                    ->label('Pengemudi')
+                                    ->options(Staf::all()->pluck('nama_staf', 'staf_id'))
+                                    ->searchable()
+                                    ->required()
+                                    ->disabled(),
+                                Select::make('kendaraan_nopol')
+                                    ->label('Nomor Polisi Kendaraan')
+                                    ->options(Kendaraan::all()->pluck('nopol_kendaraan', 'nopol_kendaraan'))
+                                    ->searchable()
+                                    ->required()
+                                    ->disabled(),
+                                Select::make('asisten_id')
+                                    ->label('Asisten')
+                                    ->options(Staf::all()->pluck('nama_staf', 'staf_id'))
+                                    ->searchable()
+                                    ->nullable()
+                                    ->disabled(),
+                                TextInput::make('tipe_penugasan')
+                                    ->label('Tipe Penugasan')
+                                    ->maxLength(255)
+                                    ->nullable()
+                                    ->disabled(),
+                                DateTimePicker::make('waktu_selesai_penugasan')
+                                    ->label('Waktu Selesai Penugasan')
+                                    ->nullable()
+                                    ->disabled(),
+                            ]),
+                        TextInput::make('no_surat_tugas')
+                            ->label('Nomor Surat Tugas')
                             ->maxLength(255)
                             ->nullable(),
-                        DateTimePicker::make('waktu_selesai_penugasan')
-                            ->nullable(),
+                        Grid::make(2)
+                            ->schema([
+                                FileUpload::make('file_tte')
+                                    ->label('Upload File TTE')
+                                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                                    ->maxSize(10240) // 10MB
+                                    ->directory('tte')
+                                    ->nullable(),
+                                FileUpload::make('file_surat_tugas')
+                                    ->label('Upload File Surat Tugas')
+                                    ->acceptedFileTypes(['application/pdf'])
+                                    ->maxSize(10240) // 10MB
+                                    ->directory('surat-tugas')
+                                    ->nullable(),
+                            ]),
+                        Placeholder::make('download_surat_tugas')
+                            ->label('')
+                            ->content(function ($get) {
+                                $perjalanan_id = $get('perjalanan_id');
+                                return new \Illuminate\Support\HtmlString('<a href="' . route('surat-tugas.pdf', ['record' => $perjalanan_id]) . '" target="_blank" class="filament-button filament-button--primary flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>Download Surat Tugas</a>');
+                            }),
                     ])
                     ->action(function (\App\Models\PerjalananKendaraan $record, array $data) {
                         $record->update($data);
+                        if (isset($data['no_surat_tugas'])) {
+                            $record->perjalanan->update(['no_surat_tugas' => $data['no_surat_tugas']]);
+                        }
                     }),
             ])
             ->bulkActions([
