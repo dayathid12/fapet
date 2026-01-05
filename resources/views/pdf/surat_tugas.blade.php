@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ asset('images/Favicon_Unpad.webp') }}" />
     <title>Surat Tugas - {{ $perjalanan->nomor_perjalanan ?? 'NOMOR_SURAT' }}</title>
     <style>
         body {
@@ -173,12 +174,36 @@
                 </tr>
             </thead>
             <tbody>
+                @forelse($perjalanan->pengemudi as $pengemudi)
                 <tr>
-                    <td>{{ $perjalanan->pengemudi->first()?->nama_staf ?? 'N/A' }}</td>
-                    <td>{{ $perjalanan->pengemudi->first()?->nip ?? 'N/A' }}</td>
+                    <td>{{ $pengemudi->nama_staf ?? 'N/A' }}</td>
+                    <td>{{ $pengemudi->nip_staf ?? 'N/A' }}</td>
                 </tr>
+                @empty
+                <tr>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
+
+        @forelse($perjalanan->asisten as $asisten)
+        <table class="details-list-table" style="margin-top: 10px;">
+            <tr>
+                <td class="label">Nama Asisten</td>
+                <td class="separator">:</td>
+                <td class="value">{{ $asisten->nama_staf ?? 'N/A' }}</td>
+            </tr>
+            <tr>
+                <td class="label">NIP Asisten</td>
+                <td class="separator">:</td>
+                <td class="value">{{ $asisten->nip_staf ?? 'N/A' }}</td>
+            </tr>
+        </table>
+        @empty
+        {{-- If no assistants, nothing will be rendered --}}
+        @endforelse
 
         <p style="margin-top: 15px; margin-bottom: 5px;">
             untuk melayani kegiatan/keberangkatan:
