@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ asset('images/Favicon_Unpad.webp') }}" />
     <!-- Judul title diubah agar lebih dinamis jika memungkinkan -->
     <title>Surat Keterangan Perjalanan - {{ $perjalanan->nomor_perjalanan ?? 'NOMOR_SURAT' }}</title>
     <style>
@@ -169,11 +170,19 @@
                     <td class="value">N/A</td>
                 </tr>
             @endforelse
-            <tr>
-                <td class="label">Nomor Kendaraan</td>
-                <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->nopol_kendaraan ?? 'N/A' }}</td>
-            </tr>
+            @forelse($perjalanan->kendaraan as $kendaraan)
+                <tr>
+                    <td class="label">Nomor Kendaraan</td>
+                    <td class="separator">:</td>
+                    <td class="value">{{ $kendaraan->nopol_kendaraan ?? 'N/A' }} ({{ $kendaraan->merk_type ?? 'N/A' }})</td>
+                </tr>
+            @empty
+                <tr>
+                    <td class="label">Nomor Kendaraan</td>
+                    <td class="separator">:</td>
+                    <td class="value">N/A</td>
+                </tr>
+            @endforelse
             <tr>
                 <td class="label">Keberangkatan</td>
                 <td class="separator">:</td>

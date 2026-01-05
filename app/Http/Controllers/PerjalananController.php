@@ -12,7 +12,7 @@ class PerjalananController extends Controller
 {
     public function generatePdf($nomor_perjalanan)
     {
-        $perjalanan = Perjalanan::with(['unitKerja', 'wilayah', 'pengemudi', 'asisten'])->findOrFail($nomor_perjalanan);
+        $perjalanan = Perjalanan::with(['unitKerja', 'wilayah', 'pengemudi', 'asisten', 'kendaraan'])->findOrFail($nomor_perjalanan);
 
         $pdf = Pdf::loadView('pdf.perjalanan', compact('perjalanan'))->setPaper('a4', 'portrait');
 
