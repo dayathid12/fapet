@@ -122,26 +122,53 @@
 
         <!-- Bagian detail menggunakan table untuk struktur yang lebih baik -->
         <table class="details-table">
-            <tr>
-                <td class="label">Nama</td>
-                <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->pengemudi->first()?->nama_staf ?? 'N/A' }}</td>
-            </tr>
-            <tr>
-                <td class="label">NIP</td>
-                <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->pengemudi->first()?->nip ?? 'N/A' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Asisten Pengemudi</td>
-                <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->asisten->first()?->nama_staf ?? 'N/A' }}</td>
-            </tr>
-            <tr>
-                <td class="label">NIP</td>
-                <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->asisten->first()?->nip ?? 'N/A' }}</td>
-            </tr>
+            @forelse($perjalanan->pengemudi as $pengemudi)
+                <tr>
+                    <td class="label">Nama Pengemudi</td>
+                    <td class="separator">:</td>
+                    <td class="value">{{ $pengemudi->nama_staf ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td class="label">NIP Pengemudi</td>
+                    <td class="separator">:</td>
+                    <td class="value">{{ $pengemudi->nip_staf ?? 'N/A' }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td class="label">Nama Pengemudi</td>
+                    <td class="separator">:</td>
+                    <td class="value">N/A</td>
+                </tr>
+                <tr>
+                    <td class="label">NIP Pengemudi</td>
+                    <td class="separator">:</td>
+                    <td class="value">N/A</td>
+                </tr>
+            @endforelse
+
+            @forelse($perjalanan->asisten as $asisten)
+                <tr>
+                    <td class="label">Nama Asisten</td>
+                    <td class="separator">:</td>
+                    <td class="value">{{ $asisten->nama_staf ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td class="label">NIP Asisten</td>
+                    <td class="separator">:</td>
+                    <td class="value">{{ $asisten->nip_staf ?? 'N/A' }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td class="label">Nama Asisten</td>
+                    <td class="separator">:</td>
+                    <td class="value">N/A</td>
+                </tr>
+                <tr>
+                    <td class="label">NIP Asisten</td>
+                    <td class="separator">:</td>
+                    <td class="value">N/A</td>
+                </tr>
+            @endforelse
             <tr>
                 <td class="label">Nomor Kendaraan</td>
                 <td class="separator">:</td>
