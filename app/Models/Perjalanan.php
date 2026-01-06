@@ -130,6 +130,16 @@ class Perjalanan extends Model
         return $this->belongsTo(EntryPengeluaran::class, 'entry_pengeluaran_id');
     }
 
+    /**
+     * Get all of the jadwalPengemudis for the Perjalanan
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function jadwalPengemudis(): HasMany
+    {
+        return $this->hasMany(JadwalPengemudi::class, 'perjalanan_id', 'id');
+    }
+
     public function getDynamicStatusAttribute(): string
     {
         if ($this->status_perjalanan === 'Terjadwal' && $this->waktu_kepulangan && $this->waktu_kepulangan->isPast()) {

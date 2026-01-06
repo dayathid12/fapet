@@ -189,18 +189,22 @@
         </table>
 
         @forelse($perjalanan->asisten as $asisten)
-        <table class="details-list-table" style="margin-top: 10px;">
-            <tr>
-                <td class="label">Nama Asisten</td>
-                <td class="separator">:</td>
-                <td class="value">{{ $asisten->nama_staf ?? 'N/A' }}</td>
-            </tr>
-            <tr>
-                <td class="label">NIP Asisten</td>
-                <td class="separator">:</td>
-                <td class="value">{{ $asisten->nip_staf ?? 'N/A' }}</td>
-            </tr>
-        </table>
+            @if($asisten->nama_staf)
+            <table class="details-list-table" style="margin-top: 10px;">
+                <tr>
+                    <td class="label">Nama Asisten</td>
+                    <td class="separator">:</td>
+                    <td class="value">{{ $asisten->nama_staf }}</td>
+                </tr>
+                @if($asisten->nip_staf)
+                <tr>
+                    <td class="label">NIP Asisten</td>
+                    <td class="separator">:</td>
+                    <td class="value">{{ $asisten->nip_staf }}</td>
+                </tr>
+                @endif
+            </table>
+            @endif
         @empty
         {{-- If no assistants, nothing will be rendered --}}
         @endforelse

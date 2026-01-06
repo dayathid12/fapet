@@ -148,75 +148,89 @@
             @endforelse
 
             @forelse($perjalanan->asisten as $asisten)
+                @if($asisten->nama_staf)
                 <tr>
                     <td class="label">Nama Asisten</td>
                     <td class="separator">:</td>
-                    <td class="value">{{ $asisten->nama_staf ?? 'N/A' }}</td>
+                    <td class="value">{{ $asisten->nama_staf }}</td>
                 </tr>
+                @if($asisten->nip_staf)
                 <tr>
                     <td class="label">NIP Asisten</td>
                     <td class="separator">:</td>
-                    <td class="value">{{ $asisten->nip_staf ?? 'N/A' }}</td>
+                    <td class="value">{{ $asisten->nip_staf }}</td>
                 </tr>
+                @endif
+                @endif
             @empty
-                <tr>
-                    <td class="label">Nama Asisten</td>
-                    <td class="separator">:</td>
-                    <td class="value">N/A</td>
-                </tr>
-                <tr>
-                    <td class="label">NIP Asisten</td>
-                    <td class="separator">:</td>
-                    <td class="value">N/A</td>
-                </tr>
+            {{-- If no assistants, nothing will be rendered --}}
             @endforelse
-            @forelse($perjalanan->kendaraan as $kendaraan)
-                <tr>
-                    <td class="label">Nomor Kendaraan</td>
-                    <td class="separator">:</td>
-                    <td class="value">{{ $kendaraan->nopol_kendaraan ?? 'N/A' }} ({{ $kendaraan->merk_type ?? 'N/A' }})</td>
-                </tr>
-            @empty
-                <tr>
-                    <td class="label">Nomor Kendaraan</td>
-                    <td class="separator">:</td>
-                    <td class="value">N/A</td>
-                </tr>
-            @endforelse
+
             <tr>
-                <td class="label">Keberangkatan</td>
+                <td class="label">Jadwal Tugas</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->format('d/m/Y H:i') : 'N/A' }}</td>
+                <td class="value">
+                    @php
+                        $jadwalText = '';
+                        $details = $perjalanan->details->first(); // Assuming single detail for simplicity
+                        $tipePenugasan = $details ? $details->tipe_penugasan : null;
+
+                        if ($tipePenugasan === 'Antar & Jemput') {
+                            $startDateTime = $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan) : null;
+                            $endDateTime = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                        } elseif ($tipePenugasan === 'Antar (Keberangkatan)') {
+                            $startDateTime = $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan) : null;
+                            $endDateTime = $details && $details->waktu_selesai_penugasan ? \Carbon\Carbon::parse($details->waktu_selesai_penugasan) : null;
+                        } elseif ($tipePenugasan === 'Jemput (Kepulangan)') {
+                            $startDateTime = $details && $details->waktu_selesai_penugasan ? \Carbon\Carbon::parse($details->waktu_selesai_penugasan) : null;
+                            $endDateTime = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                        } else {
+                            // Default to Antar & Jemput if no tipe_penugasan
+                            $startDateTime = $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan) : null;
+                            $endDateTime = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                        }
+
+                        if ($startDateTime && $endDateTime) {
+                            $startDate = $startDateTime->toDateString();
+                            $endDate = $endDateTime->toDateString();
+                            $startTime = $startDateTime->format('H:i');
+                            $endTime = $endDateTime->format('H:i');
+                            if ($startDate === $endDate) {
+                                $jadwalText = $startDateTime->format('j F Y') . ' ' . $startTime . ' - ' . $endTime;
+                            } else {
+                                $jadwalText = $startDateTime->format('j') . ' - ' . $endDateTime->format('j F Y') . ' ' . $startTime . ' - ' . $endTime;
+                            }
+                        } elseif ($startDateTime) {
+                            $jadwalText = $startDateTime->format('j F Y') . ' ' . $startDateTime->format('H:i');
+                        } elseif ($endDateTime) {
+                            $jadwalText = $endDateTime->format('j F Y') . ' ' . $endDateTime->format('H:i');
+                        } else {
+                            $jadwalText = 'N/A';
+                        }
+                    @endphp
+                    {{ $jadwalText }}
+                </td>
             </tr>
+
             <tr>
-                <td class="label">Kepulangan</td>
+                <td class="label">Nomor Kendaraan</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan)->format('d/m/Y H:i') : 'N/A' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Pengguna</td>
-                <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->nama_pengguna ?? 'N/A' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Keperluan</td>
-                <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->nama_kegiatan ?? $perjalanan->jenis_kegiatan ?? 'N/A' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Kota</td>
-                <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->wilayah->nama_wilayah ?? 'N/A' }}</td>
+                <td class="value">{{ $perjalanan->kendaraan->first()->nopol_kendaraan ?? 'N/A' }} ({{ $perjalanan->kendaraan->first()->merk_type ?? 'N/A' }})</td>
             </tr>
             <tr>
                 <td class="label">Lokasi Keberangkatan</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->lokasi_keberangkatan ?? 'N/A' }}, {{ $perjalanan->wilayah->nama_wilayah ?? 'N/A' }}</td>
+                <td class="value">{{ str_replace('06 January 2026', $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->format('H:i') : 'BERANGKAT', $perjalanan->lokasi_keberangkatan ?? 'N/A') }}, {{ $perjalanan->wilayah->nama_wilayah ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td class="label">Alamat Tujuan</td>
                 <td class="separator">:</td>
                 <td class="value">{{ $perjalanan->alamat_tujuan ?? 'N/A' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Pengguna</td>
+                <td class="separator">:</td>
+                <td class="value">{{ $perjalanan->nama_pengguna ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td class="label">Kontak Perwakilan</td>
@@ -231,7 +245,10 @@
         <tr>
             <td style="width: 50%;"></td>
             <td style="width: 50%; text-align: left; margin-left: auto;">
-                <p style="margin: 2px 0;">Jatinangor, {{ now()->format('d F Y') }}</p>
+                @php
+                    $signatureDate = $startDateTime ? $startDateTime->format('d F Y') : now()->format('d F Y');
+                @endphp
+                <p style="margin: 2px 0;">Jatinangor, {{ $signatureDate }}</p>
                 <p style="margin: 2px 0;">A.n Direktur Pengelolaan Aset</p>
                 <p style="margin: 2px 0;">dan Sarana, Prasarana</p>
                 <img src="{{ public_path('images/pdf/ttdlewo.png') }}" alt="Tanda Tangan" style="width: 150px; height: auto; margin-top: 10px; margin-bottom: 10px;">
