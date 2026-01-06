@@ -29,6 +29,7 @@ class Perjalanan extends Model
         'file_surat_jalan',
         'docs_surat_tugas',
         'upload_surat_tugas',
+        'upload_tte',
         'download_file',
         'surat_peminjaman_kendaraan',
         'surat_izin_kegiatan',
@@ -46,6 +47,7 @@ class Perjalanan extends Model
         'token',
         'tujuan_wilayah_id',
         'unit_kerja_id',
+        'unit_kerja_fakultas_ukm',
         'entry_pengeluaran_id', // Menambahkan ini agar bisa di-fill
     ];
 
@@ -57,6 +59,7 @@ class Perjalanan extends Model
 
     protected $attributes = [
         'status_operasional' => 'Belum Ditetapkan',
+        'no_surat_tugas' => null,
     ];
 
     protected static function boot()
@@ -71,6 +74,18 @@ class Perjalanan extends Model
             }
             if (empty($model->token)) {
                 $model->token = (string) \Illuminate\Support\Str::uuid();
+            }
+            if (empty($model->no_surat_tugas)) {
+                $year = date('Y');
+                $lastNumber = static::where('no_surat_tugas', 'like', '%/' . $year)
+                    ->get()
+                    ->map(function ($item) {
+                        $parts = explode('/', $item->no_surat_tugas);
+                        return (int) $parts[0];
+                    })
+                    ->max() ?? 0;
+                $nextNumber = $lastNumber + 1;
+                $model->no_surat_tugas = $nextNumber . '/UN6.4.2.1/KP.00/' . $year;
             }
         });
     }

@@ -44,4 +44,4 @@ Route::delete('/biaya/{id}', function ($id) {
 Route::get('/files/{encodedPath}', [PerjalananController::class, 'showFile'])->name('file.show');
 
 // Route untuk PDF Surat Tugas
-Route::get('/surat-tugas/{record}/pdf', [PdfController::class, 'generateSuratTugas'])->name('surat-tugas.pdf');
+Route::get('/surat-tugas/{no_surat_tugas}/pdf', [PdfController::class, 'generateSuratTugas'])->name('surat-tugas.pdf');

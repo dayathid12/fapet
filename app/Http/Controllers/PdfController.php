@@ -8,8 +8,10 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PdfController extends Controller
 {
-    public function generateSuratTugas(Perjalanan $perjalanan)
+    public function generateSuratTugas($no_surat_tugas)
     {
+        $perjalanan = Perjalanan::where('no_surat_tugas', $no_surat_tugas)->firstOrFail();
+
         // Eager load relationships to prevent N+1 query problems in the view
         $perjalanan->load('unitKerja', 'wilayah', 'pengemudi', 'asisten');
 

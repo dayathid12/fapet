@@ -49,7 +49,7 @@ class PerjalananResource extends Resource
                         Forms\Components\Grid::make(1)
                             ->schema([
                                 Forms\Components\Select::make('unit_kerja_id')
-                                    ->label('Unit Kerja/Fakultas/UKM')
+                                    ->label('Unit Kerja')
                                     ->relationship('unitKerja', 'nama_unit_kerja')
                                     ->searchable()
                                     ->preload()
@@ -61,6 +61,11 @@ class PerjalananResource extends Resource
                                     ])
                                     ->required()
                                     ->placeholder('Pilih unit kerja...'),
+
+                                Forms\Components\TextInput::make('unit_kerja_fakultas_ukm')
+                                    ->label('Unit Kerja/Fakultas/UKM')
+                                    ->placeholder('Masukkan unit kerja/fakultas/UKM')
+                                    ->maxLength(255),
 
                                 Forms\Components\Grid::make(2)
                                     ->schema([
@@ -575,7 +580,7 @@ class PerjalananResource extends Resource
                                                                     $p->where('waktu_keberangkatan', '<', $proposedEnd);
                                                                 });
                                                     });
-                                                    
+
                                                     // Kondisi 3: Bentrok dengan jadwal 'Jemput (Kepulangan)' yang ada
                                                     $overlapQuery->orWhere(function (Builder $subQuery) use ($proposedStart, $proposedEnd) {
                                                         $subQuery->where('tipe_penugasan', 'Jemput (Kepulangan)')

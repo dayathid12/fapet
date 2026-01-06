@@ -132,15 +132,37 @@ class SuratTugasResource extends Resource
                 TextColumn::make('perjalanan.status_perjalanan')
                     ->label('Status Perjalanan')
                     ->searchable(),
+                TextColumn::make('status_surat_tugas')
+                    ->label('Status')
+                    ->getStateUsing(function (\App\Models\PerjalananKendaraan $record): string {
+                        $perjalanan = $record->perjalanan;
+                        if (!empty($perjalanan->upload_surat_tugas)) {
+                            return 'Selesai';
+                        } elseif (!empty($perjalanan->no_surat_tugas)) {
+                            return 'Proses';
+                        } else {
+                            return 'Pengajuan';
+                        }
+                    })
+                    ->searchable(),
             ])
             ->actions([
+                Tables\Actions\Action::make('download_surat_tugas')
+                    ->label('')
+                    ->tooltip('Download Surat Tugas')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->url(fn (\App\Models\PerjalananKendaraan $record): string => $record->perjalanan->no_surat_tugas ? route('surat-tugas.pdf', ['no_surat_tugas' => $record->perjalanan->no_surat_tugas]) : '#')
+                    ->openUrlInNewTab()
+                    ->visible(fn (\App\Models\PerjalananKendaraan $record): bool => !empty($record->perjalanan->no_surat_tugas)),
                 Tables\Actions\Action::make('edit_perjalanan_kendaraan')
                     ->label('Lihat')
                     ->icon('heroicon-o-eye')
                     ->modal()
                     ->fillForm(fn (\App\Models\PerjalananKendaraan $record): array => [
                         'perjalanan_id' => $record->perjalanan_id,
-                        'no_surat_tugas' => $record->perjalanan?->no_surat_tugas,
+                        'no_surat_tugas' => $record->perjalanan->no_surat_tugas,
+                        'upload_tte' => $record->perjalanan->upload_tte,
+                        'upload_surat_tugas' => $record->perjalanan->upload_surat_tugas,
                         'pengemudi_id' => $record->pengemudi_id,
                         'kendaraan_nopol' => $record->kendaraan_nopol,
                         'asisten_id' => $record->asisten_id,
@@ -192,31 +214,24 @@ class SuratTugasResource extends Resource
                             ->nullable(),
                         Grid::make(2)
                             ->schema([
-                                FileUpload::make('file_tte')
+                                FileUpload::make('upload_tte')
                                     ->label('Upload File TTE')
                                     ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                                     ->maxSize(10240) // 10MB
                                     ->directory('tte')
                                     ->nullable(),
-                                FileUpload::make('file_surat_tugas')
+                                FileUpload::make('upload_surat_tugas')
                                     ->label('Upload File Surat Tugas')
                                     ->acceptedFileTypes(['application/pdf'])
                                     ->maxSize(10240) // 10MB
                                     ->directory('surat-tugas')
                                     ->nullable(),
                             ]),
-                        Placeholder::make('download_surat_tugas')
-                            ->label('')
-                            ->content(function ($get) {
-                                $perjalanan_id = $get('perjalanan_id');
-                                return new \Illuminate\Support\HtmlString('<a href="' . route('surat-tugas.pdf', ['record' => $perjalanan_id]) . '" target="_blank" class="filament-button filament-button--primary flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>Download Surat Tugas</a>');
-                            }),
                     ])
                     ->action(function (\App\Models\PerjalananKendaraan $record, array $data) {
-                        $record->update($data);
-                        if (isset($data['no_surat_tugas'])) {
-                            $record->perjalanan->update(['no_surat_tugas' => $data['no_surat_tugas']]);
-                        }
+                        // The main model for this resource is PerjalananKendaraan.
+                        // We only update the related Perjalanan model here.
+                        $record->perjalanan->update($data);
                     }),
             ])
             ->bulkActions([

@@ -13,7 +13,7 @@
             font-size: 12pt;
             color: #000;
         }
-        
+
         /* HEADER STYLES */
         .header-table {
             width: 100%;
@@ -125,12 +125,12 @@
         }
         .signature-content {
             text-align: left;
-            margin-left: auto; /* Mendorong ke kanan */
-            width: 55%; /* Lebar area tanda tangan */
+            margin-left: auto; /* Push to the right */
+            width: 55%; /* Width of the signature area */
         }
         .qr-code {
-            width: 80px; 
-            height: 80px; 
+            width: 80px;
+            height: 80px;
             margin: 10px 0;
         }
 
@@ -141,7 +141,7 @@
     <table class="header-table">
         <tr>
             <td class="logo-container">
-                <img src="{{ public_path('images/pdf/logo-pdf 1.png') }}" alt="Logo Unpad">
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/pdf/logo-pdf 1.png'))) }}" alt="Logo Universitas Padjadjaran">
             </td>
             <td class="header-text-container">
                 <h1>KEMENTERIAN PENDIDIKAN TINGGI, SAINS,</h1>
@@ -150,7 +150,7 @@
                 <div class="address">
                     Jalan Dipati Ukur No. 35 Bandung 40132<br>
                     Jalan Ir. Soekarno Km. 21 Jatinangor, Sumedang 45363<br>
-                    Telepon (022) 84288888 Laman: <u style="color:blue">www.unpad.ac.id</u>, Email: <u style="color:blue">humas@unpad.ac.id</u>
+                    Telepon (022) 84288888 Laman: www.unpad.ac.id</u>, Email: humas@unpad.ac.id</u>
                 </div>
             </td>
         </tr>
@@ -158,7 +158,7 @@
 
     <div class="title-section">
         <h3>Surat Tugas</h3>
-        <p>Nomor : {{ $perjalanan->no_surat_tugas ? $perjalanan->no_surat_tugas . '/UN6.4.2.1/KP.00/2025' : '' }}</p>
+        <p>Nomor : {{ ($perjalanan->no_surat_tugas ?? '555') . '/UN6.4.2.1/KP.00/2026' }}</p>
     </div>
 
     <div class="content">
@@ -185,29 +185,16 @@
                     <td>N/A</td>
                 </tr>
                 @endforelse
+                @forelse($perjalanan->asisten as $asisten)
+                <tr>
+                    <td>{{ $asisten->nama_staf ?? 'N/A' }}</td>
+                    <td>{{ $asisten->nip_staf ?? 'N/A' }}</td>
+                </tr>
+                @empty
+                {{-- No additional row for empty assistants --}}
+                @endforelse
             </tbody>
         </table>
-
-        @forelse($perjalanan->asisten as $asisten)
-            @if($asisten->nama_staf)
-            <table class="details-list-table" style="margin-top: 10px;">
-                <tr>
-                    <td class="label">Nama Asisten</td>
-                    <td class="separator">:</td>
-                    <td class="value">{{ $asisten->nama_staf }}</td>
-                </tr>
-                @if($asisten->nip_staf)
-                <tr>
-                    <td class="label">NIP Asisten</td>
-                    <td class="separator">:</td>
-                    <td class="value">{{ $asisten->nip_staf }}</td>
-                </tr>
-                @endif
-            </table>
-            @endif
-        @empty
-        {{-- If no assistants, nothing will be rendered --}}
-        @endforelse
 
         <p style="margin-top: 15px; margin-bottom: 5px;">
             untuk melayani kegiatan/keberangkatan:
@@ -215,24 +202,24 @@
 
         <table class="details-list-table">
             <tr>
-                <td class="label">Unit Kerja</td>
+                <td class="label">Unit</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->unitKerja->nama ?? 'N/A' }}</td> 
+                <td class="value">{{ $perjalanan->unit_kerja_fakultas_ukm ?? $perjalanan->unitKerja->nama_unit_kerja ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td class="label">Kegiatan</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->nama_kegiatan ?? $perjalanan->jenis_kegiatan ?? 'Perjalanan Dinas' }}</td>
+                <td class="value">{{ $perjalanan->nama_kegiatan ?? $perjalanan->jenis_kegiatan ?? '' }}</td>
             </tr>
             <tr>
                 <td class="label">Tujuan</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->alamat_tujuan ?? $perjalanan->wilayah->nama_wilayah ?? 'Penjaringan Jakarta Utara' }}</td>
+                <td class="value">{{ $perjalanan->alamat_tujuan ?? '' }} {{ $perjalanan->entryPengeluaran?->rincianPengeluarans?->first()?->kota_kabupaten ?? $perjalanan->wilayah->nama_wilayah ?? '' }}</td>
             </tr>
             <tr>
                 <td class="label">Keberangkatan</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->lokasi_keberangkatan ?? 'Rektorat' }}</td>
+                <td class="value">{{ $perjalanan->lokasi_keberangkatan ?? '' }}</td>
             </tr>
             <tr>
                 <td class="label">Tanggal</td>
@@ -253,23 +240,23 @@
 
     <table class="signature-table">
         <tr>
-            <td style="width: 45%;"></td>
-            
-            <td style="width: 55%; vertical-align: top;">
+            <td style="width: 30%;"></td>
+
+            <td style="width: 90%; vertical-align: top;">
                 <div class="signature-content">
                     <p style="margin: 0;">Jatinangor, {{ now()->translatedFormat('d F Y') }}</p>
                     <p style="margin: 0;">a.n. Direktur</p>
                     <p style="margin: 0;">Sekretaris Direktorat Pengelolaan</p>
                     <p style="margin: 0;">Aset dan Sarana Prasarana,</p>
-                    
-                    <img src="{{ public_path('images/pdf/qrcode_placeholder.png') }}" alt="QR Code" class="qr-code">
-                    
+                    @if($perjalanan->upload_tte)
+                        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(storage_path('app/public/' . $perjalanan->upload_tte))) }}" alt="TTE Signature" style="max-width: 300px; max-height: 150px; margin: 10px 0;">
+                    @endif
                     <p style="margin: 0;">Arief Irmansyah, S.Sos., M.Si.</p>
                     <p style="margin: 0;">NIP. 197809252005021008</p>
                 </div>
             </td>
         </tr>
-    </table>
+    </table>x
 
 </body>
 </html>

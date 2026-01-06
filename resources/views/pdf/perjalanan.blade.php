@@ -101,7 +101,7 @@
     <table class="header-table">
         <tr>
             <td class="logo-container">
-                <img src="{{ public_path('images/pdf/logo-pdf 1.png') }}" alt="Logo Universitas Padjadjaran">
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/pdf/logo-pdf 1.png'))) }}" alt="Logo Universitas Padjadjaran">
             </td>
             <td class="header-text-container">
                 <h1>KEMENTERIAN PENDIDIKAN TINGGI, SAINS DAN TEKNOLOGI</h1>
