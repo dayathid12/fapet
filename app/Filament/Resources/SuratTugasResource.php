@@ -157,19 +157,33 @@ class SuratTugasResource extends Resource
                                 return 'Pengajuan';
                             })
                             ->extraAttributes(fn (string $state): array => match ($state) {
-                                'Selesai' => ['style' => 'background-color: #3F9AAE; color: white;'],
-                                'Proses' => ['style' => 'background-color: #FFE2AF; color: black;'],
-                                'Pengajuan' => ['style' => 'background-color: #FF0000; color: white;'],
-                                default => ['style' => 'background-color: gray; color: white;'],
+                                'Selesai' => [
+                                    'class' => 'bg-blue-600 text-white',
+                                ],
+                                'Proses' => [
+                                    'class' => 'bg-yellow-400 text-black',
+                                ],
+                                'Pengajuan' => [
+                                    'class' => 'bg-gray-500 text-white',
+                                ],
+                                default => [],
+
                             }),
-                    ])->extraAttributes(fn (?PerjalananKendaraan $record): array => [
-                        'class' => 'p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-500 transition-all duration-300 group',
-                        'style' => 'background-color: ' . match (true) {
-                            !empty($record?->perjalanan?->upload_surat_tugas) => '#3F9AAE',
-                            !empty($record?->perjalanan?->no_surat_tugas) => '#FFE2AF',
-                            default => '#FF0000',
-                        } . ';'
-                    ]),
+                    ])->extraAttributes(function (?PerjalananKendaraan $record): array {
+                        $status = $record ? (
+                            !empty($record->perjalanan->upload_surat_tugas) ? 'Selesai' :
+                            (!empty($record->perjalanan->no_surat_tugas) ? 'Proses' : 'Pengajuan')
+                        ) : 'Pengajuan';
+                        return [
+                            'class' => 'p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-500 transition-all duration-300 group',
+                            'style' => match ($status) {
+                                'Selesai' => 'background: linear-gradient(135deg, #FF6B6B, #4ECDC4); color: white; box-shadow: 0 12px 40px rgba(255, 107, 107, 0.4);',
+                                'Proses' => 'background: linear-gradient(135deg, #A8E6CF, #FFD93D); color: #2E7D32; box-shadow: 0 12px 40px rgba(168, 230, 207, 0.4);',
+                                'Pengajuan' => 'background: linear-gradient(135deg, #667EEA, #764BA2); color: white; box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);',
+                                default => 'background: linear-gradient(135deg, #F093FB, #F5576C); color: white; box-shadow: 0 12px 40px rgba(240, 147, 251, 0.4);',
+                            }
+                        ];
+                    }),
 
                     // --- BODY: Driver & Detail Tugas ---
                     Split::make([
@@ -232,14 +246,21 @@ class SuratTugasResource extends Resource
                     ]),
                 ])
                 ->space(3)
-                ->extraAttributes(fn (?PerjalananKendaraan $record): array => [
-                    'class' => 'p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-500 transition-all duration-300 group',
-                    'style' => 'background-color: ' . match (true) {
-                        !empty($record?->perjalanan?->upload_surat_tugas) => '#3F9AAE',
-                        !empty($record?->perjalanan?->no_surat_tugas) => '#FFE2AF',
-                        default => '#FF0000',
-                    } . ';'
-                ]),
+                ->extraAttributes(function (?PerjalananKendaraan $record): array {
+                    $status = $record ? (
+                        !empty($record->perjalanan->upload_surat_tugas) ? 'Selesai' :
+                        (!empty($record->perjalanan->no_surat_tugas) ? 'Proses' : 'Pengajuan')
+                    ) : 'Pengajuan';
+                    return [
+                        'class' => 'p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-2xl hover:border-primary-500 transition-all duration-500 group backdrop-blur-md',
+                        'style' => match ($status) {
+                            'Selesai' => 'background: linear-gradient(135deg, rgba(227, 242, 253, 0.8), rgba(187, 222, 251, 0.8)); color: #0D47A1; box-shadow: 0 20px 40px rgba(63, 154, 174, 0.3), 0 0 20px rgba(63, 154, 174, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3);',
+                            'Proses' => 'background: linear-gradient(135deg, rgba(255, 248, 225, 0.8), rgba(255, 236, 179, 0.8)); color: #F57F17; box-shadow: 0 20px 40px rgba(255, 226, 175, 0.3), 0 0 20px rgba(255, 226, 175, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3);',
+                            'Pengajuan' => 'background: linear-gradient(135deg, rgba(245, 245, 245, 0.8), rgba(224, 224, 224, 0.8)); color: #424242; box-shadow: 0 20px 40px rgba(184, 168, 168, 0.3), 0 0 20px rgba(184, 168, 168, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3);',
+                            default => 'background: linear-gradient(135deg, rgba(250, 250, 250, 0.8), rgba(232, 232, 232, 0.8)); color: #616161; box-shadow: 0 20px 40px rgba(128, 128, 128, 0.3), 0 0 20px rgba(128, 128, 128, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3);',
+                        }
+                    ];
+                }),
             ])
             ->actions([
                 Tables\Actions\Action::make('download_pdf')
