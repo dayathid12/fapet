@@ -134,8 +134,8 @@ class SuratTugasResource extends Resource
                                 ->label('Nomor Perjalanan')
                                 ->state(fn (?PerjalananKendaraan $record) => $record?->perjalanan?->nomor_perjalanan)
                                 ->color('gray')
-                                ->size('lg')
-                                ->weight('semibold')
+                                ->size('xl')
+                                ->weight('bold')
                                 ->visible(fn (?PerjalananKendaraan $record) => !empty($record?->perjalanan?->nomor_perjalanan)),
                             TextColumn::make('custom_no_surat')
                                 ->label('Nomor Surat')
@@ -144,7 +144,7 @@ class SuratTugasResource extends Resource
                                 ->weight('bold')
                                 ->color('primary')
                                 ->formatStateUsing(fn (?string $state): string => $state ?: 'Draft Surat')
-                                ->size('lg'),
+                                ->size('xl'),
                         ])->columnSpan(2),
 
                         TextColumn::make('status_surat_tugas')
@@ -175,12 +175,12 @@ class SuratTugasResource extends Resource
                             (!empty($record->perjalanan->no_surat_tugas) ? 'Proses' : 'Pengajuan')
                         ) : 'Pengajuan';
                         return [
-                            'class' => 'p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-500 transition-all duration-300 group',
+                            'class' => 'p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-500 transition-all duration-300 group',
                             'style' => match ($status) {
-                                'Selesai' => 'background: linear-gradient(135deg, #FF6B6B, #4ECDC4); color: white; box-shadow: 0 12px 40px rgba(255, 107, 107, 0.4);',
-                                'Proses' => 'background: linear-gradient(135deg, #A8E6CF, #FFD93D); color: #2E7D32; box-shadow: 0 12px 40px rgba(168, 230, 207, 0.4);',
-                                'Pengajuan' => 'background: linear-gradient(135deg, #667EEA, #764BA2); color: white; box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);',
-                                default => 'background: linear-gradient(135deg, #F093FB, #F5576C); color: white; box-shadow: 0 12px 40px rgba(240, 147, 251, 0.4);',
+                                'Selesai' => 'background: linear-gradient(135deg, #FFB3BA, #FFDFBA); color: #5D4037; box-shadow: 0 12px 40px rgba(255, 179, 186, 0.3);',
+                                'Proses' => 'background: linear-gradient(135deg, #BAE1FF, #FFFFBA); color: #424242; box-shadow: 0 12px 40px rgba(186, 225, 255, 0.3);',
+                                'Pengajuan' => 'background: linear-gradient(135deg, #D4A5A5, #FFC3A0); color: #5D4037; box-shadow: 0 12px 40px rgba(212, 165, 165, 0.3);',
+                                default => 'background: linear-gradient(135deg, #E6E6FA, #F0E68C); color: #424242; box-shadow: 0 12px 40px rgba(230, 230, 250, 0.3);',
                             }
                         ];
                     }),
@@ -194,7 +194,7 @@ class SuratTugasResource extends Resource
                                 ->label('Pengemudi')
                                 ->state(fn (?PerjalananKendaraan $record) => $record?->pengemudi?->nama_staf)
                                 ->weight('bold')
-                                ->size('md')
+                                ->size('lg')
                                 ->icon('heroicon-m-user')
                                 ->iconColor('primary')
                                 ->extraAttributes(['class' => 'mt-2']),
@@ -210,7 +210,7 @@ class SuratTugasResource extends Resource
 
                             TextColumn::make('kendaraan_nopol')
                                 ->icon('heroicon-m-truck')
-                                ->size('sm')
+                                ->size('md')
                                 ->color('gray')
                                 ->formatStateUsing(fn ($state) => "Nopol: {$state}"),
                         ])->space(1),
@@ -232,8 +232,9 @@ class SuratTugasResource extends Resource
                                 ->alignEnd(),
 
                             TextColumn::make('tanggal_awal_tugas')
+                                ->label('Tanggal Awal Tugas')
                                 ->icon('heroicon-m-clock')
-                                ->size('sm')
+                                ->size('md')
                                 ->color('warning')
                                 ->dateTime('d M, H:i')
                                 ->alignEnd()
@@ -242,6 +243,16 @@ class SuratTugasResource extends Resource
                                     'Jemput (Kepulangan)' => $record?->perjalanan?->waktu_kepulangan,
                                     default => null,
                                 }),
+
+                            TextColumn::make('tanggal_akhir_tugas')
+                                ->label('Tanggal Akhir Tugas')
+                                ->size('xs')
+                                ->color('warning')
+                                ->dateTime('d M, H:i')
+                                ->alignEnd()
+                                ->getStateUsing(fn (?PerjalananKendaraan $record) => $record?->perjalanan?->waktu_kepulangan)
+                                ->visible(fn (?PerjalananKendaraan $record) => !empty($record?->perjalanan?->waktu_kepulangan))
+                                ->extraAttributes(['class' => 'transform translate-x-1']),
                         ])->space(1)->alignEnd(),
                     ]),
                 ])
@@ -252,12 +263,12 @@ class SuratTugasResource extends Resource
                         (!empty($record->perjalanan->no_surat_tugas) ? 'Proses' : 'Pengajuan')
                     ) : 'Pengajuan';
                     return [
-                        'class' => 'p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-2xl hover:border-primary-500 transition-all duration-500 group backdrop-blur-md',
+                        'class' => 'p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-2xl hover:border-primary-500 hover:-translate-y-2 hover:scale-103 transition-all duration-500 group backdrop-blur-md transform',
                         'style' => match ($status) {
-                            'Selesai' => 'background: linear-gradient(135deg, rgba(227, 242, 253, 0.8), rgba(187, 222, 251, 0.8)); color: #0D47A1; box-shadow: 0 20px 40px rgba(63, 154, 174, 0.3), 0 0 20px rgba(63, 154, 174, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3);',
-                            'Proses' => 'background: linear-gradient(135deg, rgba(255, 248, 225, 0.8), rgba(255, 236, 179, 0.8)); color: #F57F17; box-shadow: 0 20px 40px rgba(255, 226, 175, 0.3), 0 0 20px rgba(255, 226, 175, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3);',
-                            'Pengajuan' => 'background: linear-gradient(135deg, rgba(245, 245, 245, 0.8), rgba(224, 224, 224, 0.8)); color: #424242; box-shadow: 0 20px 40px rgba(184, 168, 168, 0.3), 0 0 20px rgba(184, 168, 168, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3);',
-                            default => 'background: linear-gradient(135deg, rgba(250, 250, 250, 0.8), rgba(232, 232, 232, 0.8)); color: #616161; box-shadow: 0 20px 40px rgba(128, 128, 128, 0.3), 0 0 20px rgba(128, 128, 128, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3);',
+                            'Selesai' => 'background: linear-gradient(135deg, rgba(255, 235, 238, 0.9), rgba(255, 243, 224, 0.9)); color: #4A4A4A; box-shadow: 0 25px 50px rgba(255, 179, 186, 0.3), 0 0 30px rgba(255, 179, 186, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 15px rgba(255, 179, 186, 0.4));',
+                            'Proses' => 'background: linear-gradient(135deg, rgba(240, 248, 255, 0.9), rgba(255, 250, 240, 0.9)); color: #4A4A4A; box-shadow: 0 25px 50px rgba(186, 225, 255, 0.3), 0 0 30px rgba(186, 225, 255, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 15px rgba(186, 225, 255, 0.4));',
+                            'Pengajuan' => 'background: linear-gradient(135deg, rgba(248, 240, 240, 0.9), rgba(255, 245, 235, 0.9)); color: #4A4A4A; box-shadow: 0 25px 50px rgba(212, 165, 165, 0.3), 0 0 30px rgba(212, 165, 165, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 15px rgba(212, 165, 165, 0.4));',
+                            default => 'background: linear-gradient(135deg, rgba(250, 245, 255, 0.9), rgba(255, 250, 245, 0.9)); color: #4A4A4A; box-shadow: 0 25px 50px rgba(230, 230, 250, 0.3), 0 0 30px rgba(230, 230, 250, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 15px rgba(230, 230, 250, 0.4));',
                         }
                     ];
                 }),
@@ -270,13 +281,6 @@ class SuratTugasResource extends Resource
                     ->url(fn (?PerjalananKendaraan $record): string => $record?->perjalanan?->no_surat_tugas ? route('surat-tugas.pdf', ['no_surat_tugas' => $record->perjalanan->no_surat_tugas]) : '#')
                     ->openUrlInNewTab()
                     ->visible(fn (?PerjalananKendaraan $record): bool => !empty($record?->perjalanan?->no_surat_tugas)),
-
-                Tables\Actions\EditAction::make()
-                    ->label('Lihat')
-                    ->icon('heroicon-o-eye')
-                    ->modalHeading('Edit Data Surat Tugas')
-                    ->modalWidth('4xl')
-                    ->color('primary'),
             ]);
     }
 
