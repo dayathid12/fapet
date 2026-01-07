@@ -129,7 +129,7 @@ class SuratTugasResource extends Resource
                     // --- HEADER: No Surat & Status ---
                     Split::make([
                         // Wrapper untuk Nomor Surat dan Nomor Perjalanan
-                        Stack::make([ // Changed from Split::make to Stack::make
+                        Split::make([
                             TextColumn::make('nomor_perjalanan_display') // Custom name for display
                                 ->label('Nomor Perjalanan')
                                 ->state(fn (?PerjalananKendaraan $record) => $record?->perjalanan?->nomor_perjalanan)
@@ -145,7 +145,7 @@ class SuratTugasResource extends Resource
                                 ->color('primary')
                                 ->formatStateUsing(fn (?string $state): string => $state ?: 'Draft Surat')
                                 ->size('lg'),
-                        ])->space(1)->columnSpan(2), // Added space(1) and kept columnSpan(2)
+                        ])->columnSpan(2),
 
                         TextColumn::make('status_surat_tugas')
                             ->badge()
@@ -156,13 +156,20 @@ class SuratTugasResource extends Resource
                                 if (!empty($record->perjalanan->no_surat_tugas)) return 'Proses';
                                 return 'Pengajuan';
                             })
-                            ->color(fn (string $state): string => match ($state) {
-                                'Selesai' => '#3F9AAE',
-                                'Proses' => '#FFE2AF',
-                                'Pengajuan' => '#F96E5B',
-                                default => 'gray', // Fallback color
+                            ->extraAttributes(fn (string $state): array => match ($state) {
+                                'Selesai' => ['style' => 'background-color: #3F9AAE; color: white;'],
+                                'Proses' => ['style' => 'background-color: #FFE2AF; color: black;'],
+                                'Pengajuan' => ['style' => 'background-color: #FF0000; color: white;'],
+                                default => ['style' => 'background-color: gray; color: white;'],
                             }),
-                    ])->extraAttributes(['class' => 'items-center pb-3 border-b border-gray-200 dark:border-gray-700 border-dashed']),
+                    ])->extraAttributes(fn (?PerjalananKendaraan $record): array => [
+                        'class' => 'p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-500 transition-all duration-300 group',
+                        'style' => 'background-color: ' . match (true) {
+                            !empty($record?->perjalanan?->upload_surat_tugas) => '#3F9AAE',
+                            !empty($record?->perjalanan?->no_surat_tugas) => '#FFE2AF',
+                            default => '#FF0000',
+                        } . ';'
+                    ]),
 
                     // --- BODY: Driver & Detail Tugas ---
                     Split::make([
@@ -225,8 +232,13 @@ class SuratTugasResource extends Resource
                     ]),
                 ])
                 ->space(3)
-                ->extraAttributes([
-                    'class' => 'bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-500 transition-all duration-300 group'
+                ->extraAttributes(fn (?PerjalananKendaraan $record): array => [
+                    'class' => 'p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-500 transition-all duration-300 group',
+                    'style' => 'background-color: ' . match (true) {
+                        !empty($record?->perjalanan?->upload_surat_tugas) => '#3F9AAE',
+                        !empty($record?->perjalanan?->no_surat_tugas) => '#FFE2AF',
+                        default => '#FF0000',
+                    } . ';'
                 ]),
             ])
             ->actions([
