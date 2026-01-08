@@ -13,6 +13,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -42,12 +44,47 @@ class SuratTugasResource extends Resource
                             ->icon('heroicon-o-briefcase')
                             ->schema([
                                 Select::make('perjalanan_id')
+                                    ->relationship('perjalanan', 'nomor_perjalanan')
                                     ->label('Nomor Perjalanan')
-                                    ->options(Perjalanan::all()->pluck('nomor_perjalanan', 'id'))
                                     ->searchable()
                                     ->required()
                                     ->prefixIcon('heroicon-m-hashtag')
                                     ->columnSpanFull(),
+
+                                DateTimePicker::make('perjalanan.waktu_keberangkatan')
+                                    ->label('Waktu Keberangkatan'),
+
+                                DateTimePicker::make('perjalanan.waktu_kepulangan')
+                                    ->label('Waktu Kepulangan'),
+
+                                DateTimePicker::make('waktu_selesai_penugasan')
+                                    ->label('Waktu Selesai Penugasan')
+                                    ->nullable(),
+
+                                Select::make('tipe_penugasan')
+                                    ->label('Tipe Penugasan')
+                                    ->options([
+                                        'Antar & Jemput Tamu' => 'Antar & Jemput Tamu',
+                                        'Perjalanan Dinas' => 'Perjalanan Dinas',
+                                        'Pengiriman Barang' => 'Pengiriman Barang',
+                                        'Lainnya' => 'Lainnya',
+                                    ])
+                                    ->nullable(),
+
+                                TextInput::make('perjalanan.unit_kerja_fakultas_ukm') // Assuming this field name
+                                    ->label('Unit Kerja'),
+
+                                TextInput::make('perjalanan.nama_kegiatan')
+                                    ->label('Kegiatan'),
+
+                                TextInput::make('perjalanan.lokasi_keberangkatan')
+                                    ->label('Keberangkatan'),
+
+                                TextInput::make('perjalanan.alamat_tujuan')
+                                    ->label('Tujuan'),
+
+                                TextInput::make('perjalanan.kota_kabupaten') // Assuming this field name
+                                    ->label('Kota'),
 
                                 Select::make('pengemudi_id')
                                     ->label('Pengemudi')
@@ -69,15 +106,6 @@ class SuratTugasResource extends Resource
                                     ->searchable()
                                     ->required()
                                     ->prefixIcon('heroicon-m-truck'),
-
-                                TextInput::make('tipe_penugasan')
-                                    ->placeholder('Contoh: Antar Jemput Tamu')
-                                    ->maxLength(255)
-                                    ->nullable(),
-
-                                DateTimePicker::make('waktu_selesai_penugasan')
-                                    ->label('Estimasi Selesai')
-                                    ->nullable(),
                             ])->columns(2),
                     ])->columnSpan(['lg' => 2]),
 
@@ -105,6 +133,16 @@ class SuratTugasResource extends Resource
                                     ->maxSize(10240)
                                     ->directory('surat-tugas')
                                     ->openable(),
+                            ])
+                            ->footerActions([
+                                Action::make('save')
+                                    ->label('Save changes')
+                                    ->action('save')
+                                    ->color('primary'),
+                                Action::make('cancel')
+                                    ->label('Cancel')
+                                    ->url(fn () => SuratTugasResource::getUrl('index'))
+                                    ->color('gray'),
                             ]),
                     ])->columnSpan(['lg' => 1]),
             ])->columns(3);
@@ -159,7 +197,7 @@ class SuratTugasResource extends Resource
                             })
                             ->extraAttributes(fn (string $state): array => match ($state) {
                                 'Selesai' => [
-                                    'class' => 'bg-blue-600 text-white',
+                                    'class' => 'bg-green-600 text-white',
                                 ],
                                 'Proses' => [
                                     'class' => 'bg-yellow-400 text-black',
@@ -176,9 +214,9 @@ class SuratTugasResource extends Resource
                             (!empty($record->perjalanan->no_surat_tugas) ? 'Proses' : 'Pengajuan')
                         ) : 'Pengajuan';
                         return [
-                            'class' => 'p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-500 transition-all duration-300 group',
+                            'class' => 'p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-500 transition-all duration-300 group',
                             'style' => match ($status) {
-                                'Selesai' => 'background: linear-gradient(135deg, #FFB3BA, #FFDFBA); color: #5D4037; box-shadow: 0 12px 40px rgba(255, 179, 186, 0.3);',
+                            'Selesai' => 'background: linear-gradient(135deg, #81C784, #A5D6A7); color: #2E7D32; box-shadow: 0 12px 40px rgba(129, 199, 132, 0.3);',
                                 'Proses' => 'background: linear-gradient(135deg, #BAE1FF, #FFFFBA); color: #424242; box-shadow: 0 12px 40px rgba(186, 225, 255, 0.3);',
                                 'Pengajuan' => 'background: linear-gradient(135deg, #D4A5A5, #FFC3A0); color: #5D4037; box-shadow: 0 12px 40px rgba(212, 165, 165, 0.3);',
                                 default => 'background: linear-gradient(135deg, #E6E6FA, #F0E68C); color: #424242; box-shadow: 0 12px 40px rgba(230, 230, 250, 0.3);',
@@ -264,10 +302,10 @@ class SuratTugasResource extends Resource
                         (!empty($record->perjalanan->no_surat_tugas) ? 'Proses' : 'Pengajuan')
                     ) : 'Pengajuan';
                     return [
-                        'class' => 'p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-2xl hover:border-primary-500 hover:-translate-y-2 hover:scale-103 transition-all duration-500 group backdrop-blur-md transform',
+                        'class' => 'p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-2xl hover:border-primary-500 hover:-translate-y-2 hover:scale-103 transition-all duration-500 group backdrop-blur-md transform',
                         'style' => match ($status) {
-                            'Selesai' => 'background: linear-gradient(135deg, rgba(255, 235, 238, 0.9), rgba(255, 243, 224, 0.9)); color: #4A4A4A; box-shadow: 0 25px 50px rgba(255, 179, 186, 0.3), 0 0 30px rgba(255, 179, 186, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 15px rgba(255, 179, 186, 0.4));',
-                            'Proses' => 'background: linear-gradient(135deg, rgba(240, 248, 255, 0.9), rgba(255, 250, 240, 0.9)); color: #4A4A4A; box-shadow: 0 25px 50px rgba(186, 225, 255, 0.3), 0 0 30px rgba(186, 225, 255, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 15px rgba(186, 225, 255, 0.4));',
+                            'Selesai' => 'background: linear-gradient(135deg, #3F9AAE, #fffaf0e6); color: #4A4A4A; box-shadow: 0 25px 50px #fffaf0e6, 0 0 30px rgba(76, 175, 80, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 15px #fffaf0e6);',
+                            'Proses' => 'background: linear-gradient(135deg, rgba(240, 248, 255, 0.9), #fffaf0e6); color: #4A4A4A; box-shadow: 0 25px 50px rgba(186, 225, 255, 0.3), 0 0 30px rgba(186, 225, 255, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 15px rgba(186, 225, 255, 0.4));',
                             'Pengajuan' => 'background: linear-gradient(135deg, rgba(248, 240, 240, 0.9), rgba(255, 245, 235, 0.9)); color: #4A4A4A; box-shadow: 0 25px 50px rgba(212, 165, 165, 0.3), 0 0 30px rgba(212, 165, 165, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 15px rgba(212, 165, 165, 0.4));',
                             default => 'background: linear-gradient(135deg, rgba(250, 245, 255, 0.9), rgba(255, 250, 245, 0.9)); color: #4A4A4A; box-shadow: 0 25px 50px rgba(230, 230, 250, 0.3), 0 0 30px rgba(230, 230, 250, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 15px rgba(230, 230, 250, 0.4));',
                         }
