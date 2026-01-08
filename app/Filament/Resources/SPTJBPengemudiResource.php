@@ -19,7 +19,7 @@ class SPTJBPengemudiResource extends Resource
 {
     protected static ?string $model = PerjalananKendaraan::class;
 
-    protected static ?string $navigationLabel = 'SPTJB Pengemudi';
+    protected static ?string $navigationLabel = 'Daftar Pengemudi';
 
     protected static ?string $navigationGroup = 'Pelaporan';
 
