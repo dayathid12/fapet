@@ -13,4 +13,9 @@ class SPTJBPengemudi extends Model
         'uraian',
         'penerima',
     ];
+
+    public function details()
+    {
+        return $this->hasMany(SPTJBUangPengemudiDetail::class, 'sptjb_pengemudi_id');
+    }
 }

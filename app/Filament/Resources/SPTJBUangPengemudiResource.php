@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SPTJBUangPengemudiResource\Pages;
+use App\Filament\Resources\SPTJBUangPengemudiResource\RelationManagers;
 use App\Models\SPTJBPengemudi;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -72,7 +73,7 @@ class SPTJBUangPengemudiResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            \App\Filament\Resources\RelationManagers\SPTJBUangPengemudiDetailsRelationManager::class,
         ];
     }
 
