@@ -21,6 +21,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -151,12 +152,6 @@ class SuratTugasResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                $query->whereHas('perjalanan', function ($q) {
-                    $q->where('status_perjalanan', 'Terjadwal')
-                      ->where('jenis_kegiatan', '!=', 'DK');
-                });
-            })
             ->contentGrid([
                 'md' => 2,
                 'xl' => 3, // Layout grid 3 kolom di layar besar
@@ -312,6 +307,30 @@ class SuratTugasResource extends Resource
                     ];
                 }),
             ])
+            ->filters([
+                SelectFilter::make('jenis_kegiatan')
+                    ->label('Jenis Kegiatan')
+                    ->multiple()
+                    ->options([
+                        'LK' => 'Luar Kota',
+                        'LB' => 'Luar Biasa',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['values'])) {
+                            return $query;
+                        }
+                        return $query->whereHas('perjalanan', function (Builder $q) use ($data) {
+                            $q->whereIn('jenis_kegiatan', $data['values']);
+                        });
+                    }),
+            ])
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->whereHas('perjalanan', function (Builder $subQuery) {
+                    $subQuery->whereIn('status_perjalanan', ['Selesai', 'Terjadwal'])
+                             ->whereRaw("TRIM(COALESCE(jenis_kegiatan, '')) <> ''")
+                             ->where('jenis_kegiatan', '!=', 'DK');
+                });
+            })
             ->actions([
                 Tables\Actions\Action::make('download_pdf')
                     ->label('Unduh PDF')

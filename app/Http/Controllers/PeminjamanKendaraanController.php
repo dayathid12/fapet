@@ -84,7 +84,6 @@ class PeminjamanKendaraanController extends Controller
                 'jumlah_rombongan' => $data['jumlah_rombongan'],
                 'alamat_tujuan' => $data['alamat_tujuan'],
                 'nama_kegiatan' => $data['nama_kegiatan'],
-                'jenis_kegiatan' => $data['nama_kegiatan'],
                 'tujuan_wilayah_id' => $data['tujuan_wilayah_id'],
                 'unit_kerja_id' => $data['unit_kerja_id'],
                 'nama_pengguna' => $data['nama_pengguna'],

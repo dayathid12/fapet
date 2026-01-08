@@ -74,18 +74,6 @@ class Perjalanan extends Model
             if (empty($model->token)) {
                 $model->token = (string) \Illuminate\Support\Str::uuid();
             }
-            if (empty($model->no_surat_tugas)) {
-                $year = date('Y');
-                $lastNumber = static::where('no_surat_tugas', 'like', '%/' . $year)
-                    ->get()
-                    ->map(function ($item) {
-                        $parts = explode('/', $item->no_surat_tugas);
-                        return (int) $parts[0];
-                    })
-                    ->max() ?? 0;
-                $nextNumber = $lastNumber + 1;
-                $model->no_surat_tugas = $nextNumber . '/UN6.4.2.1/KP.00/' . $year;
-            }
         });
     }
 

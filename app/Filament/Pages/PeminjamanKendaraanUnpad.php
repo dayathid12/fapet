@@ -281,7 +281,6 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
         }
         unset($data['tujuan_wilayah_id_step3']);
 
-        $data['jenis_kegiatan'] = $data['nama_kegiatan'] ?? null;
         // nopol_kendaraan is now nullable, so setting to null is acceptable if not provided
         // We can remove this line if we want it to implicitly be null when not provided by the form
         // $data['nopol_kendaraan'] = null;

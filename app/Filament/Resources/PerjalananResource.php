@@ -460,7 +460,7 @@ class PerjalananResource extends Resource
                                 'LB' => 'gray',
                             ])
                             ->grouped()
-                            ->required()
+                            ->default(null)
                             ->extraAttributes(['class' => 'justify-center']),
 
                         Forms\Components\Grid::make(2)
