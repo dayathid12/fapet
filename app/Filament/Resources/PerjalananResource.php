@@ -387,7 +387,8 @@ class PerjalananResource extends Resource
                     ->headerActions([
                         FormAction::make('edit')
                             ->label('Edit')
-                            ->action(fn ($record) => redirect(PerjalananResource::getUrl('edit', ['record' => $record]))),
+                            ->action(fn ($record) => redirect(PerjalananResource::getUrl('edit', ['record' => $record])))
+                            ->visible(fn () => !str_contains(request()->url(), '/edit')),
                         FormAction::make('back')
                             ->label('Kembali')
                             ->icon('heroicon-o-arrow-left')
@@ -510,7 +511,7 @@ class PerjalananResource extends Resource
                                         $globalPulang    = $get('../../waktu_kepulangan');
                                         $tipeTugas       = $get('tipe_penugasan');
                                         $waktuSelesai    = $get('waktu_selesai_penugasan');
-                                        $currentPerjalananId = $record?->id;
+                                        $currentPerjalananId = $record?->perjalanan_id;
 
                                         $canFilter = false;
                                         $proposedStart = null;
@@ -551,7 +552,7 @@ class PerjalananResource extends Resource
 
                                         // --- 5. JALANKAN QUERY FILTERING ---
                                         // Jika data lengkap dan valid, filter kendaraan yang bentrok jadwalnya.
-                                        return Kendaraan::whereDoesntHave('perjalananKendaraans', function (Builder $query) use ($proposedStart, $proposedEnd, $currentPerjalananId) {
+                                        $availableKendaraan = Kendaraan::whereDoesntHave('perjalananKendaraans', function (Builder $query) use ($proposedStart, $proposedEnd, $currentPerjalananId) {
                                             $query
                                                 // Hanya periksa perjalanan yang berstatus 'Terjadwal'
                                                 ->whereHas('perjalanan', function (Builder $perjalananQuery) use ($currentPerjalananId) {
@@ -591,8 +592,17 @@ class PerjalananResource extends Resource
                                                     });
                                                 });
                                         })
-                                        ->get()
-                                        ->mapWithKeys(function ($kendaraan) {
+                                        ->get();
+
+                                        // Jika ada kendaraan yang sudah dipilih (untuk edit), pastikan selalu termasuk
+                                        if ($record && $record->kendaraan_nopol) {
+                                            $currentKendaraan = Kendaraan::where('nopol_kendaraan', $record->kendaraan_nopol)->first();
+                                            if ($currentKendaraan && !$availableKendaraan->contains('nopol_kendaraan', $record->kendaraan_nopol)) {
+                                                $availableKendaraan->push($currentKendaraan);
+                                            }
+                                        }
+
+                                        return $availableKendaraan->mapWithKeys(function ($kendaraan) {
                                             return [$kendaraan->nopol_kendaraan => implode(' - ', array_filter([
                                                 $kendaraan->nopol_kendaraan,
                                                 $kendaraan->jenis_kendaraan,

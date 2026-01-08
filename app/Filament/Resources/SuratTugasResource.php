@@ -28,9 +28,8 @@ class SuratTugasResource extends Resource
 
     protected static ?string $navigationLabel = 'Surat Tugas';
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $activeNavigationIcon = 'heroicon-s-document-text';
+        protected static ?string $navigationGroup = 'Pelaporan';
 
     public static function form(Form $form): Form
     {
@@ -136,7 +135,8 @@ class SuratTugasResource extends Resource
                                 ->color('gray')
                                 ->size('xl')
                                 ->weight('bold')
-                                ->visible(fn (?PerjalananKendaraan $record) => !empty($record?->perjalanan?->nomor_perjalanan)),
+                                ->visible(fn (?PerjalananKendaraan $record) => !empty($record?->perjalanan?->nomor_perjalanan))
+                                ->extraAttributes(fn (?PerjalananKendaraan $record) => !empty($record?->perjalanan?->nomor_perjalanan) ? ['class' => 'bg-blue-50 text-blue-800 px-2 py-1 rounded-md'] : []),
                             TextColumn::make('custom_no_surat')
                                 ->label('Nomor Surat')
                                 ->state(fn (?PerjalananKendaraan $record) => $record?->perjalanan?->no_surat_tugas)
@@ -144,7 +144,8 @@ class SuratTugasResource extends Resource
                                 ->weight('bold')
                                 ->color('primary')
                                 ->formatStateUsing(fn (?string $state): string => $state ?: 'Draft Surat')
-                                ->size('xl'),
+                                ->size('xl')
+                                ->extraAttributes(fn (?PerjalananKendaraan $record) => !empty($record?->perjalanan?->no_surat_tugas) ? ['class' => 'bg-green-50 text-green-800 px-2 py-1 rounded-md'] : []),
                         ])->columnSpan(2),
 
                         TextColumn::make('status_surat_tugas')
@@ -280,7 +281,17 @@ class SuratTugasResource extends Resource
                     ->color('success')
                     ->url(fn (?PerjalananKendaraan $record): string => $record?->perjalanan?->no_surat_tugas ? route('surat-tugas.pdf', ['no_surat_tugas' => $record->perjalanan->no_surat_tugas]) : '#')
                     ->openUrlInNewTab()
-                    ->visible(fn (?PerjalananKendaraan $record): bool => !empty($record?->perjalanan?->no_surat_tugas)),
+                    ->visible(fn (?PerjalananKendaraan $record): bool => !empty($record?->perjalanan?->no_surat_tugas))
+                    ->extraAttributes(['class' => 'mt-4']),
+
+                Tables\Actions\Action::make('download_word')
+                    ->label('Unduh Word')
+                    ->icon('heroicon-o-document-text')
+                    ->color('info')
+                    ->url(fn (?PerjalananKendaraan $record): string => $record?->perjalanan?->no_surat_tugas ? route('surat-tugas.word', ['no_surat_tugas' => $record->perjalanan->no_surat_tugas]) : '#')
+                    ->openUrlInNewTab()
+                    ->visible(fn (?PerjalananKendaraan $record): bool => !empty($record?->perjalanan?->no_surat_tugas))
+                    ->extraAttributes(['class' => 'mt-4']),
             ]);
     }
 

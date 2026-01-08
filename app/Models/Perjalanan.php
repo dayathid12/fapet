@@ -47,7 +47,6 @@ class Perjalanan extends Model
         'token',
         'tujuan_wilayah_id',
         'unit_kerja_id',
-        'unit_kerja_fakultas_ukm',
         'entry_pengeluaran_id', // Menambahkan ini agar bisa di-fill
     ];
 

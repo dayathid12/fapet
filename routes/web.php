@@ -45,3 +45,6 @@ Route::get('/files/{encodedPath}', [PerjalananController::class, 'showFile'])->n
 
 // Route untuk PDF Surat Tugas
 Route::get('/surat-tugas/{no_surat_tugas}/pdf', [PdfController::class, 'generateSuratTugas'])->name('surat-tugas.pdf');
+
+// Route untuk Word Surat Tugas
+Route::get('/surat-tugas/{no_surat_tugas}/word', [PdfController::class, 'generateSuratTugasWord'])->name('surat-tugas.word');
