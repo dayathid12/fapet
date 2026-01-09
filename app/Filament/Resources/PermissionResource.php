@@ -56,6 +56,19 @@ class PermissionResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->default('web'),
+                Forms\Components\CheckboxList::make('accessible_resources')
+                    ->options(function () {
+                        $resources = [];
+                        $filamentResources = \Filament\Filament::get()->all();
+                        foreach ($filamentResources as $resourceClass) {
+                            if (method_exists($resourceClass, 'getNavigationLabel')) {
+                                $resources[$resourceClass] = $resourceClass::getNavigationLabel();
+                            }
+                        }
+                        return $resources;
+                    })
+                    ->columns(2)
+                    ->label('Accessible Resources')
             ]);
     }
 

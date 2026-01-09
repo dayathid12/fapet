@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SPTJBPengemudiResource\Pages;
 use App\Models\PerjalananKendaraan;
+use App\Models\SPTJBPengemudi;
+use App\Models\SPTJBUangPengemudiDetail;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -13,6 +15,8 @@ use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Forms;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 
 class SPTJBPengemudiResource extends Resource
@@ -53,11 +57,11 @@ class SPTJBPengemudiResource extends Resource
                 TextColumn::make('perjalanan.waktu_kepulangan')
                     ->label('Waktu Kepulangan')
                     ->dateTime('d M Y, H:i'),
-                TextColumn::make('status')
+                TextColumn::make('status_baru')
                     ->label('Status')
                     ->badge()
-                    ->color('success')
-                    ->default('Selesai'),
+                    ->color(fn ($record) => $record->hasBeenProcessed() ? 'success' : 'warning')
+                    ->state(fn ($record) => $record->hasBeenProcessed() ? 'Selesai' : 'Ajukan'),
             ])
             ->filters([
                 SelectFilter::make('jenis_kegiatan')
@@ -84,6 +88,80 @@ class SPTJBPengemudiResource extends Resource
             })
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('masukanPengemudi')
+                        ->label('Masukan Pengemudi')
+                        ->icon('heroicon-o-plus')
+                        ->color('success')
+                        ->form([
+                            Forms\Components\TextInput::make('no_sptjb')
+                                ->label('No. SPTJB')
+                                ->required(),
+                        ])
+                        ->action(function (array $data, $records) {
+                            $sptjb = SPTJBPengemudi::firstOrCreate([
+                                'no_sptjb' => $data['no_sptjb']
+                            ], [
+                                'uraian' => 'Uang Saku Pengemudi dalam rangka melayani Kegiatan Civitas Akademika Unpad',
+                                'penerima' => 'Pengemudi dkk',
+                            ]);
+
+                            foreach ($records as $record) {
+                                // For pengemudi
+                                if ($record->pengemudi) {
+                                    SPTJBUangPengemudiDetail::create([
+                                        'sptjb_pengemudi_id' => $sptjb->id,
+                                        'no' => null,
+                                        'nama' => $record->pengemudi->nama_staf,
+                                        'jabatan' => 'Pengemudi',
+                                        'tanggal_penugasan' => null,
+                                        'jumlah_hari' => null,
+                                        'besaran_uang_per_hari' => null,
+                                        'jumlah_rp' => null,
+                                        'jumlah_uang_diterima' => null,
+                                        'nomor_rekening' => null,
+                                        'golongan' => null,
+                                        'no_sptjb' => $data['no_sptjb'],
+                                        'nomor_perjalanan' => $record->perjalanan->nomor_perjalanan,
+                                    ]);
+                                }
+
+                                // For asisten
+                                if ($record->asisten) {
+                                    SPTJBUangPengemudiDetail::create([
+                                        'sptjb_pengemudi_id' => $sptjb->id,
+                                        'no' => null,
+                                        'nama' => $record->asisten->nama_staf,
+                                        'jabatan' => 'Asisten',
+                                        'tanggal_penugasan' => null,
+                                        'jumlah_hari' => null,
+                                        'besaran_uang_per_hari' => null,
+                                        'jumlah_rp' => null,
+                                        'jumlah_uang_diterima' => null,
+                                        'nomor_rekening' => null,
+                                        'golongan' => null,
+                                        'no_sptjb' => $data['no_sptjb'],
+                                        'nomor_perjalanan' => $record->perjalanan->nomor_perjalanan,
+                                    ]);
+                                }
+                            }
+
+                            // Update no sequentially
+                            $details = SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $sptjb->id)->orderBy('id')->get();
+                            foreach ($details as $index => $detail) {
+                                $detail->update(['no' => $index + 1]);
+                            }
+
+                            // Notification
+                            Notification::make()
+                                ->title('Berhasil!')
+                                ->body('Data pengemudi telah dimasukkan ke SPTJB ' . $data['no_sptjb'] . ' (ID: ' . $sptjb->id . '). Total detail: ' . $details->count())
+                                ->success()
+                                ->send();
+
+                            // Redirect to edit page
+                            return redirect()->to(\App\Filament\Resources\SPTJBUangPengemudiResource::getUrl('edit', ['record' => $sptjb->id]));
+                        })
+                        ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

@@ -73,7 +73,7 @@ class SPTJBUangPengemudiResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Resources\RelationManagers\SPTJBUangPengemudiDetailsRelationManager::class,
+            \App\Filament\Resources\SPTJBUangPengemudiResource\RelationManagers\SPTJBUangPengemudiDetailsRelationManager::class,
         ];
     }
 

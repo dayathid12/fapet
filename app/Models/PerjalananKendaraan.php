@@ -72,10 +72,24 @@ class PerjalananKendaraan extends Model
         {
             return $this->belongsTo(Staf::class, 'asisten_id', 'staf_id');
         }
-    
+
         public function rincianPengeluarans(): \Illuminate\Database\Eloquent\Relations\HasMany
         {
             return $this->hasMany(RincianPengeluaran::class, 'perjalanan_id');
         }
+
+        public function hasBeenProcessed(): bool
+        {
+            $namaPengemudi = $this->pengemudi?->nama_staf;
+            $namaAsisten = $this->asisten?->nama_staf;
+
+            return \App\Models\SPTJBUangPengemudiDetail::where(function ($query) use ($namaPengemudi, $namaAsisten) {
+                if ($namaPengemudi) {
+                    $query->orWhere('nama', $namaPengemudi);
+                }
+                if ($namaAsisten) {
+                    $query->orWhere('nama', $namaAsisten);
+                }
+            })->exists();
+        }
     }
-    

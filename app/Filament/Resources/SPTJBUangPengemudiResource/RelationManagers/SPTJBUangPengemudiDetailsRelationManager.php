@@ -37,34 +37,30 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                     ->required()
                     ->maxLength(255),
                 Forms\Components\DatePicker::make('tanggal_penugasan')
-                    ->label('Tanggal Penugasan')
-                    ->required(),
+                    ->label('Tanggal Penugasan'),
                 Forms\Components\TextInput::make('jumlah_hari')
                     ->label('Jumlah Hari')
-                    ->numeric()
-                    ->required(),
+                    ->numeric(),
                 Forms\Components\TextInput::make('besaran_uang_per_hari')
                     ->label('Besaran uang / Hari (Rp)')
                     ->numeric()
-                    ->prefix('Rp')
-                    ->required(),
+                    ->prefix('Rp'),
                 Forms\Components\TextInput::make('jumlah_rp')
                     ->label('Jumlah RP.')
                     ->numeric()
-                    ->prefix('Rp')
-                    ->required(),
+                    ->prefix('Rp'),
                 Forms\Components\TextInput::make('jumlah_uang_diterima')
                     ->label('Jumlah Uang Diterima')
                     ->numeric()
-                    ->prefix('Rp')
-                    ->required(),
+                    ->prefix('Rp'),
                 Forms\Components\TextInput::make('nomor_rekening')
                     ->label('Nomor Rekening')
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('golongan')
                     ->label('Golongan')
-                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('nomor_perjalanan')
+                    ->label('Nomor Perjalanan')
                     ->maxLength(255),
             ]);
     }
@@ -77,6 +73,8 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('no')
                     ->label('No')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('nomor_perjalanan')
+                    ->label('Nomor Perjalanan'),
                 Tables\Columns\TextColumn::make('nama')
                     ->label('Nama')
                     ->searchable(),
@@ -104,12 +102,8 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
             ->filters([
                 //
             ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make(),
-            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

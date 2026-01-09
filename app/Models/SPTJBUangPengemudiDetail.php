@@ -22,6 +22,14 @@ class SPTJBUangPengemudiDetail extends Model
         'nomor_rekening',
         'golongan',
         'no_sptjb',
+        'nomor_perjalanan',
+    ];
+
+    protected $casts = [
+        'tanggal_penugasan' => 'date',
+        'besaran_uang_per_hari' => 'decimal:2',
+        'jumlah_rp' => 'decimal:2',
+        'jumlah_uang_diterima' => 'decimal:2',
     ];
 
     public function sptjbPengemudi(): BelongsTo

@@ -17,13 +17,13 @@ return new class extends Migration
             $table->integer('no')->nullable(); // Auto-generated based on row
             $table->string('nama');
             $table->string('jabatan');
-            $table->date('tanggal_penugasan');
-            $table->integer('jumlah_hari');
-            $table->decimal('besaran_uang_per_hari', 15, 2);
-            $table->decimal('jumlah_rp', 15, 2);
-            $table->decimal('jumlah_uang_diterima', 15, 2);
-            $table->string('nomor_rekening');
-            $table->string('golongan');
+            $table->date('tanggal_penugasan')->nullable();
+            $table->integer('jumlah_hari')->nullable();
+            $table->decimal('besaran_uang_per_hari', 15, 2)->nullable();
+            $table->decimal('jumlah_rp', 15, 2)->nullable();
+            $table->decimal('jumlah_uang_diterima', 15, 2)->nullable();
+            $table->string('nomor_rekening')->nullable();
+            $table->string('golongan')->nullable();
             $table->string('no_sptjb')->nullable(); // Auto-filled from parent
             $table->timestamps();
         });
