@@ -181,136 +181,120 @@
 </x-filament-panels::page>
 
 @push('scripts')
-    <script src='https://unpkg.com/tesseract.js@5.0.3/dist/tesseract.min.js'></script>
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('ocrHandler', () => ({
-                init() {
-                    console.log('OCR Handler initialized.');
-                },
-                async processImage(event, livewireComponent) { // Added livewireComponent argument
-                    console.log('Processing image...');
-                    const file = event.target.files[0];
-                    if (!file) {
-                        return;
-                    }
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('OCR script loaded - DOM ready');
 
-                    // TODO: Add OCR logic here
-                    console.log('File selected:', file.name);
+    // Function to handle toll file upload
+    function handleTollFileUpload(fileInput) {
+        const file = fileInput.files[0];
+        if (!file) return;
 
-                    // Example: try to read the file
-                    const reader = new FileReader();
-                    reader.onload = async (e) => {
-                        const image = e.target.result;
-                        console.log('Image loaded, starting OCR...');
-                        try {
-                            const { data: { text } } = await Tesseract.recognize(
-                                image,
-                                'eng', // Language
-                                { logger: m => console.log(m) }
-                            );
-                            console.log('OCR Result:', text);
+        console.log('Toll file selected:', file.name);
 
-                            const ocrText = text.toLowerCase();
-                            let biaya = 0;
-                            let deskripsi = '';
-                            let jenis_bbm = null;
-                            let volume = 0;
-                            let tipe = null; // New variable to determine the type (bbm, toll, parkir)
+        // Find the form and biaya_toll input - try multiple selectors
+        const form = fileInput.closest('form');
+        if (!form) {
+            console.error('Form not found');
+            return;
+        }
 
-                            // --- Robust Parsing Logic ---
-                            // Identify type first
-                            if (ocrText.includes('bbm') || ocrText.includes('bensin') || ocrText.includes('pertamax') || ocrText.includes('dekslite') || ocrText.includes('liter')) {
-                                tipe = 'bbm';
-                            } else if (ocrText.includes('toll') || ocrText.includes('tol') || ocrText.includes('gerbang')) {
-                                tipe = 'toll';
-                            } else if (ocrText.includes('parkir') || ocrText.includes('parking') || ocrText.includes('lokasi')) {
-                                tipe = 'parkir';
-                            }
-
-                            // Extract 'biaya' (amount) - looking for Rp or currency symbols followed by numbers
-                            const biayaMatch = ocrText.match(/(?:rp|idr|\$|€|£)\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/);
-                            if (biayaMatch && biayaMatch[1]) {
-                                biaya = parseFloat(biayaMatch[1].replace(/\./g, '').replace(/,/g, '.'));
-                            } else {
-                                // Fallback: look for numbers that look like amounts, perhaps near 'total' or 'jumlah'
-                                const totalMatch = ocrText.match(/(?:total|jumlah|harga)\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/);
-                                if (totalMatch && totalMatch[1]) {
-                                    biaya = parseFloat(totalMatch[1].replace(/\./g, '').replace(/,/g, '.'));
-                                }
-                            }
-
-                            // Extract 'jenis_bbm'
-                            if (tipe === 'bbm') {
-                                if (ocrText.includes('pertamax')) {
-                                    jenis_bbm = 'Pertamax';
-                                } else if (ocrText.includes('dexlite') || ocrText.includes('dekslite')) {
-                                    jenis_bbm = 'Dexlite';
-                                } else if (ocrText.includes('solar')) {
-                                    jenis_bbm = 'Lainnya'; // Assuming 'Solar'
-                                } else {
-                                    jenis_bbm = 'Lainnya'; // Default for other BBM types
-                                }
-                            }
-
-                            // Extract 'volume'
-                            if (tipe === 'bbm') {
-                                const volumeMatch = ocrText.match(/(\d+(?:[.,]\d+)?)\s*(liter|lt)/);
-                                if (volumeMatch && volumeMatch[1]) {
-                                    volume = parseFloat(volumeMatch[1].replace(/,/g, '.'));
-                                }
-                            }
-
-                            // Extract 'deskripsi'
-                            // This is highly dependent on the document. For now, a generic approach.
-                            // For BBM: try to find pump/station name or transaction ID
-                            // For Toll: try to find gate name or card ID
-                            // For Parkir: try to find location
-                            if (tipe === 'bbm') {
-                                 // Look for common keywords near numbers that could be transaction IDs or locations
-                                 const bbmDescMatch = ocrText.match(/(spbu|pom bensin|station|transaksi|lokasi)\s*([a-zA-Z0-9\s#\/\-]+)/);
-                                 deskripsi = bbmDescMatch ? bbmDescMatch[2].trim() : ocrText.substring(0, 100);
-                            } else if (tipe === 'toll') {
-                                 const tollDescMatch = ocrText.match(/(gerbang|gate|card|kartu)\s*([a-zA-Z0-9\s#\/\-]+)/);
-                                 deskripsi = tollDescMatch ? tollDescMatch[2].trim() : ocrText.substring(0, 100);
-                            } else if (tipe === 'parkir') {
-                                const parkirDescMatch = ocrText.match(/(lokasi|area|tempat)\s*parkir\s*([a-zA-Z0-9\s#\/\-]+)/);
-                                deskripsi = parkirDescMatch ? parkirDescMatch[2].trim() : ocrText.substring(0, 100);
-                            } else {
-                                deskripsi = ocrText.substring(0, 100); // Generic fallback
-                            }
-                            if (deskripsi.length > 255) { // Ensure description fits typical database column
-                                deskripsi = deskripsi.substring(0, 255);
-                            }
-
-
-                            // --- Populate fields using Livewire component ---
-                            if (livewireComponent) {
-                                livewireComponent.set('data.tipe', tipe);
-                                livewireComponent.set('data.biaya', biaya);
-                                livewireComponent.set('data.deskripsi', deskripsi);
-                                if (tipe === 'bbm') {
-                                    livewireComponent.set('data.jenis_bbm', jenis_bbm);
-                                    livewireComponent.set('data.volume', volume);
-                                }
-                            }
-
-                            console.log('Form fields updated:');
-                            console.log('Tipe:', tipe);
-                            console.log('Biaya:', biaya);
-                            console.log('Deskripsi:', deskripsi);
-                            if (tipe === 'bbm') {
-                                console.log('Jenis BBM:', jenis_bbm);
-                                console.log('Volume:', volume);
-                            }
-
-                        } catch (error) {
-                            console.error('OCR Error:', error);
-                        }
-                    };
-                    reader.readAsDataURL(file);
+        // Try different selectors for the biaya_toll input
+        let biayaTollInput = form.querySelector('input[name*="biaya_toll"]');
+        if (!biayaTollInput) {
+            biayaTollInput = form.querySelector('input[name="biaya_toll"]');
+        }
+        if (!biayaTollInput) {
+            biayaTollInput = form.querySelector('input[id*="biaya_toll"]');
+        }
+        if (!biayaTollInput) {
+            // Try to find any input that might be the toll amount field
+            const allInputs = form.querySelectorAll('input[type="text"], input[type="number"]');
+            for (let input of allInputs) {
+                if (input.name && (input.name.includes('biaya') || input.placeholder && input.placeholder.includes('toll'))) {
+                    biayaTollInput = input;
+                    break;
                 }
-            }));
+            }
+        }
+
+        if (!biayaTollInput) {
+            console.error('biaya_toll input not found. Available inputs:', Array.from(form.querySelectorAll('input')).map(i => ({name: i.name, id: i.id, type: i.type})));
+            return;
+        }
+
+        console.log('Found biaya_toll input:', biayaTollInput.name || biayaTollInput.id);
+
+        // Show loading state
+        const originalPlaceholder = biayaTollInput.placeholder;
+        biayaTollInput.placeholder = "Sedang membaca struk...";
+        biayaTollInput.disabled = true;
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('struk', file);
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+        console.log('Sending request to /api/ocr-toll');
+
+        // Call OCR API
+        fetch('/api/ocr-toll', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response received:', response);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Data received:', data);
+            if (data.jumlah_toll) {
+                // Fill the field with extracted amount
+                biayaTollInput.value = data.jumlah_toll;
+                biayaTollInput.placeholder = originalPlaceholder;
+                console.log('Field filled with:', data.jumlah_toll);
+                // Trigger input event to update Filament form state
+                biayaTollInput.dispatchEvent(new Event('input', { bubbles: true }));
+            } else if (data.error) {
+                console.error('OCR Error:', data.error);
+                alert('Gagal membaca struk: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            alert('Terjadi kesalahan saat memproses struk');
+        })
+        .finally(() => {
+            biayaTollInput.disabled = false;
+            biayaTollInput.placeholder = originalPlaceholder;
         });
-    </script>
+    }
+
+    // Listen for file input changes - use event delegation for dynamic content
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('input[type="file"][name*="bukti_path_toll"]') ||
+            e.target.matches('input[type="file"][name="bukti_path_toll"]') ||
+            e.target.matches('input[type="file"][id*="bukti_path_toll"]')) {
+            console.log('Toll file input change detected');
+            handleTollFileUpload(e.target);
+        }
+    });
+
+    // Also check periodically for modal forms (since Filament modals are dynamic)
+    setInterval(function() {
+        const tollFileInputs = document.querySelectorAll('input[type="file"]:not([data-ocr-attached])');
+        tollFileInputs.forEach(function(input) {
+            if (input.name && (input.name.includes('bukti_path_toll') || input.name === 'bukti_path_toll')) {
+                input.setAttribute('data-ocr-attached', 'true');
+                console.log('Attached OCR handler to toll file input:', input.name);
+                input.addEventListener('change', function(e) {
+                    handleTollFileUpload(e.target);
+                });
+            }
+        });
+    }, 1000);
+
+    console.log('OCR script initialization complete');
+});
+</script>
 @endpush

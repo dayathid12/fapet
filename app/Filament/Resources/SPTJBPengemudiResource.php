@@ -18,6 +18,7 @@ use Filament\Tables\Table;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
+use Carbon\CarbonPeriod;
 
 class SPTJBPengemudiResource extends Resource
 {
@@ -106,6 +107,21 @@ class SPTJBPengemudiResource extends Resource
                             ]);
 
                             foreach ($records as $record) {
+                                // Calculate tanggal_penugasan and jumlah_hari from perjalanan dates
+                                $waktuKeberangkatan = $record->perjalanan->waktu_keberangkatan;
+                                $waktuKepulangan = $record->perjalanan->waktu_kepulangan;
+                                $tanggalPenugasan = null;
+                                $jumlahHari = null;
+                                if ($waktuKeberangkatan && $waktuKepulangan) {
+                                    $period = CarbonPeriod::create($waktuKeberangkatan, $waktuKepulangan);
+                                    $dates = [];
+                                    foreach ($period as $date) {
+                                        $dates[] = $date->format('j');
+                                    }
+                                    $tanggalPenugasan = implode(',', $dates);
+                                    $jumlahHari = count($dates);
+                                }
+
                                 // For pengemudi
                                 if ($record->pengemudi) {
                                     SPTJBUangPengemudiDetail::create([
@@ -113,9 +129,9 @@ class SPTJBPengemudiResource extends Resource
                                         'no' => null,
                                         'nama' => $record->pengemudi->nama_staf,
                                         'jabatan' => 'Pengemudi',
-                                        'tanggal_penugasan' => null,
-                                        'jumlah_hari' => null,
-                                        'besaran_uang_per_hari' => null,
+                                        'tanggal_penugasan' => $tanggalPenugasan,
+                                        'jumlah_hari' => $jumlahHari,
+                                        'besaran_uang_per_hari' => 150000,
                                         'jumlah_rp' => null,
                                         'jumlah_uang_diterima' => null,
                                         'nomor_rekening' => null,
@@ -132,9 +148,9 @@ class SPTJBPengemudiResource extends Resource
                                         'no' => null,
                                         'nama' => $record->asisten->nama_staf,
                                         'jabatan' => 'Asisten',
-                                        'tanggal_penugasan' => null,
-                                        'jumlah_hari' => null,
-                                        'besaran_uang_per_hari' => null,
+                                        'tanggal_penugasan' => $tanggalPenugasan,
+                                        'jumlah_hari' => $jumlahHari,
+                                        'besaran_uang_per_hari' => 150000,
                                         'jumlah_rp' => null,
                                         'jumlah_uang_diterima' => null,
                                         'nomor_rekening' => null,
@@ -162,7 +178,6 @@ class SPTJBPengemudiResource extends Resource
                             return redirect()->to(\App\Filament\Resources\SPTJBUangPengemudiResource::getUrl('edit', ['record' => $sptjb->id]));
                         })
                         ->deselectRecordsAfterCompletion(),
-                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

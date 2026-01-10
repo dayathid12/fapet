@@ -2,18 +2,23 @@
 
 namespace App\Filament\Resources\SPTJBUangPengemudiResource\RelationManagers;
 
+use App\Models\Staf;
 use App\Models\SPTJBUangPengemudiDetail;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Blade;
 
 class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
 {
     protected static string $relationship = 'details';
+
+
 
     public function form(Form $form): Form
     {
@@ -28,40 +33,92 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                     ->disabled()
                     ->dehydrated(false)
                     ->default(fn () => static::getNextNo($this->ownerRecord->id)),
-                Forms\Components\TextInput::make('nama')
+                Forms\Components\Select::make('nama')
                     ->label('Nama')
-                    ->required()
-                    ->maxLength(255),
+                    ->options(Staf::all()->pluck('nama_staf', 'nama_staf'))
+                    ->searchable()
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $staf = Staf::where('nama_staf', $state)->first();
+                        if ($staf) {
+                            $set('nomor_rekening', $staf->rekening);
+                            $set('golongan', $staf->gol_pangkat);
+                        }
+                    })
+                    ->required(),
                 Forms\Components\TextInput::make('jabatan')
                     ->label('Jabatan')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\DatePicker::make('tanggal_penugasan')
+                Forms\Components\TextInput::make('tanggal_penugasan')
                     ->label('Tanggal Penugasan'),
                 Forms\Components\TextInput::make('jumlah_hari')
                     ->label('Jumlah Hari')
-                    ->numeric(),
+                    ->numeric()
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        $besaran = $get('besaran_uang_per_hari');
+                        if ($state && $besaran) {
+                            $set('jumlah_rp', $state * $besaran);
+                            $set('jumlah_uang_diterima', $state * $besaran);
+                        }
+                    }),
                 Forms\Components\TextInput::make('besaran_uang_per_hari')
                     ->label('Besaran uang / Hari (Rp)')
                     ->numeric()
-                    ->prefix('Rp'),
+                    ->prefix('Rp')
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        $jumlahHari = $get('jumlah_hari');
+                        if ($state && $jumlahHari) {
+                            $set('jumlah_rp', $state * $jumlahHari);
+                            $set('jumlah_uang_diterima', $state * $jumlahHari);
+                        }
+                    }),
                 Forms\Components\TextInput::make('jumlah_rp')
                     ->label('Jumlah RP.')
                     ->numeric()
-                    ->prefix('Rp'),
+                    ->prefix('Rp')
+                    ->disabled(),
                 Forms\Components\TextInput::make('jumlah_uang_diterima')
                     ->label('Jumlah Uang Diterima')
                     ->numeric()
-                    ->prefix('Rp'),
+                    ->prefix('Rp')
+                    ->disabled(),
                 Forms\Components\TextInput::make('nomor_rekening')
                     ->label('Nomor Rekening')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->disabled(),
                 Forms\Components\TextInput::make('golongan')
                     ->label('Golongan')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->disabled(),
                 Forms\Components\TextInput::make('nomor_perjalanan')
                     ->label('Nomor Perjalanan')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        if ($state) {
+                            $perjalanan = \App\Models\Perjalanan::where('nomor_perjalanan', $state)->first();
+                            if ($perjalanan) {
+                                $besaran = 150000;
+                                $set('besaran_uang_per_hari', $besaran);
+    
+                                if ($perjalanan->waktu_keberangkatan && $perjalanan->waktu_kepulangan) {
+                                    $period = \Carbon\CarbonPeriod::create($perjalanan->waktu_keberangkatan, $perjalanan->waktu_kepulangan);
+                                    $dates = [];
+                                    foreach ($period as $date) {
+                                        $dates[] = $date->format('j');
+                                    }
+                                    $jumlahHari = count($dates);
+                                    $set('tanggal_penugasan', implode(',', $dates));
+                                    $set('jumlah_hari', $jumlahHari);
+                                    $set('jumlah_rp', $besaran * $jumlahHari);
+                                    $set('jumlah_uang_diterima', $besaran * $jumlahHari);
+                                }
+                            }
+                        }
+                    }),
             ]);
     }
 
@@ -81,8 +138,7 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('jabatan')
                     ->label('Jabatan'),
                 Tables\Columns\TextColumn::make('tanggal_penugasan')
-                    ->label('Tanggal Penugasan')
-                    ->date(),
+                    ->label('Tanggal Penugasan'),
                 Tables\Columns\TextColumn::make('jumlah_hari')
                     ->label('Jumlah Hari'),
                 Tables\Columns\TextColumn::make('besaran_uang_per_hari')
@@ -90,20 +146,43 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                     ->money('IDR'),
                 Tables\Columns\TextColumn::make('jumlah_rp')
                     ->label('Jumlah RP.')
-                    ->money('IDR'),
+                    ->money('IDR')
+                    ->state(function ($record) {
+                        return $record->besaran_uang_per_hari * $record->jumlah_hari;
+                    }),
                 Tables\Columns\TextColumn::make('jumlah_uang_diterima')
                     ->label('Jumlah Uang Diterima')
-                    ->money('IDR'),
+                    ->money('IDR')
+                    ->state(function ($record) {
+                        return $record->besaran_uang_per_hari * $record->jumlah_hari;
+                    }),
                 Tables\Columns\TextColumn::make('nomor_rekening')
-                    ->label('Nomor Rekening'),
+                    ->label('Nomor Rekening')
+                    ->state(function ($record) {
+                        $staf = Staf::where('nama_staf', $record->nama)->first();
+                        return $staf ? $staf->rekening : '';
+                    }),
                 Tables\Columns\TextColumn::make('golongan')
-                    ->label('Golongan'),
+                    ->label('Golongan')
+                    ->state(function ($record) {
+                        $staf = Staf::where('nama_staf', $record->nama)->first();
+                        return $staf ? $staf->gol_pangkat : '';
+                    }),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('viewPdf')
+                    ->label('File SPTJB')
+                    ->modalHeading(fn ($record) => 'SPTJB Detail ' . $record->nama)
+                    ->modalContent(fn ($record) => Blade::render('<iframe src="{{ route(\'sptjb.pdf\', $getRecord()->id) }}" width="100%" height="600px"></iframe>', ['getRecord' => $record]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->modalWidth('7xl')
+                    ->color('info')
+                    ->icon('heroicon-o-document-text'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

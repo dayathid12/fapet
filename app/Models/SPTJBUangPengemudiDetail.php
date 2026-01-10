@@ -26,7 +26,7 @@ class SPTJBUangPengemudiDetail extends Model
     ];
 
     protected $casts = [
-        'tanggal_penugasan' => 'date',
+        'tanggal_penugasan' => 'string',
         'besaran_uang_per_hari' => 'decimal:2',
         'jumlah_rp' => 'decimal:2',
         'jumlah_uang_diterima' => 'decimal:2',

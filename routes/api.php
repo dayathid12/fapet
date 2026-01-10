@@ -22,3 +22,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/wilayah/search', [WilayahController::class, 'search'])->name('api.wilayah.search');
 Route::get('/unit-kerja/search', [UnitKerjaController::class, 'search'])->name('api.unit-kerja.search');
+
+Route::post('/ocr-toll', [App\Http\Controllers\TollOcrController::class, 'extract'])->name('api.ocr-toll');

@@ -51,4 +51,20 @@ class PdfController extends Controller
             ->header('Content-Type', 'application/msword')
             ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
     }
+
+    public function generateSptjbPdf(\App\Models\SPTJBUangPengemudiDetail $detail)
+    {
+        $sptjb = $detail->sptjb;
+
+        // Set locale to Indonesian
+        \Carbon\Carbon::setLocale('id');
+        // Get today's date and format it in Indonesian
+        $tanggal = \Carbon\Carbon::now()->translatedFormat('d F Y');
+
+        $pdf = Pdf::loadView('pdf.sptjb', compact('sptjb', 'detail', 'tanggal'))->setPaper('a4', 'portrait');
+
+        $fileName = 'sptjb-' . preg_replace('/[^a-zA-Z0-9_-]/', '', $sptjb->no_sptjb) . '-' . $detail->id . '.pdf';
+
+        return $pdf->stream($fileName);
+    }
 }

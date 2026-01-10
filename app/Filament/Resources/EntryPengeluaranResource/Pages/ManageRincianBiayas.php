@@ -25,6 +25,10 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Component as Livewire;
 
 class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasForms, \Filament\Infolists\Contracts\HasInfolists
 {
@@ -137,6 +141,14 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                 ->label('Tambah Rincian Biaya')
                 ->icon('heroicon-o-plus')
                 ->action(function (array $data): void {
+                    // Unify the 'biaya' and 'bukti_path' fields
+                    $data['biaya'] = $data['biaya_toll'] ?? $data['biaya_bbm'] ?? $data['biaya_parkir'] ?? null;
+                    $data['bukti_path'] = $data['bukti_path_toll'] ?? $data['bukti_path_bbm'] ?? $data['bukti_path_parkir'] ?? null;
+
+                    // Remove the temporary, category-specific fields
+                    unset($data['biaya_toll'], $data['biaya_bbm'], $data['biaya_parkir']);
+                    unset($data['bukti_path_toll'], $data['bukti_path_bbm'], $data['bukti_path_parkir']);
+
                     $this->rincianPengeluaran->rincianBiayas()->create($data);
                 })
                 ->form(fn(Form $form) => $this->getBiayaForm($form)),
@@ -156,7 +168,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                     'parkir' => 'Parkir',
                 ])
                 ->required()
-                ->reactive()
+                ->live()
                 ->afterStateUpdated(function ($state, callable $set) {
                     // Clear fields when tipe changes
                     if ($state !== 'bbm') {
@@ -168,47 +180,113 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
             \Filament\Forms\Components\Section::make('Detail BBM')
                 ->visible(fn ($get) => $get('tipe') === 'bbm')
                 ->schema([
-                    TextInput::make('biaya')->label('Jumlah BBM')->numeric()->prefix('Rp')->required(),
+                    TextInput::make('biaya_bbm')->label('Jumlah BBM')->numeric()->prefix('Rp')->required(),
                     Select::make('jenis_bbm')->label('Jenis BBM')->options(['Dexlite' => 'Dexlite', 'Pertamax' => 'Pertamax', 'Lainnya' => 'Lainnya'])->required(),
                     TextInput::make('volume')->label('Volume (Liter)')->numeric()->required(),
                     TextInput::make('deskripsi')->label('Kode ATM/Keterangan')->required(),
-                    FileUpload::make('bukti_path')
+                    FileUpload::make('bukti_path_bbm')
                         ->label('Upload Struk BBM')
-                        ->directory('struk-bbm')
-                        ->extraAttributes([
-                            'x-on:change' => 'processImage($event, $wire)',
-                            'x-data' => 'ocrHandler', // Initialize Alpine component here
-                        ]),
+                        ->directory('struk-bbm'),
                 ]),
 
             \Filament\Forms\Components\Section::make('Detail Toll')
                 ->visible(fn ($get) => $get('tipe') === 'toll')
                 ->schema([
-                    TextInput::make('biaya')->label('Jumlah Toll')->numeric()->prefix('Rp')->required(),
+                    TextInput::make('biaya_toll')->label('Jumlah Toll')->numeric()->prefix('Rp')->required(),
                     TextInput::make('deskripsi')->label('Kode Kartu Toll/Gerbang')->required(),
-                    FileUpload::make('bukti_path')
+                    FileUpload::make('bukti_path_toll')
                         ->label('Upload Struk Toll')
                         ->directory('struk-toll')
-                        ->extraAttributes([
-                            'x-on:change' => 'processImage($event, $wire)',
-                            'x-data' => 'ocrHandler', // Initialize Alpine component here
-                        ]),
+                        ->image()
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            if ($state && is_array($state) && count($state) > 0) {
+                                $filePath = $state[0]; // Get the first uploaded file path
+                                $extractedAmount = self::extractAmountFromReceipt($filePath);
+                                if ($extractedAmount && is_numeric($extractedAmount)) {
+                                    $set('biaya_toll', $extractedAmount);
+                                }
+                            }
+                        }),
                 ]),
 
             \Filament\Forms\Components\Section::make('Detail Parkir')
                 ->visible(fn ($get) => $get('tipe') === 'parkir')
                 ->schema([
-                    TextInput::make('biaya')->label('Jumlah Parkir')->numeric()->prefix('Rp')->required(),
+                    TextInput::make('biaya_parkir')->label('Jumlah Parkir')->numeric()->prefix('Rp')->required(),
                     TextInput::make('deskripsi')->label('Lokasi Parkir')->required(),
-                    FileUpload::make('bukti_path')
+                    FileUpload::make('bukti_path_parkir')
                         ->label('Upload Bukti Parkir')
-                        ->directory('bukti-parkir')
-                        ->extraAttributes([
-                            'x-on:change' => 'processImage($event, $wire)',
-                            'x-data' => 'ocrHandler', // Initialize Alpine component here
-                        ]),
+                        ->directory('bukti-parkir'),
                 ]),
         ]);
+    }
+
+    public static function extractAmountFromReceipt(string $filePath): ?string
+    {
+        $apiKey = config('services.gemini.api_key');
+        if (!$apiKey) {
+            Log::error('GEMINI_API_KEY not set in .env');
+            return null;
+        }
+
+        $fullPath = Storage::disk('public')->path($filePath);
+        if (!file_exists($fullPath)) {
+            Log::error('File not found: ' . $fullPath);
+            return null;
+        }
+
+        $fileContents = base64_encode(file_get_contents($fullPath));
+        $mimeType = mime_content_type($fullPath);
+
+        $prompt = <<<PROMPT
+Lihat gambar struk tol ini dengan teliti.
+Ekstrak nominal harga tarif tol yang dibayarkan.
+Cari teks "Rp" yang sejajar dengan kata "GOL", "TARIF", atau "TOTAL".
+Abaikan Sisa Saldo, Saldo Kartu, atau nomor seri kartu (SN).
+Kembalikan HANYA angka saja tanpa karakter lain, seperti "22000" untuk Rp 22.000.
+Jika tidak yakin, kembalikan "uncertain".
+PROMPT;
+
+        try {
+            $response = Http::post('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $apiKey, [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt],
+                                [
+                                    'inline_data' => [
+                                        'mime_type' => $mimeType,
+                                        'data' => $fileContents
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.1,
+                        'topK' => 1,
+                        'topP' => 1,
+                        'maxOutputTokens' => 50,
+                    ]
+                ]);
+
+            if ($response->successful()) {
+                $candidates = $response->json('candidates');
+                if (!empty($candidates[0]['content']['parts'][0]['text'])) {
+                    $text = $candidates[0]['content']['parts'][0]['text'];
+                    $numericText = preg_replace('/[^0-9]/', '', $text);
+                    return $numericText ?: null;
+                }
+            }
+
+            Log::error('Gemini API call was not successful.', ['response' => $response->json()]);
+            return null;
+
+        } catch (\Exception $e) {
+            Log::error('Gemini API call failed: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public function rp($value): string
