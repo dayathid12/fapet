@@ -181,7 +181,26 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                 ->visible(fn ($get) => $get('tipe') === 'bbm')
                 ->schema([
                     TextInput::make('biaya_bbm')->label('Jumlah BBM')->numeric()->prefix('Rp')->required(),
-                    Select::make('jenis_bbm')->label('Jenis BBM')->options(['Dexlite' => 'Dexlite', 'Pertamax' => 'Pertamax', 'Lainnya' => 'Lainnya'])->required(),
+                    Select::make('jenis_bbm')->label('Jenis BBM')->options([
+                        'Pertalite' => 'Pertalite',
+                        'Pertamax' => 'Pertamax',
+                        'Pertamax Green 95' => 'Pertamax Green 95',
+                        'Pertamax Turbo' => 'Pertamax Turbo',
+                        'Shell Super' => 'Shell Super',
+                        'Shell V-Power' => 'Shell V-Power',
+                        'Shell V-Power Nitro+' => 'Shell V-Power Nitro+',
+                        'BP 92' => 'BP 92',
+                        'BP Ultimate' => 'BP Ultimate',
+                        'Revvo 90' => 'Revvo 90',
+                        'Revvo 92' => 'Revvo 92',
+                        'Revvo 95' => 'Revvo 95',
+                        'BioSolar (B35)' => 'BioSolar (B35)',
+                        'Dexlite' => 'Dexlite',
+                        'Pertamina Dex' => 'Pertamina Dex',
+                        'Shell V-Power Diesel' => 'Shell V-Power Diesel',
+                        'BP Ultimate Diesel' => 'BP Ultimate Diesel',
+                        'Vivo Diesel Plus' => 'Vivo Diesel Plus',
+                    ])->required(),
                     TextInput::make('volume')->label('Volume (Liter)')->numeric()->required(),
                     TextInput::make('deskripsi')->label('Kode ATM/Keterangan')->required(),
                     FileUpload::make('bukti_path_bbm')
@@ -193,7 +212,6 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                 ->visible(fn ($get) => $get('tipe') === 'toll')
                 ->schema([
                     TextInput::make('biaya_toll')->label('Jumlah Toll')->numeric()->prefix('Rp')->required(),
-                    TextInput::make('deskripsi')->label('Kode Kartu Toll/Gerbang')->required(),
                     FileUpload::make('bukti_path_toll')
                         ->label('Upload Struk Toll')
                         ->directory('struk-toll')
@@ -214,7 +232,6 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                 ->visible(fn ($get) => $get('tipe') === 'parkir')
                 ->schema([
                     TextInput::make('biaya_parkir')->label('Jumlah Parkir')->numeric()->prefix('Rp')->required(),
-                    TextInput::make('deskripsi')->label('Lokasi Parkir')->required(),
                     FileUpload::make('bukti_path_parkir')
                         ->label('Upload Bukti Parkir')
                         ->directory('bukti-parkir'),
