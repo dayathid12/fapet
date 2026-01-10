@@ -1,13 +1,6 @@
-# TODO: Create Child Resource for SPTJBUangPengemudiResource
+# TODO: Add Total Rincian Biayas Column to EntryPengeluaranResource
 
-## Steps to Complete:
-1. Create migration for `sptjb_uang_pengemudi_details` table with required fields. ✅
-2. Create `SPTJBUangPengemudiDetail` model with relationships. ✅
-3. Create `SPTJBUangPengemudiDetailResource` Filament resource. ✅
-4. Update `SPTJBPengemudi` model to include `hasMany` relationship. ✅
-5. Update `SPTJBUangPengemudiResource` to include the child resource in relations. ✅
-6. Run the migration to create the table. ✅
-7. Create the missing RelationManager class. ✅
-8. Create the missing SPTJBUangPengemudiDetail model. ✅
-9. Test the new child resource functionality. ✅
-10. Run migration to create database table. ✅
+- [x] Modify getEloquentQuery method to include withSum for total_rincian_biayas (sum of all biaya from rincianBiayas)
+- [x] Add new TextColumn in table method to display the total with label 'Total Rincian Biayas', money format IDR, sortable
+
+**COMPLETED**: The Total Rincian Biayas column has been successfully added to the EntryPengeluaranResource table. The column displays the sum of all biaya from rincianBiayas relationship, formatted as IDR currency, and is sortable.

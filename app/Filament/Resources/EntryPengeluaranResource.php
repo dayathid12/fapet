@@ -82,6 +82,10 @@ class EntryPengeluaranResource extends Resource
                         return ($record->total_parkir_biaya ?? 0) + ($record->total_parkir_pengeluaran ?? 0);
                     })
                     ->sortable(),
+                TextColumn::make('total_rincian_biayas')
+                    ->label('Total Rincian Biayas')
+                    ->money('IDR')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -133,7 +137,8 @@ class EntryPengeluaranResource extends Resource
             ->withSum(['rincianBiayas as total_parkir_biaya' => function ($query) {
                 $query->where('tipe', 'Parkir');
             }], 'biaya')
-            ->withSum('rincianPengeluarans as total_parkir_pengeluaran', 'biaya_parkir');
+            ->withSum('rincianPengeluarans as total_parkir_pengeluaran', 'biaya_parkir')
+            ->withSum('rincianBiayas as total_rincian_biayas', 'biaya');
     }
 
 }

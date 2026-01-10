@@ -179,3 +179,138 @@
 
     </div>
 </x-filament-panels::page>
+
+@push('scripts')
+    <script src='https://unpkg.com/tesseract.js@5.0.3/dist/tesseract.min.js'></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('ocrHandler', () => ({
+                init() {
+                    console.log('OCR Handler initialized.');
+                },
+                async processImage(event, livewireComponent) { // Added livewireComponent argument
+                    console.log('Processing image...');
+                    const file = event.target.files[0];
+                    if (!file) {
+                        return;
+                    }
+
+                    // TODO: Add OCR logic here
+                    console.log('File selected:', file.name);
+
+                    // Example: try to read the file
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const image = e.target.result;
+                        console.log('Image loaded, starting OCR...');
+                        try {
+                            const { data: { text } } = await Tesseract.recognize(
+                                image,
+                                'eng', // Language
+                                { logger: m => console.log(m) }
+                            );
+                            console.log('OCR Result:', text);
+
+                            const ocrText = text.toLowerCase();
+                            let biaya = 0;
+                            let deskripsi = '';
+                            let jenis_bbm = null;
+                            let volume = 0;
+                            let tipe = null; // New variable to determine the type (bbm, toll, parkir)
+
+                            // --- Robust Parsing Logic ---
+                            // Identify type first
+                            if (ocrText.includes('bbm') || ocrText.includes('bensin') || ocrText.includes('pertamax') || ocrText.includes('dekslite') || ocrText.includes('liter')) {
+                                tipe = 'bbm';
+                            } else if (ocrText.includes('toll') || ocrText.includes('tol') || ocrText.includes('gerbang')) {
+                                tipe = 'toll';
+                            } else if (ocrText.includes('parkir') || ocrText.includes('parking') || ocrText.includes('lokasi')) {
+                                tipe = 'parkir';
+                            }
+
+                            // Extract 'biaya' (amount) - looking for Rp or currency symbols followed by numbers
+                            const biayaMatch = ocrText.match(/(?:rp|idr|\$|€|£)\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/);
+                            if (biayaMatch && biayaMatch[1]) {
+                                biaya = parseFloat(biayaMatch[1].replace(/\./g, '').replace(/,/g, '.'));
+                            } else {
+                                // Fallback: look for numbers that look like amounts, perhaps near 'total' or 'jumlah'
+                                const totalMatch = ocrText.match(/(?:total|jumlah|harga)\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/);
+                                if (totalMatch && totalMatch[1]) {
+                                    biaya = parseFloat(totalMatch[1].replace(/\./g, '').replace(/,/g, '.'));
+                                }
+                            }
+
+                            // Extract 'jenis_bbm'
+                            if (tipe === 'bbm') {
+                                if (ocrText.includes('pertamax')) {
+                                    jenis_bbm = 'Pertamax';
+                                } else if (ocrText.includes('dexlite') || ocrText.includes('dekslite')) {
+                                    jenis_bbm = 'Dexlite';
+                                } else if (ocrText.includes('solar')) {
+                                    jenis_bbm = 'Lainnya'; // Assuming 'Solar'
+                                } else {
+                                    jenis_bbm = 'Lainnya'; // Default for other BBM types
+                                }
+                            }
+
+                            // Extract 'volume'
+                            if (tipe === 'bbm') {
+                                const volumeMatch = ocrText.match(/(\d+(?:[.,]\d+)?)\s*(liter|lt)/);
+                                if (volumeMatch && volumeMatch[1]) {
+                                    volume = parseFloat(volumeMatch[1].replace(/,/g, '.'));
+                                }
+                            }
+
+                            // Extract 'deskripsi'
+                            // This is highly dependent on the document. For now, a generic approach.
+                            // For BBM: try to find pump/station name or transaction ID
+                            // For Toll: try to find gate name or card ID
+                            // For Parkir: try to find location
+                            if (tipe === 'bbm') {
+                                 // Look for common keywords near numbers that could be transaction IDs or locations
+                                 const bbmDescMatch = ocrText.match(/(spbu|pom bensin|station|transaksi|lokasi)\s*([a-zA-Z0-9\s#\/\-]+)/);
+                                 deskripsi = bbmDescMatch ? bbmDescMatch[2].trim() : ocrText.substring(0, 100);
+                            } else if (tipe === 'toll') {
+                                 const tollDescMatch = ocrText.match(/(gerbang|gate|card|kartu)\s*([a-zA-Z0-9\s#\/\-]+)/);
+                                 deskripsi = tollDescMatch ? tollDescMatch[2].trim() : ocrText.substring(0, 100);
+                            } else if (tipe === 'parkir') {
+                                const parkirDescMatch = ocrText.match(/(lokasi|area|tempat)\s*parkir\s*([a-zA-Z0-9\s#\/\-]+)/);
+                                deskripsi = parkirDescMatch ? parkirDescMatch[2].trim() : ocrText.substring(0, 100);
+                            } else {
+                                deskripsi = ocrText.substring(0, 100); // Generic fallback
+                            }
+                            if (deskripsi.length > 255) { // Ensure description fits typical database column
+                                deskripsi = deskripsi.substring(0, 255);
+                            }
+
+
+                            // --- Populate fields using Livewire component ---
+                            if (livewireComponent) {
+                                livewireComponent.set('data.tipe', tipe);
+                                livewireComponent.set('data.biaya', biaya);
+                                livewireComponent.set('data.deskripsi', deskripsi);
+                                if (tipe === 'bbm') {
+                                    livewireComponent.set('data.jenis_bbm', jenis_bbm);
+                                    livewireComponent.set('data.volume', volume);
+                                }
+                            }
+
+                            console.log('Form fields updated:');
+                            console.log('Tipe:', tipe);
+                            console.log('Biaya:', biaya);
+                            console.log('Deskripsi:', deskripsi);
+                            if (tipe === 'bbm') {
+                                console.log('Jenis BBM:', jenis_bbm);
+                                console.log('Volume:', volume);
+                            }
+
+                        } catch (error) {
+                            console.error('OCR Error:', error);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }));
+        });
+    </script>
+@endpush

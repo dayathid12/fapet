@@ -172,7 +172,13 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                     Select::make('jenis_bbm')->label('Jenis BBM')->options(['Dexlite' => 'Dexlite', 'Pertamax' => 'Pertamax', 'Lainnya' => 'Lainnya'])->required(),
                     TextInput::make('volume')->label('Volume (Liter)')->numeric()->required(),
                     TextInput::make('deskripsi')->label('Kode ATM/Keterangan')->required(),
-                    FileUpload::make('bukti_path')->label('Upload Struk BBM')->directory('struk-bbm'),
+                    FileUpload::make('bukti_path')
+                        ->label('Upload Struk BBM')
+                        ->directory('struk-bbm')
+                        ->extraAttributes([
+                            'x-on:change' => 'processImage($event, $wire)',
+                            'x-data' => 'ocrHandler', // Initialize Alpine component here
+                        ]),
                 ]),
 
             \Filament\Forms\Components\Section::make('Detail Toll')
@@ -180,7 +186,13 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                 ->schema([
                     TextInput::make('biaya')->label('Jumlah Toll')->numeric()->prefix('Rp')->required(),
                     TextInput::make('deskripsi')->label('Kode Kartu Toll/Gerbang')->required(),
-                    FileUpload::make('bukti_path')->label('Upload Struk Toll')->directory('struk-toll'),
+                    FileUpload::make('bukti_path')
+                        ->label('Upload Struk Toll')
+                        ->directory('struk-toll')
+                        ->extraAttributes([
+                            'x-on:change' => 'processImage($event, $wire)',
+                            'x-data' => 'ocrHandler', // Initialize Alpine component here
+                        ]),
                 ]),
 
             \Filament\Forms\Components\Section::make('Detail Parkir')
@@ -188,7 +200,13 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                 ->schema([
                     TextInput::make('biaya')->label('Jumlah Parkir')->numeric()->prefix('Rp')->required(),
                     TextInput::make('deskripsi')->label('Lokasi Parkir')->required(),
-                    FileUpload::make('bukti_path')->label('Upload Bukti Parkir')->directory('bukti-parkir'),
+                    FileUpload::make('bukti_path')
+                        ->label('Upload Bukti Parkir')
+                        ->directory('bukti-parkir')
+                        ->extraAttributes([
+                            'x-on:change' => 'processImage($event, $wire)',
+                            'x-data' => 'ocrHandler', // Initialize Alpine component here
+                        ]),
                 ]),
         ]);
     }
