@@ -13,6 +13,7 @@ use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
 
 class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
 {
@@ -55,36 +56,32 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('jumlah_hari')
                     ->label('Jumlah Hari')
                     ->numeric()
+                    ->default(1) // Added default value
                     ->live()
                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                         $besaran = $get('besaran_uang_per_hari');
                         if ($state && $besaran) {
-                            $set('jumlah_rp', $state * $besaran);
                             $set('jumlah_uang_diterima', $state * $besaran);
                         }
                     }),
                 Forms\Components\TextInput::make('besaran_uang_per_hari')
                     ->label('Besaran uang / Hari (Rp)')
                     ->numeric()
+                    ->default(150000) // Added default value
                     ->prefix('Rp')
                     ->live()
                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                         $jumlahHari = $get('jumlah_hari');
                         if ($state && $jumlahHari) {
-                            $set('jumlah_rp', $state * $jumlahHari);
                             $set('jumlah_uang_diterima', $state * $jumlahHari);
                         }
                     }),
-                Forms\Components\TextInput::make('jumlah_rp')
-                    ->label('Jumlah RP.')
-                    ->numeric()
-                    ->prefix('Rp')
-                    ->disabled(),
                 Forms\Components\TextInput::make('jumlah_uang_diterima')
-                    ->label('Jumlah Uang Diterima')
-                    ->numeric()
-                    ->prefix('Rp')
-                    ->disabled(),
+    ->label('Jumlah Uang Diterima')
+    ->numeric()
+    ->prefix('Rp')
+    ->readOnly()
+    ->dehydrated(),
                 Forms\Components\TextInput::make('nomor_rekening')
                     ->label('Nomor Rekening')
                     ->maxLength(255)
@@ -103,7 +100,7 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                             if ($perjalanan) {
                                 $besaran = 150000;
                                 $set('besaran_uang_per_hari', $besaran);
-    
+
                                 if ($perjalanan->waktu_keberangkatan && $perjalanan->waktu_kepulangan) {
                                     $period = \Carbon\CarbonPeriod::create($perjalanan->waktu_keberangkatan, $perjalanan->waktu_kepulangan);
                                     $dates = [];
@@ -113,8 +110,7 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                                     $jumlahHari = count($dates);
                                     $set('tanggal_penugasan', implode(',', $dates));
                                     $set('jumlah_hari', $jumlahHari);
-                                    $set('jumlah_rp', $besaran * $jumlahHari);
-                                    $set('jumlah_uang_diterima', $besaran * $jumlahHari);
+                                    $set('jumlah_uang_diterima', 750000);
                                 }
                             }
                         }
@@ -144,12 +140,7 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('besaran_uang_per_hari')
                     ->label('Besaran uang / Hari (Rp)')
                     ->money('IDR'),
-                Tables\Columns\TextColumn::make('jumlah_rp')
-                    ->label('Jumlah RP.')
-                    ->money('IDR')
-                    ->state(function ($record) {
-                        return $record->besaran_uang_per_hari * $record->jumlah_hari;
-                    }),
+
                 Tables\Columns\TextColumn::make('jumlah_uang_diterima')
                     ->label('Jumlah Uang Diterima')
                     ->money('IDR')
@@ -172,12 +163,26 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
             ->filters([
                 //
             ])
+            ->headerActions([
+                Action::make('fileSptjb')
+                    ->label('File SPTJB')
+                    ->modalHeading('File SPTJB')
+                    ->modalContent(function () {
+                        $sptjb = $this->getOwnerRecord();
+                        return new HtmlString('<iframe src="' . route('sptjb.full.pdf', $sptjb->id) . '" width="100%" height="600px"></iframe>');
+                    })
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->modalWidth('7xl')
+                    ->color('info')
+                    ->icon('heroicon-o-document-text')
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Action::make('viewPdf')
                     ->label('File SPTJB')
                     ->modalHeading(fn ($record) => 'SPTJB Detail ' . $record->nama)
-                    ->modalContent(fn ($record) => Blade::render('<iframe src="{{ route(\'sptjb.pdf\', $getRecord()->id) }}" width="100%" height="600px"></iframe>', ['getRecord' => $record]))
+                    ->modalContent(fn ($record) => new HtmlString(Blade::render('<iframe src="{{ route(\'sptjb.pdf\', $getRecord()->id) }}" width="100%" height="600px"></iframe>', ['getRecord' => $record])))
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false)
                     ->modalWidth('7xl')

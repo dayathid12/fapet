@@ -67,4 +67,21 @@ class PdfController extends Controller
 
         return $pdf->stream($fileName);
     }
+
+    public function generateSptjbFullPdf(\App\Models\SPTJBPengemudi $sptjb)
+    {
+        // Load details
+        $sptjb->load('details');
+
+        // Set locale to Indonesian
+        \Carbon\Carbon::setLocale('id');
+        // Get today's date and format it in Indonesian
+        $tanggal = \Carbon\Carbon::now()->translatedFormat('d F Y');
+
+        $pdf = Pdf::loadView('pdf.sptjb_full', compact('sptjb', 'tanggal'))->setPaper('legal', 'portrait');
+
+        $fileName = 'sptjb-full-' . preg_replace('/[^a-zA-Z0-9_-]/', '', $sptjb->no_sptjb) . '.pdf';
+
+        return $pdf->stream($fileName);
+    }
 }

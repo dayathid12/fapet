@@ -12,10 +12,20 @@ class SPTJBPengemudi extends Model
         'no_sptjb',
         'uraian',
         'penerima',
+        'total_jumlah_uang_diterima',
+    ];
+
+    protected $appends = [
+        'total_jumlah_uang_diterima',
     ];
 
     public function details()
     {
         return $this->hasMany(SPTJBUangPengemudiDetail::class, 'sptjb_pengemudi_id');
+    }
+
+    public function getTotalJumlahUangDiterimaAttribute()
+    {
+        return $this->details()->sum('jumlah_uang_diterima');
     }
 }

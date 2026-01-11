@@ -42,6 +42,12 @@ class SPTJBUangPengemudiResource extends Resource
                     ->default('Amin dkk 14 org')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('total_jumlah_uang_diterima')
+                    ->label('Total Uang Diterima')
+                    ->prefix('Rp')
+                    ->readOnly()
+                    ->numeric()
+                    ->formatStateUsing(fn ($state, $record) => $record ? $record->load('details')->total_jumlah_uang_diterima : 0),
             ]);
     }
 

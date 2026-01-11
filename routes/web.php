@@ -50,4 +50,6 @@ Route::get('/surat-tugas/{no_surat_tugas}/pdf', [PdfController::class, 'generate
 Route::get('/surat-tugas/{no_surat_tugas}/word', [PdfController::class, 'generateSuratTugasWord'])->name('surat-tugas.word');
 
 // Route untuk PDF SPTJB
+
 Route::get('/sptjb/detail/{detail}/pdf', [PdfController::class, 'generateSptjbPdf'])->name('sptjb.pdf');
+Route::get('/sptjb/{sptjb}/pdf', [PdfController::class, 'generateSptjbFullPdf'])->name('sptjb.full.pdf');

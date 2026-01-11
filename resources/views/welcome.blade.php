@@ -624,7 +624,7 @@
 
     <!-- SCRIPT -->
     <script>
-        const targetDate = new Date('2026-01-08T16:50:00').getTime();
+        const targetDate = new Date('2026-11-08T16:50:00').getTime();
         function updateCountdown() {
             const now = new Date().getTime();
             const gap = targetDate - now;
