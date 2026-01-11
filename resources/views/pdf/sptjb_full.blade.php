@@ -185,15 +185,20 @@ if (!function_exists('terbilang')) {
         </tbody>
     </table>
 
-    <table class="signature-table">
+<table style="width: 100%; border: none; margin-top: 50px; border-collapse: collapse;">
         <tr>
-            <td></td>
-            <td style="text-align: left; padding-left: 50px;">
-                <p>Jatinangor, {{ $tanggal }}</p>
-                <p>Pembuat Komitmen,</p>
-                <br><br><br>
-                <p class="font-bold underline">Nurhayati , SE.,M.Ak.</p>
-                <p>NIP 197101111999032002</p>
+            <td style="width: 60%; border: none;"></td>
+
+            <td style="width: 40%; border: none; text-align: left; vertical-align: top;">
+                <div style="line-height: 1.2;">
+                    <p style="margin: 0;">Jatinangor, 11 Januari 2026</p>
+                    <p style="margin: 0;">Pembuat Komitmen,</p>
+
+                    <div style="height: 80px;"></div>
+
+                    <p style="margin: 0; font-weight: bold; text-decoration: underline;">Nurhayati, SE., M.Ak.</p>
+                    <p style="margin: 0;">NIP 197101111999032002</p>
+                </div>
             </td>
         </tr>
     </table>
