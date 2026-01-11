@@ -191,14 +191,12 @@ class SuratTugasResource extends Resource
                                 return 'Pengajuan';
                             })
                             ->extraAttributes(fn (string $state): array => match ($state) {
-                                'Selesai' => [
-                                    'class' => 'bg-green-600 text-white',
-                                ],
+                                'Selesai' => [],
                                 'Proses' => [
-                                    'class' => 'bg-yellow-400 text-black',
+
                                 ],
                                 'Pengajuan' => [
-                                    'class' => 'bg-gray-500 text-white',
+                                  
                                 ],
                                 default => [],
 
