@@ -54,9 +54,57 @@
             margin: 0;
             padding: 0;
         }
+        .receipt-details-table td {
+            padding: 5px 0; /* Adjust as needed */
+            word-break: break-word; /* Ensure long words break and wrap */
+        }
     </style>
 </head>
 <body>
+<?php
+function terbilang($angka) {
+    $angka = abs((int)$angka);
+    $bilangan = array(
+        '',
+        'satu',
+        'dua',
+        'tiga',
+        'empat',
+        'lima',
+        'enam',
+        'tujuh',
+        'delapan',
+        'sembilan',
+        'sepuluh',
+        'sebelas'
+    );
+    $temp = '';
+    if ($angka < 12) {
+        $temp = ' ' . $bilangan[$angka];
+    } elseif ($angka < 20) {
+        $temp = terbilang($angka - 10) . ' belas';
+    } elseif ($angka < 100) {
+        $temp = terbilang($angka / 10) . ' puluh' . terbilang($angka % 10);
+    } elseif ($angka < 200) {
+        $temp = ' seratus' . terbilang($angka - 100);
+    } elseif ($angka < 1000) {
+        $temp = terbilang($angka / 100) . ' ratus' . terbilang($angka % 100);
+    } elseif ($angka < 2000) {
+        $temp = ' seribu' . terbilang($angka - 1000);
+    } elseif ($angka < 1000000) {
+        $temp = terbilang($angka / 1000) . ' ribu' . terbilang($angka % 1000);
+    } elseif ($angka < 2000000) {
+        $temp = ' satu juta' . terbilang($angka - 1000000);
+    } elseif ($angka < 1000000000) {
+        $temp = terbilang($angka / 1000000) . ' juta' . terbilang($angka % 1000000);
+    } elseif ($angka < 1000000000000) {
+        $temp = terbilang($angka / 1000000000) . ' milyar' . terbilang(fmod($angka, 1000000000));
+    } elseif ($angka < 1000000000000000) {
+        $temp = terbilang($angka / 1000000000000) . ' triliun' . terbilang(fmod($angka, 1000000000000));
+    }
+    return $temp;
+}
+?>
     <div class="text-center">
         <h3 class="font-bold underline">SURAT PERNYATAAN TANGGUNG JAWAB BELANJA</h3>
         <span>Nomor: {{ $sptjb->no_sptjb }}</span>
@@ -141,5 +189,56 @@
         <p>NIP 197101111999032002</p>
     </div>
 
+    <div style="page-break-before: always;">
+        <div style="float: right; width: 200px; text-align: left; margin-right: -10px;">
+            <p style="margin: 0; padding: 0;">T.A.2025</p>
+            <p style="margin: 0; padding: 0;">Nomor Bukti :</p>
+            <p style="margin: 0; padding: 0;">M A K : 528317</p>
+        </div>
+        <div style="clear: both;"></div>
+        <h3 class="font-bold underline text-center" style="font-size: 18pt;">KUITANSI PEMBAYARAN</h3>
+
+        <table class="no-border-table mt-4 receipt-details-table">
+            <tr>
+                <td style="width: 150px;">Sudah terima dari</td>
+                <td>: Kuasa Pengguna Anggaran Universitas Padjadjaran</td>
+            </tr>
+            <tr>
+                <td>Jumlah Uang</td>
+                <td>: Rp{{ number_format($sptjb->total_jumlah_uang_diterima, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td>Terbilang</td>
+                <td>: {{ ucwords(trim(terbilang($sptjb->total_jumlah_uang_diterima))) }}</td>
+            </tr>
+            <tr>
+                <td>Untuk Pembayaran</td>
+                <td>: {{ $sptjb->uraian }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>&nbsp;&nbsp;Beban Uang Saku Pengemudi (528317)</td>
+            </tr>
+        </table>
+
+        <div class="mt-8" style="overflow: hidden;">
+            <p style="float: left;">Mengetahui/Menyetujui:</p>
+            <p style="float: right;">Jatinangor, 22 September 2025</p>
+        </div>
+        <div style="overflow: hidden; margin-top: 2rem;">
+            <div style="width: 49%; float: left; text-align: center;">
+                <p>Pembuat Komitmen,</p>
+                <br><br><br>
+                <p class="font-bold underline">Nurhayati , SE.,M.Ak.</p>
+                <p>NIP 197101111999032002</p>
+            </div>
+            <div style="width: 49%; float: right; text-align: center;">
+                <p>Koordinator Pool Kendaraan,</p>
+                <br><br><br>
+                <p class="font-bold underline">Gugun Gunawan, S.S.</p>
+                <p>NIP.198211262016023001</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
