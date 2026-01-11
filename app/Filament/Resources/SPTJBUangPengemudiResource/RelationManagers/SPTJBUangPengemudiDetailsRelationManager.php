@@ -175,19 +175,22 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                     ->modalCancelAction(false)
                     ->modalWidth('7xl')
                     ->color('info')
-                    ->icon('heroicon-o-document-text')
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Action::make('viewPdf')
-                    ->label('File SPTJB')
-                    ->modalHeading(fn ($record) => 'SPTJB Detail ' . $record->nama)
-                    ->modalContent(fn ($record) => new HtmlString(Blade::render('<iframe src="{{ route(\'sptjb.pdf\', $getRecord()->id) }}" width="100%" height="600px"></iframe>', ['getRecord' => $record])))
+                    ->icon('heroicon-o-document-text'),
+                Action::make('tableSptjb')
+                    ->label('Table SPTJB')
+                    ->modalHeading('Table SPTJB')
+                    ->modalContent(function () {
+                        $sptjb = $this->getOwnerRecord();
+                        return new HtmlString('<iframe src="' . route('sptjb.table.pdf', $sptjb->id) . '" width="100%" height="600px"></iframe>');
+                    })
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false)
                     ->modalWidth('7xl')
-                    ->color('info')
-                    ->icon('heroicon-o-document-text'),
+                    ->color('success')
+                    ->icon('heroicon-o-table-cells')
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

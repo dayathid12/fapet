@@ -14,7 +14,7 @@ class EditSPTJBUangPengemudi extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            // Actions\DeleteAction::make(), // Removed as per request
         ];
     }
 

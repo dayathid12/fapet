@@ -191,7 +191,7 @@ if (!function_exists('terbilang')) {
 
             <td style="width: 40%; border: none; text-align: left; vertical-align: top;">
                 <div style="line-height: 1.2;">
-                    <p style="margin: 0;">Jatinangor, 11 Januari 2026</p>
+                    <p style="margin: 0;">Jatinangor, {{ \Carbon\Carbon::now()->locale('id_ID')->isoFormat('D MMMM YYYY') }}</p>
                     <p style="margin: 0;">Pembuat Komitmen,</p>
 
                     <div style="height: 80px;"></div>
@@ -253,7 +253,7 @@ if (!function_exists('terbilang')) {
 
                 <td style="text-align: center; vertical-align: top; width: 50%;">
                     <div style="display: inline-block; text-align: center;">
-                        <p style="margin: 0;">Jatinangor, 22 September 2025</p>
+                        <p style="margin: 0;">Jatinangor, {{ \Carbon\Carbon::now()->locale('id_ID')->isoFormat('D MMMM YYYY') }}</p>
                         <p style="margin: 0;">Koordinator Pool Kendaraan,</p>
 
                         <div style="height: 80px;"></div>

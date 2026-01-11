@@ -53,11 +53,6 @@ class SPTJBUangPengemudiDetailResource extends Resource
                     ->numeric()
                     ->prefix('Rp')
                     ->required(),
-                Forms\Components\TextInput::make('jumlah_rp')
-                    ->label('Jumlah RP.')
-                    ->numeric()
-                    ->prefix('Rp')
-                    ->required(),
                 Forms\Components\TextInput::make('jumlah_uang_diterima')
                     ->label('Jumlah Uang Diterima')
                     ->numeric()
@@ -93,9 +88,6 @@ class SPTJBUangPengemudiDetailResource extends Resource
                     ->label('Jumlah Hari'),
                 Tables\Columns\TextColumn::make('besaran_uang_per_hari')
                     ->label('Besaran uang / Hari (Rp)')
-                    ->money('IDR'),
-                Tables\Columns\TextColumn::make('jumlah_rp')
-                    ->label('Jumlah RP.')
                     ->money('IDR'),
                 Tables\Columns\TextColumn::make('jumlah_uang_diterima')
                     ->label('Jumlah Uang Diterima')
