@@ -26,6 +26,6 @@ class SPTJBPengemudi extends Model
 
     public function getTotalJumlahUangDiterimaAttribute()
     {
-        return $this->details()->sum('jumlah_uang_diterima');
+        return $this->details()->sum(\DB::raw('besaran_uang_per_hari * jumlah_hari'));
     }
 }

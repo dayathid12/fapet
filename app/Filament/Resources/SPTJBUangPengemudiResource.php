@@ -47,7 +47,17 @@ class SPTJBUangPengemudiResource extends Resource
                     ->prefix('Rp')
                     ->readOnly()
                     ->numeric()
-                    ->formatStateUsing(fn ($state, $record) => $record ? $record->load('details')->total_jumlah_uang_diterima : 0),
+                    ->formatStateUsing(function ($state, $record) {
+                        if (!$record) {
+                            return '0';
+                        }
+                        $total = $record->load('details')->total_jumlah_uang_diterima;
+                        if ($total == floor($total)) {
+                            return number_format($total, 0, ',', '.');
+                        } else {
+                            return number_format($total, 2, ',', '.');
+                        }
+                    }),
             ]);
     }
 
