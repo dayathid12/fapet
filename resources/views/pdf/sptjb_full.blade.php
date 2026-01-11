@@ -1,4 +1,4 @@
-<?php dd($sptjb->load('details')); ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -92,7 +92,14 @@
                 <td>{{ $sptjb->penerima ?? ($sptjb->details->first()->nama ?? 'N/A') }}</td>
                 <td>{{ $sptjb->uraian ?? 'N/A' }}</td>
                 <td style="text-align: right;">
-                    {{ number_format($sptjb->details->sum('jumlah_uang_diterima'), 0, ',', '.') }}
+                    <?php
+                        $value = $sptjb->total_jumlah_uang_diterima;
+                        if ($value == floor($value)) {
+                            echo number_format($value, 0, ',', '.');
+                        } else {
+                            echo number_format($value, 2, ',', '.');
+                        }
+                    ?>
                 </td>
             </tr>
         </tbody>
@@ -100,7 +107,14 @@
             <tr>
                 <td colspan="4" class="font-bold" style="text-align: right;">TOTAL</td>
                 <td class="font-bold" style="text-align: right;">
-                    {{ number_format($sptjb->details->sum('jumlah_uang_diterima'), 0, ',', '.') }}
+                    <?php
+                        $value = $sptjb->total_jumlah_uang_diterima;
+                        if ($value == floor($value)) {
+                            echo number_format($value, 0, ',', '.');
+                        } else {
+                            echo number_format($value, 2, ',', '.');
+                        }
+                    ?>
                 </td>
             </tr>
         </tfoot>
