@@ -26,6 +26,7 @@ class PeminjamanKendaraanUnpad extends Page implements \Filament\Forms\Contracts
     protected static string $view = 'filament.pages.peminjaman-kendaraan-unpad';
     protected static ?string $title = 'Peminjaman Kendaraan Unpad';
     protected static bool $shouldSkipContentWrapper = true;
+    protected static bool $shouldRegisterNavigation = false;
 
     #[Reactive]
     public $currentStep = 1;
