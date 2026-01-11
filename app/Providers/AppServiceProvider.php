@@ -9,6 +9,7 @@ use App\Policies\PermissionPolicy;
 use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Contracts\Role;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
 use Spatie\Permission\Models\Permission;
 use Livewire\Livewire; // Add this line
 use App\Filament\Pages\PeminjamanKendaraanUnpad; // Add this line
@@ -38,5 +39,8 @@ class AppServiceProvider extends ServiceProvider
         // Register the Livewire component for the public form
         Livewire::component('filament.pages.peminjaman-kendaraan-unpad', PeminjamanKendaraanUnpad::class);
         Livewire::component('booking-kendaraan-calendar', \App\Livewire\BookingKendaraanCalendar::class);
+
+        // Share PWA manifest and meta tags with all views
+        // View::share('pwa_meta', View::make('vendor.laravel-pwa.meta')->render());
     }
 }
