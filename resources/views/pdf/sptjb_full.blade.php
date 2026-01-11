@@ -50,6 +50,10 @@
             width: 40%;
             margin-left: 60%;
         }
+        .signature-block p {
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 <body>
@@ -132,7 +136,7 @@
     <div class="signature-block">
         <p>Jatinangor, {{ $tanggal }}</p>
         <p>Pembuat Komitmen,</p>
-        <br><br><br>
+        <br><br><br><br><br>
         <p class="font-bold underline">Nurhayati , SE.,M.Ak.</p>
         <p>NIP 197101111999032002</p>
     </div>
