@@ -61,7 +61,7 @@
         <p style="font-size: 11pt;">KEMENTERIAN PENDIDIKAN TINGGI, SAINS DAN TEKNOLOGI</p>
         <p class="title-univ">UNIVERSITAS PADJADJARAN</p>
         <p class="address">JALAN RAYA BANDUNG - SUMEDANG KM.21 JATINANGOR</p>
-        <p class="description">Daftar Pembayaran Uang Saku Pengemudi dalam rangka melayani Kegiatan Civitas Akademika Unpad tgl {{ $sptjb->tanggal_range ?? \Carbon\Carbon::now()->locale('id_ID')->isoFormat('D MMMM YYYY') }}</p>
+        <p class="description">{{ $sptjb->uraian }}</p>
     </div>
 
     <table>
@@ -91,7 +91,7 @@
                     <td class="text-center">{{ $detail->tanggal_penugasan }}</td>
                     <td class="text-center">{{ $detail->jumlah_hari }}</td>
                     <td class="text-right">Rp. {{ number_format($detail->besaran_uang_per_hari, 0, ',', '.') }}</td>
-                    <td class="text-right">Rp. {{ number_format($detail->jumlah_uang_diterima, 0, ',', '.') }}</td>
+                    <td class="text-right">Rp. {{ number_format($detail->besaran_uang_per_hari * $detail->jumlah_hari, 0, ',', '.') }}</td>
                     <td class="text-center">{{ $staf ? $staf->rekening : '-' }}</td>
                     <td class="text-center">{{ $staf ? $staf->nama_bank : '-' }}</td>
                 </tr>
@@ -100,7 +100,7 @@
         <tfoot>
             <tr style="font-weight: bold;">
                 <td colspan="6" class="text-right">Jumlah</td>
-                <td class="text-right">Rp{{ number_format($sptjb->details->sum('jumlah_uang_diterima'), 0, ',', '.') }}</td>
+                <td class="text-right">Rp{{ number_format($sptjb->details->sum(function($detail) { return $detail->besaran_uang_per_hari * $detail->jumlah_hari; }), 0, ',', '.') }}</td>
                 <td colspan="2" style="background-color: #e0e0e0;"></td>
             </tr>
         </tfoot>
