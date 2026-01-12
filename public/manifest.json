@@ -1,6 +1,7 @@
 {
-    "name": "Sistem Informasi Manajemen Kendaraan",
-    "short_name": "SIMK",
+    "name": "My Laravel PWA",
+    "short_name": "Laravel PWA",
+    "description": "A Laravel Progressive Web App",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

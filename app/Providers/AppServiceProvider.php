@@ -42,5 +42,5 @@ class AppServiceProvider extends ServiceProvider
 
         // Share PWA manifest and meta tags with all views
         // View::share('pwa_meta', View::make('vendor.laravel-pwa.meta')->render());
-    }
+     }
 }

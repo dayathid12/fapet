@@ -18,3 +18,12 @@
 - [x] Add JavaScript to view for auto-filling toll amount field
 - [ ] Test the toll receipt upload and auto-fill functionality
 - [ ] Verify that saving the form stores the data correctly in the database
+
+# TODO: Implement HTTPS Encryption for PWA
+
+## Tasks
+- [x] Create ForceHttps middleware to redirect HTTP to HTTPS in production
+- [x] Register ForceHttps middleware in app/Http/Kernel.php
+- [x] Force URL scheme to HTTPS in production via AppServiceProvider.php
+- [ ] Test HTTPS redirection in production environment
+- [ ] Ensure web server (e.g., Nginx/Apache) is configured for HTTPS

@@ -44,7 +44,8 @@ class AppPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/app/theme.css')
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
-                fn (): string => '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">',
+                fn (): string => '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">' .
+                                 '<link rel="manifest" href="/manifest.json">',
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -52,6 +53,10 @@ class AppPanelProvider extends PanelProvider
                 
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): string => '<script>if ("serviceWorker" in navigator) {navigator.serviceWorker.register("/serviceworker.js").then(registration => {console.log("Service Worker registered with scope:", registration.scope);}).catch(error => {console.error("Service Worker registration failed:", error);});}</script>',
+            )
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
