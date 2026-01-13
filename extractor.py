@@ -3,8 +3,11 @@ import PIL.Image
 import json
 import os
 
-# Konfigurasi API
-API_KEY = "AIzaSyBnEeK2x66gsAr0ypwF_RQVbYkDdMR91XQ"
+# Konfigurasi API - Ambil dari environment variable untuk keamanan
+API_KEY = os.getenv('GEMINI_API_KEY')
+# Konfigurasi API - Ambil dari environment variable untuk keamanan
+API_KEY = os.getenv('GEMINI_API_KEY')
+
 genai.configure(api_key=API_KEY)
 
 def extract_toll_amount(file_path):

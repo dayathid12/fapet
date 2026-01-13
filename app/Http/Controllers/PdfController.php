@@ -55,6 +55,7 @@ class PdfController extends Controller
     public function generateSptjbPdf(\App\Models\SPTJBUangPengemudiDetail $detail)
     {
         $sptjb = $detail->sptjb;
+        dd($sptjb->no_sptjb);
 
         // Set locale to Indonesian
         \Carbon\Carbon::setLocale('id');

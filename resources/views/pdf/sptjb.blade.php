@@ -52,7 +52,7 @@
 <body>
     <div class="text-center">
         <h3 class="font-bold underline">SURAT PERNYATAAN TANGGUNG JAWAB BELANJA</h3>
-        <span>Nomor: {{ $sptjb->no_sptjb }}</span>
+        <span>Nomor: {{ $sptjb->no_sptjb }}/UN6.PK/KU/2026</span>
     </div>
 
     <table class="no-border-table mt-8">

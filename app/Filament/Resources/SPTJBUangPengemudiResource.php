@@ -32,6 +32,9 @@ class SPTJBUangPengemudiResource extends Resource
                     ->label('No. SPTJB')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\DatePicker::make('tanggal_surat')
+                    ->label('Tanggal Surat')
+                    ->required(),
                 Forms\Components\TextInput::make('uraian')
                     ->label('Uraian')
                     ->default('Uang Saku Pengemudi dalam rangka melayani Kegiatan Civitas Akademika Unpad tgl 5 s.d. 9 ' . date('F') . ' ' . date('Y'))

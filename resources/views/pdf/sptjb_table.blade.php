@@ -10,11 +10,11 @@
             margin: 0.5cm;
             line-height: 1.2;
         }
-        .header { text-align: center; margin-bottom: 20px; }
+        .header { text-align: left; margin-bottom: 20px; }
         .header p { margin: 0; padding: 0; }
         .header .title-univ { font-size: 11pt; font-weight: bold; }
-        .header .address { font-size: 10pt; font-weight: bold; border-bottom: 1px solid black; display: inline-block; width: 100%; padding-bottom: 2px; }
-        .header .description { font-size: 8pt; margin-top: 5px; }
+        .header .address { font-size: 10pt; font-weight: bold; }
+        .header .description { font-size: 8pt; }
 
         table {
             width: 100%;
@@ -47,7 +47,10 @@
             padding: 0 10px;
             font-size: 8pt;
         }
-        .sign-space { height: 60px; }
+        .sign-space { height: 62px; }
+        .sign-space-direktur { height: 45px; }
+
+
 
         @page {
             size: A4 landscape;
@@ -58,10 +61,18 @@
 <body>
 
     <div class="header">
-        <p style="font-size: 11pt;">KEMENTERIAN PENDIDIKAN TINGGI, SAINS DAN TEKNOLOGI</p>
-        <p class="title-univ">UNIVERSITAS PADJADJARAN</p>
-        <p class="address">JALAN RAYA BANDUNG - SUMEDANG KM.21 JATINANGOR</p>
-        <p class="description">{{ $sptjb->uraian }}</p>
+        <table style="width: 100%; border: none; margin-bottom: 20px;">
+            <tr>
+                <td style="width: 70%; text-align: left; border: none; padding: 0;">
+                    <p style="font-size: 11pt; margin: 0; padding: 0;">KEMENTERIAN PENDIDIKAN TINGGI, SAINS DAN TEKNOLOGI</p>
+                    <p class="title-univ" style="margin: 0; padding: 0;">UNIVERSITAS PADJADJARAN</p>
+                    <p class="address" style="margin: 0; padding: 0;">JALAN RAYA BANDUNG - SUMEDANG KM.21 JATINANGOR</p>
+                </td>
+                <td style="width: 30%; text-align: right; border: none; padding: 0;">
+                    <p class="description" style="font-size: 8pt; margin: 0; padding: 0;">Uang Saku Pengemudi dalam rangka melayani Kegiatan Civitas Akademika Unpad/UN6.PK/KU/2026</p>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <table>
@@ -124,13 +135,13 @@
             </td>
             <td>
                 Mengetahui...<br>
-                Direktur Pengelolaan Aset
-                <div class="sign-space"></div>
+                Direktur Pengelolaan Aset<br>dan Sarana Prasarana
+                <div class="sign-space-direktur"></div>
                 <strong>{{ $penandatangan->direktur_nama ?? 'Edward Henry,S.IP.,MM.' }}</strong><br>
                 NIP.{{ $penandatangan->direktur_nip ?? '196910232002121001' }}
             </td>
             <td>
-                Jatinangor, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}<br>
+                Jatinangor, {{ \Carbon\Carbon::parse($sptjb->tanggal_surat)->locale('id_ID')->isoFormat('D MMMM Y') }}<br>
                 Pembuat Daftar
                 <div class="sign-space"></div>
                 <strong>{{ $penandatangan->pembuat_nama ?? 'Agah Gunadi Ramdhan' }}</strong><br>

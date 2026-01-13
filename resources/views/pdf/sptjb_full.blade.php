@@ -144,7 +144,7 @@ if (!function_exists('terbilang')) {
 
     <div class="text-center">
         <h3 class="font-bold underline">SURAT PERNYATAAN TANGGUNG JAWAB BELANJA</h3>
-        <span>Nomor: {{ $sptjb->no_sptjb }}</span>
+        <span>Nomor: {{ $sptjb->no_sptjb }}/UN6.PK/KU/2026</span>
     </div>
 
     <table class="no-border-table mt-8">
@@ -191,7 +191,7 @@ if (!function_exists('terbilang')) {
 
             <td style="width: 40%; border: none; text-align: left; vertical-align: top;">
                 <div style="line-height: 1.2;">
-                    <p style="margin: 0;">Jatinangor, {{ \Carbon\Carbon::now()->locale('id_ID')->isoFormat('D MMMM YYYY') }}</p>
+                    <p style="margin: 0;">Jatinangor, {{ \Carbon\Carbon::parse($sptjb->tanggal_surat)->locale('id_ID')->isoFormat('D MMMM YYYY') }}</p>
                     <p style="margin: 0;">Pembuat Komitmen,</p>
 
                     <div style="height: 80px;"></div>
@@ -206,7 +206,7 @@ if (!function_exists('terbilang')) {
     <div class="page-break">
         <div style="text-align: right;">
             <div style="display: inline-block; text-align: left;">
-                <p style="margin: 0;">T.A. 2025</p>
+                <p style="margin: 0;">T.A. 2026</p>
                 <p style="margin: 0;">Nomor Bukti :</p>
                 <p style="margin: 0;">M A K : 528317</p>
             </div>
@@ -239,8 +239,8 @@ if (!function_exists('terbilang')) {
 
        <table style="width: 100%; border-collapse: collapse; margin-top: 50px; table-layout: fixed;">
             <tr>
-                <td style="text-align: center; vertical-align: top; width: 50%;">
-                    <div style="display: inline-block; text-align: center;">
+                <td style="text-align: left; vertical-align: top; width: 50%;">
+                    <div style="width: 250px; display: block; margin: 0 auto; text-align: left;">
                         <p style="margin: 0;">Mengetahui/Menyetujui:</p>
                         <p style="margin: 0;">Pembuat Komitmen,</p>
 
@@ -251,12 +251,14 @@ if (!function_exists('terbilang')) {
                     </div>
                 </td>
 
-                <td style="text-align: center; vertical-align: top; width: 50%;">
-                    <div style="display: inline-block; text-align: center;">
-                        <p style="margin: 0;">Jatinangor, {{ \Carbon\Carbon::now()->locale('id_ID')->isoFormat('D MMMM YYYY') }}</p>
+                <td style="text-align: left; vertical-align: top; width: 50%;">
+                    <div style="width: 250px; display: block; margin: 0 auto; text-align: left;">
+                        <p style="margin: 0;">Jatinangor, {{ \Carbon\Carbon::parse($sptjb->tanggal_surat)->locale('id_ID')->isoFormat('D MMMM YYYY') }}</p>
                         <p style="margin: 0;">Koordinator Pool Kendaraan,</p>
 
-                        <div style="height: 80px;"></div>
+                        <div style="height: 80px;">
+                            <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/pdf/ttdlewo.png'))) }}" style="width: 100px; height: auto; display: block; margin: 0 auto;">
+                        </div>
 
                         <p style="margin: 0; font-weight: bold; text-decoration: underline;">Gugun Gunawan, S.S.</p>
                         <p style="margin: 0;">NIP 198211262016023001</p>

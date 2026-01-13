@@ -1,29 +1,12 @@
-# TODO: Update Tanggal Penugasan Logic
+# Deployment Preparation Steps
 
-## Tasks
-- [x] Edit SPTJBUangPengemudiDetailsRelationManager.php to simplify afterStateUpdated for nomor_perjalanan field
-  - Remove complex tipe_penugasan logic
-  - Directly calculate dates from perjalanan->waktu_keberangkatan to perjalanan->waktu_kepulangan
-  - Set tanggal_penugasan as comma-separated days (e.g., "1,2,3")
-- [ ] Verify the change works as expected (manual testing after implementation)
-
-# TODO: Fix Gemini Toll Receipt Extraction
-
-## Tasks
-- [x] Add Gemini API key configuration to config/services.php
-- [x] Update extractAmountFromReceipt method to accept file path instead of UploadedFile and read from storage
-- [x] Ensure GEMINI_API_KEY is set in .env file
-- [x] Create TollOcrController with extract method for API endpoint
-- [x] Add API route for OCR functionality
-- [x] Add JavaScript to view for auto-filling toll amount field
-- [ ] Test the toll receipt upload and auto-fill functionality
-- [ ] Verify that saving the form stores the data correctly in the database
-
-# TODO: Implement HTTPS Encryption for PWA
-
-## Tasks
-- [x] Create ForceHttps middleware to redirect HTTP to HTTPS in production
-- [x] Register ForceHttps middleware in app/Http/Kernel.php
-- [x] Force URL scheme to HTTPS in production via AppServiceProvider.php
-- [ ] Test HTTPS redirection in production environment
-- [ ] Ensure web server (e.g., Nginx/Apache) is configured for HTTPS
+- [x] Install Composer dependencies for production: composer install --optimize-autoloader --no-dev
+- [x] Install NPM dependencies: npm install
+- [ ] Build frontend assets for production: npm run build
+- [ ] Clear Laravel caches: php artisan optimize:clear
+- [ ] Optimize Laravel (cache config, routes, views): php artisan optimize
+- [ ] Create storage symlink: php artisan storage:link
+- [ ] Run database migrations: php artisan migrate --force
+- [x] Set permissions on storage directory: sudo chown -R www-data:www-data /path/to/your/project/storage (Skipped on Windows - sudo not available)
+- [x] Set permissions on bootstrap/cache directory: sudo chown -R www-data:www-data /path/to/your/project/bootstrap/cache (Skipped on Windows - sudo not available)
+- [ ] (Optional) Configure PM2 for production if needed

@@ -13,6 +13,7 @@ class SPTJBPengemudi extends Model
         'uraian',
         'penerima',
         'total_jumlah_uang_diterima',
+        'tanggal_surat',
     ];
 
     protected $appends = [
