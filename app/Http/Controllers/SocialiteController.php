@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Hash;
 
 class SocialiteController extends Controller
 {
@@ -19,34 +18,38 @@ class SocialiteController extends Controller
     public function handleGoogleCallback(Request $request)
     {
         try {
-            $googleUser = Socialite::driver('google')->withoutVerifying()->user();
+            // Mengambil data user dari Google [Tanpa withoutVerifying]
+            $googleUser = Socialite::driver('google')->user();
 
             $user = User::where('email', $googleUser->email)->first();
 
             if (!$user) {
-                return redirect('/login')->with('error', 'Email Anda tidak terdaftar. Silakan hubungi administrator.');
+                return redirect('/app/login')->with('error', 'Email Anda tidak terdaftar.');
             }
 
-            // Update google_id if it's null
+            // Simpan google_id jika masih kosong
             if (is_null($user->google_id)) {
                 $user->google_id = $googleUser->id;
                 $user->save();
             }
 
-            // Assign 'admin' role to specific user
+            // Memberikan role admin jika email adalah admin utama
             if ($user->email === 'dayat.hidayat@unpad.ac.id') {
-                $user->assignRole('admin');
+                if (method_exists($user, 'assignRole')) {
+                    $user->assignRole('admin');
+                }
             }
 
+            // Login dan regenerasi session
             Auth::login($user);
-
             $request->session()->regenerate();
 
-            return redirect('/app'); // Redirect to dashboard or home
+            // Redirect langsung ke dashboard admin
+            return redirect()->to('https://sarpras.unpad.ac.id/app/admin');
 
         } catch (\Throwable $e) {
             Log::error('Google Login Error: ' . $e->getMessage());
-            return redirect('/app')->with('error', 'Terjadi kesalahan saat login atau Anda menolak aplikasi.');
+            return redirect('/app/login')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 }

@@ -7,6 +7,10 @@ use App\Http\Controllers\PerjalananController;
 use App\Http\Controllers\PeminjamanKendaraanController;
 use App\Http\Controllers\PdfController;
 
+//use App\Http\Controllers\Auth\LoginController; // Sesuaikan dengan nama controller Anda
+
+//Route::get('auth/google/callback', [LoginController::class, 'handleGoogleCallback']);
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -22,9 +26,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Route untuk mengarahkan ke Google
 Route::get('/auth/google/redirect', [SocialiteController::class, 'redirectToGoogle'])->name('google.redirect');
-Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCallback'])->name('google.callback');
 
+// Route untuk menerima balik data dari Google (Callback)
+Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCallback'])->name('google.callback');
 // Route untuk Jadwal Kendaraan
 Route::get('/jadwal-kendaraan', [JadwalController::class, 'index'])->name('jadwal.index');
 
