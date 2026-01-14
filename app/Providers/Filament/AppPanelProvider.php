@@ -39,6 +39,7 @@ class AppPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->favicon(asset('images/Favicon_Unpad.ico'))
             ->brandLogo(asset('images/Unpad_logo.png'))
             ->brandLogoHeight('2.2rem')
             ->viteTheme('resources/css/filament/app/theme.css')
@@ -50,7 +51,7 @@ class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                
+
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->renderHook(

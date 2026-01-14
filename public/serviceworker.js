@@ -1,8 +1,6 @@
 const CACHE_NAME = 'simk-cache-v1';
 const urlsToCache = [
     '/',
-    '/css/app.css', // Assuming you have an app.css
-    '/js/app.js',   // Assuming you have an app.js
     '/images/icons/icon-72x72.png',
     '/images/icons/icon-96x96.png',
     '/images/icons/icon-128x128.png',
@@ -13,7 +11,8 @@ const urlsToCache = [
     '/images/icons/icon-512x512.png',
     '/images/Unpad_logo.png',
     '/manifest.json'
-    // Add other assets you want to cache
+    // Note: CSS and JS files are served by Vite in development mode
+    // Add other static assets you want to cache
 ];
 
 self.addEventListener('install', event => {

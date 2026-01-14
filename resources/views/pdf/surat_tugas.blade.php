@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{{ asset('images/Favicon_Unpad.webp') }}" />
+    <link rel="icon" href="{{ asset('images/Favicon_Unpad.ico') }}" />
     <title>Surat Tugas - {{ $perjalanan->nomor_perjalanan ?? 'NOMOR_SURAT' }}</title>
     <style>
         body {
