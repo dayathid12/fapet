@@ -37,35 +37,65 @@ class SPTJBPengemudiResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('status_baru')
-                    ->label('Status')
-                    ->badge()
-                    ->color(fn ($record) => $record->hasBeenProcessed() ? 'success' : 'warning')
-                    ->state(fn ($record) => $record->hasBeenProcessed() ? 'Selesai' : 'Ajukan'),
-                TextColumn::make('perjalanan.nomor_perjalanan')
-                    ->label('Nomor Perjalanan')
-                    ->searchable(),
-                TextColumn::make('perjalanan.no_surat_tugas')
-                    ->label('Nomor Surat Tugas')
-                    ->searchable(),
-                TextColumn::make('pengemudi.nama_staf')
-                    ->label('Pengemudi'),
-                TextColumn::make('asisten.nama_staf')
-                    ->label('Asisten')
-                    ->placeholder('Tidak ada'),
-                TextColumn::make('kendaraan_nopol')
-                    ->label('Kendaraan'),
-                TextColumn::make('perjalanan.jenis_kegiatan')
-                    ->label('Jenis Kegiatan'),
-                TextColumn::make('tipe_penugasan')
-                    ->label('Tipe Penugasan')
-                    ->badge(),
-                TextColumn::make('perjalanan.waktu_keberangkatan')
-                    ->label('Waktu Keberangkatan')
-                    ->dateTime('d M Y, H:i'),
-                TextColumn::make('perjalanan.waktu_kepulangan')
-                    ->label('Waktu Kepulangan')
-                    ->dateTime('d M Y, H:i'),
+                Tables\Columns\Layout\Grid::make(3)
+                    ->schema([
+                        Tables\Columns\Layout\Stack::make([
+                            TextColumn::make('status_baru')
+                                ->label('Status')
+                                ->badge()
+                                ->color(fn ($record) => $record->hasBeenProcessed() ? 'success' : 'warning')
+                                ->state(fn ($record) => $record->hasBeenProcessed() ? 'Selesai' : 'Ajukan'),
+                            TextColumn::make('combined_nomor')
+                                ->label('Nomor Perjalanan / Surat Tugas')
+                                ->state(fn ($record) => ($record->perjalanan->nomor_perjalanan ?? 'N/A') . ' / ' . ($record->perjalanan->no_surat_tugas ?? 'N/A'))
+                                ->searchable(['perjalanan.nomor_perjalanan', 'perjalanan.no_surat_tugas'])
+                                ->weight('bold')
+                                ->color('primary'),
+                        ])->space(2),
+                        Tables\Columns\Layout\Stack::make([
+                            TextColumn::make('pengemudi.nama_staf')
+                                ->label('Pengemudi')
+                                ->icon('heroicon-o-user'),
+                            TextColumn::make('asisten.nama_staf')
+                                ->label('Asisten')
+                                ->placeholder('Tidak ada')
+                                ->icon('heroicon-o-user-group'),
+                        ])->space(2),
+                        Tables\Columns\Layout\Stack::make([
+                            Tables\Columns\Layout\Split::make([
+                                TextColumn::make('tipe_penugasan')
+                                    ->label('Tipe Penugasan')
+                                    ->badge()
+                                    ->color('info'),
+                                TextColumn::make('perjalanan.jenis_kegiatan')
+                                    ->label('Jenis Kegiatan')
+                                    ->badge(),
+                            ]),
+                            TextColumn::make('combined_waktu')
+                                ->label('Waktu Keberangkatan - Kepulangan')
+                                ->state(function ($record) {
+                                    $start = $record->perjalanan->waktu_keberangkatan;
+                                    $end = $record->perjalanan->waktu_kepulangan;
+                                    if (!$start || !$end) return 'N/A';
+
+                                    $startCarbon = \Carbon\Carbon::parse($start);
+                                    $endCarbon = \Carbon\Carbon::parse($end);
+
+                                    $startDate = $startCarbon->format('j');
+                                    $endDate = $endCarbon->format('j');
+                                    $month = $startCarbon->format('F');
+                                    $startTime = $startCarbon->format('H:i');
+                                    $endTime = $endCarbon->format('H:i');
+
+                                    if ($startCarbon->toDateString() === $endCarbon->toDateString()) {
+                                        return $startDate . ' ' . $month . ' ' . $startTime . ' - ' . $endTime;
+                                    } else {
+                                        return $startDate . ' - ' . $endDate . ' ' . $month . ' ' . $startTime . ' - ' . $endTime;
+                                    }
+                                })
+                                ->icon('heroicon-o-clock'),
+                        ])->space(2),
+                    ]),
             ])
             ->actions([
                 Tables\Actions\Action::make('view_surat_tugas')
@@ -230,5 +260,14 @@ class SPTJBPengemudiResource extends Resource
         return [
             'index' => Pages\ListSPTJBPengemudi::route('/'),
         ];
+    }
+
+    public static function getResourceView(string $view): string
+    {
+        if ($view === 'filament-panels::resources.pages.list-records') {
+            return 'filament.resources.sptjb-pengemudi-resource.pages.list-sptjb-pengemudis';
+        }
+
+        return parent::getResourceView($view);
     }
 }
