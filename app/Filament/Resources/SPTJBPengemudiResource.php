@@ -166,7 +166,7 @@ class SPTJBPengemudiResource extends Resource
                         ->modalSubmitAction(false)
                         ->modalCancelAction(false)
                         ->modalContent(function (Collection $records) {
-                            $content = '';
+                            $content = '<div style="margin-bottom: 20px;"><button onclick="window.print()" style="background-color: #10b981; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Print Semua</button></div>';
                             foreach ($records as $record) {
                                 $filePath = $record->perjalanan->upload_surat_tugas;
                                 if (!$filePath) {
@@ -184,11 +184,11 @@ class SPTJBPengemudiResource extends Resource
                                 }
 
                                 if (in_array(strtolower($fileExtension), ['pdf'])) {
-                                    $content .= '<div style="width: 100%; height: 600px; border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden; margin-bottom: 20px;">
+                                    $content .= '<div style="width: 100%; height: 600px; border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden; margin-bottom: 20px; page-break-after: always;">
                                                 <iframe src="' . $fileUrl . '" style="width: 100%; height: 100%; border: none;"></iframe>
                                             </div>';
                                 } elseif (Str::contains($fileMimeType, 'image')) {
-                                    $content .= '<div style="width: 100%; text-align: center; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 20px;">
+                                    $content .= '<div style="width: 100%; text-align: center; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 20px; page-break-after: always;">
                                                 <img src="' . $fileUrl . '" alt="Scan Surat Tugas" style="max-width: 100%; height: auto; display: block; margin: auto;">
                                             </div>';
                                 } else {
