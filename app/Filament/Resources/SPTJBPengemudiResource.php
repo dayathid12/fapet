@@ -18,6 +18,9 @@ use Filament\Tables\Table;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\HtmlString;
 use Carbon\CarbonPeriod;
 
 class SPTJBPengemudiResource extends Resource
@@ -34,6 +37,11 @@ class SPTJBPengemudiResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('status_baru')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn ($record) => $record->hasBeenProcessed() ? 'success' : 'warning')
+                    ->state(fn ($record) => $record->hasBeenProcessed() ? 'Selesai' : 'Ajukan'),
                 TextColumn::make('perjalanan.nomor_perjalanan')
                     ->label('Nomor Perjalanan')
                     ->searchable(),
@@ -58,11 +66,41 @@ class SPTJBPengemudiResource extends Resource
                 TextColumn::make('perjalanan.waktu_kepulangan')
                     ->label('Waktu Kepulangan')
                     ->dateTime('d M Y, H:i'),
-                TextColumn::make('status_baru')
-                    ->label('Status')
-                    ->badge()
-                    ->color(fn ($record) => $record->hasBeenProcessed() ? 'success' : 'warning')
-                    ->state(fn ($record) => $record->hasBeenProcessed() ? 'Selesai' : 'Ajukan'),
+            ])
+            ->actions([
+                Tables\Actions\Action::make('view_surat_tugas')
+                    ->label('View Surat Tugas')
+                    ->icon('heroicon-o-eye')
+                    ->color('primary')
+                    ->modalHeading('Preview Surat Tugas')
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->modalContent(function ($record) {
+                        $filePath = $record->perjalanan->upload_surat_tugas;
+                        if (!$filePath) {
+                            return new HtmlString('<p>Tidak ada file Scan Surat Tugas yang diunggah.</p>');
+                        }
+
+                        $fileUrl = Storage::url($filePath);
+                        $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
+                        $fileMimeType = Storage::mimeType($filePath);
+
+                        if (!Storage::disk('public')->exists($filePath)) {
+                            return new HtmlString('<p>File tidak ditemukan.</p>');
+                        }
+
+                        if (in_array(strtolower($fileExtension), ['pdf'])) {
+                            return new HtmlString('<div style="width: 100%; height: 600px; border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden;">
+                                        <iframe src="' . $fileUrl . '" style="width: 100%; height: 100%; border: none;"></iframe>
+                                    </div>');
+                        } elseif (Str::contains($fileMimeType, 'image')) {
+                            return new HtmlString('<div style="width: 100%; text-align: center; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem;">
+                                        <img src="' . $fileUrl . '" alt="Scan Surat Tugas" style="max-width: 100%; height: auto; display: block; margin: auto;">
+                                    </div>');
+                        } else {
+                            return new HtmlString('<p>Format file tidak dapat dipratinjau langsung. <a href="' . $fileUrl . '" target="_blank" class="text-blue-500 underline">Download file</a></p>');
+                        }
+                    }),
             ])
             ->filters([
                 SelectFilter::make('jenis_kegiatan')
