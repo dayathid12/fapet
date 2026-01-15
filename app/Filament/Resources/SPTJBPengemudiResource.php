@@ -18,6 +18,7 @@ use Filament\Tables\Table;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\HtmlString;
@@ -157,6 +158,46 @@ class SPTJBPengemudiResource extends Resource
             })
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('print')
+                        ->label('Print')
+                        ->icon('heroicon-o-printer')
+                        ->color('info')
+                        ->modalHeading('Print Surat Tugas')
+                        ->modalSubmitAction(false)
+                        ->modalCancelAction(false)
+                        ->modalContent(function (Collection $records) {
+                            $content = '';
+                            foreach ($records as $record) {
+                                $filePath = $record->perjalanan->upload_surat_tugas;
+                                if (!$filePath) {
+                                    $content .= '<p>Tidak ada file Scan Surat Tugas untuk ' . ($record->perjalanan->nomor_perjalanan ?? 'N/A') . '.</p>';
+                                    continue;
+                                }
+
+                                $fileUrl = Storage::url($filePath);
+                                $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
+                                $fileMimeType = Storage::mimeType($filePath);
+
+                                if (!Storage::disk('public')->exists($filePath)) {
+                                    $content .= '<p>File tidak ditemukan untuk ' . ($record->perjalanan->nomor_perjalanan ?? 'N/A') . '.</p>';
+                                    continue;
+                                }
+
+                                if (in_array(strtolower($fileExtension), ['pdf'])) {
+                                    $content .= '<div style="width: 100%; height: 600px; border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden; margin-bottom: 20px;">
+                                                <iframe src="' . $fileUrl . '" style="width: 100%; height: 100%; border: none;"></iframe>
+                                            </div>';
+                                } elseif (Str::contains($fileMimeType, 'image')) {
+                                    $content .= '<div style="width: 100%; text-align: center; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 20px;">
+                                                <img src="' . $fileUrl . '" alt="Scan Surat Tugas" style="max-width: 100%; height: auto; display: block; margin: auto;">
+                                            </div>';
+                                } else {
+                                    $content .= '<p>Format file tidak dapat dipratinjau langsung untuk ' . ($record->perjalanan->nomor_perjalanan ?? 'N/A') . '. <a href="' . $fileUrl . '" target="_blank" class="text-blue-500 underline">Download file</a></p>';
+                                }
+                            }
+                            return new HtmlString($content);
+                        })
+                        ->deselectRecordsAfterCompletion(false),
                     Tables\Actions\BulkAction::make('masukanPengemudi')
                         ->label('Masukan Pengemudi')
                         ->icon('heroicon-o-plus')
