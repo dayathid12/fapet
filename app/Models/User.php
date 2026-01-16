@@ -54,6 +54,6 @@ class User extends Authenticatable
      */
     public function staf(): BelongsTo
     {
-        return $this->belongsTo(Staf::class);
+        return $this->belongsTo(Staf::class, 'staf_id', 'staf_id');
     }
 }

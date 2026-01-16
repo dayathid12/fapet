@@ -36,9 +36,12 @@ class ListJadwalMengemudis extends ListRecords
         }
         $data['totalJam'] = $totalJam;
         $user = auth()->user();
-        $data['userName'] = $user->name ?? 'Unknown';
-        $staf = \App\Models\Staf::where('nama_staf', $user->name)->first();
-        $data['userNip'] = $staf ? $staf->nip_staf : 'N/A';
+
+        // Menggunakan relasi untuk mendapatkan data staf, ini lebih andal
+        $staf = $user->staf; 
+
+        $data['userName'] = $staf ? $staf->nama_staf : $user->name; // Fallback ke nama user jika relasi staf tidak ada
+        $data['userNip'] = $staf ? $staf->nip_staf : 'N/A'; // Tampilkan N/A jika relasi staf tidak ada
 
         return $data;
     }

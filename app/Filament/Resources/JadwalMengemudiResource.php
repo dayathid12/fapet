@@ -96,7 +96,7 @@ class JadwalMengemudiResource extends Resource
                         'Selesai' => 'Selesai',
                     ])
                     ->label('Filter Status'),
-                
+
                 Tables\Filters\Filter::make('waktu_dan_tipe_penugasan')
                     ->form([
                         Forms\Components\Select::make('tipe_penugasan')
@@ -122,7 +122,7 @@ class JadwalMengemudiResource extends Resource
 
                                 return $query->whereHas('details', function (Builder $detailsQuery) use ($startDate, $endDate, $tipeTugas) {
                                     $detailsQuery->where(function (Builder $q) use ($startDate, $endDate, $tipeTugas) {
-                                        
+
                                         $applyAntarJemput = !$tipeTugas || $tipeTugas === 'Antar & Jemput';
                                         if ($applyAntarJemput) {
                                             $q->orWhere(function (Builder $sub) use ($startDate, $endDate) {
@@ -184,7 +184,7 @@ class JadwalMengemudiResource extends Resource
                                 'rincianPengeluaranId' => $rincianPengeluaran->id,
                             ]);
                         }
-                        
+
                         return null;
                     })
                     ->visible(function (Perjalanan $record): bool {
@@ -204,10 +204,14 @@ class JadwalMengemudiResource extends Resource
         $query = parent::getEloquentQuery();
         $user = auth()->user();
 
-        // Jika user memiliki relasi staf, filter berdasarkan staf_id
+        // Jika user memiliki relasi staf (adalah pengemudi/asisten), filter berdasarkan staf_id
         if ($user && $user->staf) {
-            $query->whereHas('details', function (Builder $query) use ($user) {
-                $query->where('pengemudi_id', $user->staf->id);
+            $stafId = $user->staf->id;
+            $query->whereHas('details', function (Builder $query) use ($stafId) {
+                $query->where(function (Builder $subQuery) use ($stafId) {
+                    $subQuery->where('pengemudi_id', $stafId)
+                             ->orWhere('asisten_id', $stafId);
+                });
             });
         }
 

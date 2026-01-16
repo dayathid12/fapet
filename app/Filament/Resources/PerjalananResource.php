@@ -707,6 +707,29 @@ class PerjalananResource extends Resource
             ->emptyStateIcon('heroicon-o-truck');
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        // Jika user memiliki relasi staf (adalah pengemudi/asisten), filter berdasarkan staf_id
+        if ($user && $user->staf) {
+            $stafId = $user->staf->id;
+            $query->whereHas('details', function (Builder $query) use ($stafId) {
+                $query->where(function (Builder $subQuery) use ($stafId) {
+                    $subQuery->where('pengemudi_id', $stafId)
+                             ->orWhere('asisten_id', $stafId);
+                });
+            });
+        }
+
+        // Tambahkan filter default untuk status_perjalanan agar hanya menampilkan 'Terjadwal' dan 'Selesai'
+        // Jika Anda ingin semua status terlihat oleh admin, tambahkan kondisi: ->when(!$user->hasRole('admin'), function ($q) { ... })
+        $query->whereIn('status_perjalanan', ['Terjadwal', 'Selesai']);
+
+        return $query;
+    }
+
     public static function getRelations(): array
     {
         return [
