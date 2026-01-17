@@ -55,7 +55,7 @@
                 {{-- Make sure the Alpine attributes get re-evaluated after a Livewire request: --}}
                 :wire:key="$this->getId() . 'table.selection.indicator.actions.select-all.' . $allSelectableRecordsCount . '.' . $page"
             >
-                {{ trans_choice('filament-tables::table.selection_indicator.actions.select_all.label', $allSelectableRecordsCount, ['count' => \Illuminate\Support\Number::format($allSelectableRecordsCount, locale: $locale)]) }}
+                {{ trans_choice('filament-tables::table.selection_indicator.actions.select_all.label', $allSelectableRecordsCount, ['count' => extension_loaded('intl') ? \Illuminate\Support\Number::format($allSelectableRecordsCount, locale: $locale) : number_format($allSelectableRecordsCount)]) }}
             </x-filament::link>
 
             <x-filament::link

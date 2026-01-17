@@ -51,9 +51,9 @@
                     'filament::components/pagination.overview',
                     $paginator->total(),
                     [
-                        'first' => \Illuminate\Support\Number::format($paginator->firstItem() ?? 0),
-                        'last' => \Illuminate\Support\Number::format($paginator->lastItem() ?? 0),
-                        'total' => \Illuminate\Support\Number::format($paginator->total()),
+                        'first' => extension_loaded('intl') ? \Illuminate\Support\Number::format($paginator->firstItem() ?? 0) : number_format($paginator->firstItem() ?? 0),
+                        'last' => extension_loaded('intl') ? \Illuminate\Support\Number::format($paginator->lastItem() ?? 0) : number_format($paginator->lastItem() ?? 0),
+                        'total' => extension_loaded('intl') ? \Illuminate\Support\Number::format($paginator->total()) : number_format($paginator->total()),
                     ],
                 )
             }}

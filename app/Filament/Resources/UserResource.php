@@ -19,33 +19,6 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
     protected static ?string $navigationLabel = 'User';
 
-    protected static ?string $navigationGroup = 'Roles and Permissions';
-
-    public static function canViewAny(): bool
-    {
-        return true;
-    }
-
-    public static function canView($record): bool
-    {
-        return true;
-    }
-
-    public static function canCreate(): bool
-    {
-        return true;
-    }
-
-    public static function canEdit($record): bool
-    {
-        return true;
-    }
-
-    public static function canDelete($record): bool
-    {
-        return true;
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -63,7 +36,6 @@ class UserResource extends Resource
                     ->visibleOn('create')
                     ->password()
                     ->maxLength(255),
-                     Select::make('roles')->multiple()->relationship('roles', 'name')->preload(),
             ]);
     }
 
@@ -75,8 +47,6 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                    Tables\Columns\TextColumn::make('roles.name')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('created_at')

@@ -12,16 +12,11 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = \App\Models\User::firstOrCreate([
+        \App\Models\User::firstOrCreate([
             'email' => 'dayat.hidayat@unpad.ac.id',
         ], [
             'name' => 'Dayat Hidayat',
             'password' => bcrypt('password'),
         ]);
-
-        $adminRole = \Spatie\Permission\Models\Role::where('name', 'Admin')->first();
-        if ($adminRole) {
-            $user->assignRole($adminRole);
-        }
     }
 }

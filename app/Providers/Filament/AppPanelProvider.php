@@ -18,9 +18,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -95,11 +94,6 @@ class AppPanelProvider extends PanelProvider
                      ->icon('heroicon-s-document'),
 
 
-                NavigationGroup::make()
-                    ->label('Roles and Permissions')
-                    ->icon('heroicon-s-lock-closed')
-
-
 
             ])
             ->middleware([
@@ -115,8 +109,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
-             ->plugin(FilamentSpatieRolesPermissionsPlugin::make());
+            ]);
 
 
     }
