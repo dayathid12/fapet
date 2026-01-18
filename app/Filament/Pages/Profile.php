@@ -68,105 +68,129 @@ class Profile extends Page implements HasForms
             ->schema([
                 Forms\Components\Section::make('Informasi Pribadi')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label('Nama')
-                            ->required()
-                            ->maxLength(255),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Nama')
+                                    ->required()
+                                    ->maxLength(255),
 
-                        Forms\Components\TextInput::make('email')
-                            ->label('Email')
-                            ->email()
-                            ->required()
-                            ->maxLength(255),
+                                Forms\Components\TextInput::make('email')
+                                    ->label('Email')
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(255),
+                            ]),
 
                         Forms\Components\TextInput::make('current_password')
                             ->label('Password Saat Ini')
                             ->password()
                             ->required()
                             ->currentPassword()
-                            ->revealable()
-                            ->hidden(),
-
-                        Forms\Components\TextInput::make('password')
-                            ->label('Password Baru')
-                            ->password()
-                            ->required()
-                            ->rule(Password::default())
-                            ->revealable()
-                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                            ->live()
-                            ->same('password_confirmation'),
-
-                        Forms\Components\TextInput::make('password_confirmation')
-                            ->label('Konfirmasi Password Baru')
-                            ->password()
-                            ->required()
                             ->revealable(),
+
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('password')
+                                    ->label('Password Baru')
+                                    ->password()
+                                    ->required()
+                                    ->rule(Password::default())
+                                    ->revealable()
+                                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                                    ->live()
+                                    ->same('password_confirmation'),
+
+                                Forms\Components\TextInput::make('password_confirmation')
+                                    ->label('Konfirmasi Password Baru')
+                                    ->password()
+                                    ->required()
+                                    ->revealable(),
+                            ]),
                     ]),
 
                 Forms\Components\Section::make('Informasi Staf')
+                    ->collapsed()
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('id_nama')
                                     ->label('ID Nama')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled()
+                                    ->hidden(),
 
                                 Forms\Components\TextInput::make('nama_staf')
                                     ->label('Nama Staf')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('gol_pangkat')
                                     ->label('Golongan Pangkat')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('nip_staf')
                                     ->label('NIP Staf')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('jabatan')
                                     ->label('Jabatan')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled()
+                                    ->hidden(),
 
                                 Forms\Components\TextInput::make('status_kepegawaian')
                                     ->label('Status Kepegawaian')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('pendidikan_aktif')
                                     ->label('Pendidikan Aktif')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('kartu_pegawai')
                                     ->label('Kartu Pegawai')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('wa_staf')
                                     ->label('WhatsApp')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled()
+                                    ->hidden(),
 
                                 Forms\Components\TextInput::make('no_telepon')
                                     ->label('No Telepon')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('alamat_rumah')
                                     ->label('Alamat Rumah')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('no_ktp')
                                     ->label('No KTP')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('no_npwp')
                                     ->label('No NPWP')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('no_bpjs_kesehatan')
                                     ->label('No BPJS Kesehatan')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('no_bpjs_ketenagakerjaan')
                                     ->label('No BPJS Ketenagakerjaan')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('rekening')
                                     ->label('Rekening')
@@ -177,22 +201,26 @@ class Profile extends Page implements HasForms
                                     ->maxLength(255),
 
                                 Forms\Components\DatePicker::make('tanggal_lahir')
-                                    ->label('Tanggal Lahir'),
+                                    ->label('Tanggal Lahir')
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('tempat_lahir')
                                     ->label('Tempat Lahir')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\TextInput::make('menuju_pensiun')
                                     ->label('Menuju Pensiun')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(),
 
                                 Forms\Components\Select::make('status_aplikasi')
                                     ->label('Status Aplikasi')
                                     ->options([
                                         'aktif' => 'Aktif',
                                         'non-aktif' => 'Non-Aktif',
-                                    ]),
+                                    ])
+                                    ->disabled(),
                             ]),
                     ]),
             ])
