@@ -31,9 +31,34 @@ class Profile extends Page implements HasForms
 
     public function mount(): void
     {
+        $user = auth()->user();
+        $staf = $user->staf;
+
         $this->form->fill([
-            'name' => auth()->user()->name,
-            'email' => auth()->user()->email,
+            'name' => $user->name,
+            'email' => $user->email,
+            'id_nama' => $staf?->id_nama,
+            'nama_staf' => $staf?->nama_staf,
+            'gol_pangkat' => $staf?->gol_pangkat,
+            'nip_staf' => $staf?->nip_staf,
+            'status' => $staf?->status,
+            'pendidikan_aktif' => $staf?->pendidikan_aktif,
+            'wa_staf' => $staf?->wa_staf,
+            'jabatan' => $staf?->jabatan,
+            'tanggal_lahir' => $staf?->tanggal_lahir,
+            'menuju_pensiun' => $staf?->menuju_pensiun,
+            'kartu_pegawai' => $staf?->kartu_pegawai,
+            'status_kepegawaian' => $staf?->status_kepegawaian,
+            'tempat_lahir' => $staf?->tempat_lahir,
+            'no_ktp' => $staf?->no_ktp,
+            'no_npwp' => $staf?->no_npwp,
+            'no_bpjs_kesehatan' => $staf?->no_bpjs_kesehatan,
+            'no_bpjs_ketenagakerjaan' => $staf?->no_bpjs_ketenagakerjaan,
+            'no_telepon' => $staf?->no_telepon,
+            'alamat_rumah' => $staf?->alamat_rumah,
+            'rekening' => $staf?->rekening,
+            'nama_bank' => $staf?->nama_bank,
+            'status_aplikasi' => $staf?->status_aplikasi,
         ]);
     }
 
@@ -53,16 +78,14 @@ class Profile extends Page implements HasForms
                             ->email()
                             ->required()
                             ->maxLength(255),
-                    ]),
 
-                Forms\Components\Section::make('Ubah Password')
-                    ->schema([
                         Forms\Components\TextInput::make('current_password')
                             ->label('Password Saat Ini')
                             ->password()
                             ->required()
                             ->currentPassword()
-                            ->revealable(),
+                            ->revealable()
+                            ->hidden(),
 
                         Forms\Components\TextInput::make('password')
                             ->label('Password Baru')
@@ -79,9 +102,99 @@ class Profile extends Page implements HasForms
                             ->password()
                             ->required()
                             ->revealable(),
-                    ])
-                    ->collapsible()
-                    ->collapsed(),
+                    ]),
+
+                Forms\Components\Section::make('Informasi Staf')
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('id_nama')
+                                    ->label('ID Nama')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('nama_staf')
+                                    ->label('Nama Staf')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('gol_pangkat')
+                                    ->label('Golongan Pangkat')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('nip_staf')
+                                    ->label('NIP Staf')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('jabatan')
+                                    ->label('Jabatan')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('status_kepegawaian')
+                                    ->label('Status Kepegawaian')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('pendidikan_aktif')
+                                    ->label('Pendidikan Aktif')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('kartu_pegawai')
+                                    ->label('Kartu Pegawai')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('wa_staf')
+                                    ->label('WhatsApp')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('no_telepon')
+                                    ->label('No Telepon')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('alamat_rumah')
+                                    ->label('Alamat Rumah')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('no_ktp')
+                                    ->label('No KTP')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('no_npwp')
+                                    ->label('No NPWP')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('no_bpjs_kesehatan')
+                                    ->label('No BPJS Kesehatan')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('no_bpjs_ketenagakerjaan')
+                                    ->label('No BPJS Ketenagakerjaan')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('rekening')
+                                    ->label('Rekening')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('nama_bank')
+                                    ->label('Nama Bank')
+                                    ->maxLength(255),
+
+                                Forms\Components\DatePicker::make('tanggal_lahir')
+                                    ->label('Tanggal Lahir'),
+
+                                Forms\Components\TextInput::make('tempat_lahir')
+                                    ->label('Tempat Lahir')
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('menuju_pensiun')
+                                    ->label('Menuju Pensiun')
+                                    ->maxLength(255),
+
+                                Forms\Components\Select::make('status_aplikasi')
+                                    ->label('Status Aplikasi')
+                                    ->options([
+                                        'aktif' => 'Aktif',
+                                        'non-aktif' => 'Non-Aktif',
+                                    ]),
+                            ]),
+                    ]),
             ])
             ->statePath('data');
     }
@@ -107,6 +220,33 @@ class Profile extends Page implements HasForms
                 'email' => $data['email'],
                 'password' => $data['password'] ?? $user->password,
             ]);
+
+            if ($user->staf) {
+                $user->staf->update([
+                    'id_nama' => $data['id_nama'],
+                    'nama_staf' => $data['nama_staf'],
+                    'gol_pangkat' => $data['gol_pangkat'],
+                    'nip_staf' => $data['nip_staf'],
+                    'status' => $data['status'],
+                    'pendidikan_aktif' => $data['pendidikan_aktif'],
+                    'wa_staf' => $data['wa_staf'],
+                    'jabatan' => $data['jabatan'],
+                    'tanggal_lahir' => $data['tanggal_lahir'],
+                    'menuju_pensiun' => $data['menuju_pensiun'],
+                    'kartu_pegawai' => $data['kartu_pegawai'],
+                    'status_kepegawaian' => $data['status_kepegawaian'],
+                    'tempat_lahir' => $data['tempat_lahir'],
+                    'no_ktp' => $data['no_ktp'],
+                    'no_npwp' => $data['no_npwp'],
+                    'no_bpjs_kesehatan' => $data['no_bpjs_kesehatan'],
+                    'no_bpjs_ketenagakerjaan' => $data['no_bpjs_ketenagakerjaan'],
+                    'no_telepon' => $data['no_telepon'],
+                    'alamat_rumah' => $data['alamat_rumah'],
+                    'rekening' => $data['rekening'],
+                    'nama_bank' => $data['nama_bank'],
+                    'status_aplikasi' => $data['status_aplikasi'],
+                ]);
+            }
 
             Notification::make()
                 ->title('Profil berhasil diperbarui')
