@@ -22,7 +22,6 @@ class Staf extends Model
         'wa_staf',
         'jabatan',
         'tanggal_lahir',
-        'menuju_pensiun',
         'kartu_pegawai',
         'status_kepegawaian',
         'tempat_lahir',
@@ -39,6 +38,10 @@ class Staf extends Model
         'sort_order',
     ];
 
+    protected $appends = [
+        'menuju_pensiun',
+    ];
+
     public function perjalanans()
     {
         return $this->belongsToMany(Perjalanan::class, 'perjalanan_kendaraans', 'pengemudi_id', 'perjalanan_id', 'staf_id', 'nomor_perjalanan')
@@ -53,6 +56,53 @@ class Staf extends Model
     public function jadwalPengemudis(): HasMany
     {
         return $this->hasMany(JadwalPengemudi::class, 'staf_id', 'staf_id');
+    }
+
+    /**
+     * Get the retirement countdown attribute.
+     *
+     * @return string
+     */
+    public function getMenujuPensiunAttribute(): string
+    {
+        if (!$this->tanggal_lahir) {
+            return 'Data tanggal lahir tidak tersedia';
+        }
+
+        try {
+            $birthDate = \Carbon\Carbon::parse($this->tanggal_lahir);
+            $retirementDate = $birthDate->copy()->addYears(58); // PNS pensiun di usia 58 tahun
+            $now = \Carbon\Carbon::now();
+
+            if ($retirementDate->isPast()) {
+                return 'Sudah pensiun';
+            }
+
+            $diff = $now->diff($retirementDate);
+
+            $years = $diff->y;
+            $months = $diff->m;
+            $days = $diff->d;
+
+            $parts = [];
+
+            if ($years > 0) {
+                $parts[] = $years . ' tahun';
+            }
+
+            if ($months > 0) {
+                $parts[] = $months . ' bulan';
+            }
+
+            if ($days > 0) {
+                $parts[] = $days . ' hari';
+            }
+
+            return implode(' ', $parts) ?: 'Kurang dari 1 hari';
+
+        } catch (\Exception $e) {
+            return 'Error menghitung waktu pensiun';
+        }
     }
 }
 

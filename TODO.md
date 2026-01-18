@@ -1,4 +1,7 @@
-- [ ] Create app/Filament/Pages/Profile.php with form for editing name, email, and password
-- [ ] Implement save logic to update user with password validation
-- [ ] Register the Profile page in Filament navigation
-- [ ] Test the profile page functionality
+- [ ] Move calculateRetirementCountdown method to Staf model
+- [ ] Add menuju_pensiun to appends in Staf model
+- [ ] Remove menuju_pensiun from fillable in Staf model
+- [ ] Update Profile.php mount to use $staf->menuju_pensiun
+- [ ] Remove calculateRetirementCountdown from Profile.php
+- [ ] Update Profile.php save to not update menuju_pensiun
+- [ ] Update form TextInput for menuju_pensiun to remove formatStateUsing

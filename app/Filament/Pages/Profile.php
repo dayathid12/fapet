@@ -11,6 +11,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 use Illuminate\Validation\Rules\Password;
 
 class Profile extends Page implements HasForms
@@ -212,7 +213,10 @@ class Profile extends Page implements HasForms
                                 Forms\Components\TextInput::make('menuju_pensiun')
                                     ->label('Menuju Pensiun')
                                     ->maxLength(255)
-                                    ->disabled(),
+                                    ->disabled()
+                                    ->formatStateUsing(function ($state, $record) {
+                                        return $this->calculateRetirementCountdown($record?->tanggal_lahir ?? $state);
+                                    }),
 
                                 Forms\Components\Select::make('status_aplikasi')
                                     ->label('Status Aplikasi')
@@ -220,7 +224,8 @@ class Profile extends Page implements HasForms
                                         'aktif' => 'Aktif',
                                         'non-aktif' => 'Non-Aktif',
                                     ])
-                                    ->disabled(),
+                                    ->disabled()
+                                    ->hidden(),
                             ]),
                     ]),
             ])
@@ -234,6 +239,48 @@ class Profile extends Page implements HasForms
                 ->label('Simpan')
                 ->submit('save'),
         ];
+    }
+
+    private function calculateRetirementCountdown(?string $tanggalLahir): string
+    {
+        if (!$tanggalLahir) {
+            return 'Data tanggal lahir tidak tersedia';
+        }
+
+        try {
+            $birthDate = \Carbon\Carbon::parse($tanggalLahir);
+            $retirementDate = $birthDate->copy()->addYears(58); // PNS pensiun di usia 58 tahun
+            $now = \Carbon\Carbon::now();
+
+            if ($retirementDate->isPast()) {
+                return 'Sudah pensiun';
+            }
+
+            $diff = $now->diff($retirementDate);
+
+            $years = $diff->y;
+            $months = $diff->m;
+            $days = $diff->d;
+
+            $parts = [];
+
+            if ($years > 0) {
+                $parts[] = $years . ' tahun';
+            }
+
+            if ($months > 0) {
+                $parts[] = $months . ' bulan';
+            }
+
+            if ($days > 0) {
+                $parts[] = $days . ' hari';
+            }
+
+            return implode(' ', $parts) ?: 'Kurang dari 1 hari';
+
+        } catch (\Exception $e) {
+            return 'Error menghitung waktu pensiun';
+        }
     }
 
     public function save(): void
@@ -260,7 +307,6 @@ class Profile extends Page implements HasForms
                     'wa_staf' => $data['wa_staf'],
                     'jabatan' => $data['jabatan'],
                     'tanggal_lahir' => $data['tanggal_lahir'],
-                    'menuju_pensiun' => $data['menuju_pensiun'],
                     'kartu_pegawai' => $data['kartu_pegawai'],
                     'status_kepegawaian' => $data['status_kepegawaian'],
                     'tempat_lahir' => $data['tempat_lahir'],
