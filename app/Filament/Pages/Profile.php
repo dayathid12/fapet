@@ -210,14 +210,6 @@ class Profile extends Page implements HasForms
                                     ->maxLength(255)
                                     ->disabled(),
 
-                                Forms\Components\TextInput::make('menuju_pensiun')
-                                    ->label('Menuju Pensiun')
-                                    ->maxLength(255)
-                                    ->disabled()
-                                    ->formatStateUsing(function ($state, $record) {
-                                        return $this->calculateRetirementCountdown($record?->tanggal_lahir ?? $state);
-                                    }),
-
                                 Forms\Components\Select::make('status_aplikasi')
                                     ->label('Status Aplikasi')
                                     ->options([
