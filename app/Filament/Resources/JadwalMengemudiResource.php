@@ -8,6 +8,9 @@ use App\Models\JadwalMengemudi;
 use App\Models\Perjalanan;
 use App\Models\EntryPengeluaran;
 use App\Models\RincianPengeluaran;
+use App\Models\Staf;
+use App\Models\Kendaraan;
+use App\Models\Wilayah;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -17,9 +20,10 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+
 class JadwalMengemudiResource extends Resource
 {
-    protected static ?string $model = Perjalanan::class;
+    protected static ?string $model = JadwalMengemudi::class;
     protected static ?string $navigationLabel = 'Jadwal Mengemudi';
     protected static ?string $navigationGroup = 'Poll Kendaraan';
     protected static ?int $navigationSort = 2;
@@ -29,7 +33,47 @@ class JadwalMengemudiResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Forms\Components\Select::make('perjalanan_id')
+                    ->label('Perjalanan')
+                    ->relationship('perjalanan', 'nomor_perjalanan')
+                    ->required(),
+                Forms\Components\Select::make('pengemudi_id')
+                    ->label('Pengemudi')
+                    ->relationship('pengemudi', 'nama_staf')
+                    ->required(),
+                Forms\Components\Select::make('asisten_id')
+                    ->label('Asisten')
+                    ->relationship('asisten', 'nama_staf'),
+                Forms\Components\Select::make('kendaraan_id')
+                    ->label('Kendaraan')
+                    ->relationship('kendaraan', 'nopol_kendaraan')
+                    ->required(),
+                Forms\Components\Select::make('tipe_penugasan')
+                    ->label('Tipe Penugasan')
+                    ->options([
+                        'Antar & Jemput' => 'Antar & Jemput',
+                        'Antar (Keberangkatan)' => 'Antar (Keberangkatan)',
+                        'Jemput (Kepulangan)' => 'Jemput (Kepulangan)',
+                    ])
+                    ->required(),
+                Forms\Components\DateTimePicker::make('waktu_keberangkatan')
+                    ->label('Waktu Keberangkatan')
+                    ->required(),
+                Forms\Components\DateTimePicker::make('waktu_kepulangan')
+                    ->label('Waktu Kepulangan'),
+                Forms\Components\DateTimePicker::make('waktu_selesai_penugasan')
+                    ->label('Waktu Selesai Penugasan'),
+                Forms\Components\Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        'Terjadwal' => 'Terjadwal',
+                        'Berlangsung' => 'Berlangsung',
+                        'Selesai' => 'Selesai',
+                        'Dibatalkan' => 'Dibatalkan',
+                    ])
+                    ->default('Terjadwal'),
+                Forms\Components\Textarea::make('catatan')
+                    ->label('Catatan'),
             ]);
     }
 
@@ -53,7 +97,7 @@ class JadwalMengemudiResource extends Resource
                     ->label('Nomor Polisi Kendaraan')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status_perjalanan') // Asumsi ada di model Perjalanan
+                Tables\Columns\TextColumn::make('perjalanan.status_perjalanan') // Asumsi ada di model Perjalanan
                     ->label('Status Perjalanan')
                     ->badge() // Tampilkan sebagai badge untuk tampilan lebih baik
                     ->color(fn (string $state): string => match ($state) {
@@ -87,10 +131,19 @@ class JadwalMengemudiResource extends Resource
                     ->sortable(),
             ])
             ->modifyQueryUsing(function (Builder $query) {
+                // Filter berdasarkan user yang login jika pengemudi/asisten
+                $user = auth()->user();
+                if ($user && $user->staf) {
+                    $stafId = $user->staf->id;
+                    $query->where(function (Builder $subQuery) use ($stafId) {
+                        $subQuery->where('pengemudi_id', $stafId)
+                                 ->orWhere('asisten_id', $stafId);
+                    });
+                }
                 return $query;
             })
             ->filters([
-                Tables\Filters\SelectFilter::make('status_perjalanan')
+                Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'Terjadwal' => 'Terjadwal',
                         'Selesai' => 'Selesai',
@@ -169,14 +222,13 @@ class JadwalMengemudiResource extends Resource
                 Tables\Actions\Action::make('surat_jalan')
                     ->label('Surat Jalan')
                     ->icon('heroicon-o-document')
-                    ->url(fn ($record) => route('perjalanan.pdf', $record->nomor_perjalanan))
+                    ->url(fn ($record) => route('perjalanan.pdf', $record->perjalanan->nomor_perjalanan))
                     ->openUrlInNewTab(),
                 Tables\Actions\Action::make('input_pengeluaran')
                     ->label('Rincian Biaya')
-                    ->icon('heroicon-o-banknotes') // Menggunakan ikon banknotes
-                    ->url(function (Perjalanan $record): ?string {
-                        // Find the associated RincianPengeluaran without creating one
-                        $rincianPengeluaran = RincianPengeluaran::where('perjalanan_id', $record->id)->first();
+                    ->icon('heroicon-o-banknotes')
+                    ->url(function (JadwalMengemudi $record): ?string {
+                        $rincianPengeluaran = RincianPengeluaran::where('perjalanan_id', $record->perjalanan_id)->first();
 
                         if ($rincianPengeluaran) {
                             return \App\Filament\Resources\EntryPengeluaranResource::getUrl('rincian-biaya', [
@@ -187,9 +239,8 @@ class JadwalMengemudiResource extends Resource
 
                         return null;
                     })
-                    ->visible(function (Perjalanan $record): bool {
-                        // The button is only visible if a corresponding RincianPengeluaran exists.
-                        return RincianPengeluaran::where('perjalanan_id', $record->id)->exists();
+                    ->visible(function (JadwalMengemudi $record): bool {
+                        return RincianPengeluaran::where('perjalanan_id', $record->perjalanan_id)->exists();
                     })
             ])
             ->bulkActions([
@@ -207,16 +258,14 @@ class JadwalMengemudiResource extends Resource
         // Jika user memiliki relasi staf (adalah pengemudi/asisten), filter berdasarkan staf_id
         if ($user && $user->staf) {
             $stafId = $user->staf->id;
-            $query->whereHas('details', function (Builder $query) use ($stafId) {
-                $query->where(function (Builder $subQuery) use ($stafId) {
-                    $subQuery->where('pengemudi_id', $stafId)
-                             ->orWhere('asisten_id', $stafId);
-                });
+            $query->where(function (Builder $subQuery) use ($stafId) {
+                $subQuery->where('pengemudi_id', $stafId)
+                         ->orWhere('asisten_id', $stafId);
             });
         }
 
-        // Tambahkan filter default untuk status_perjalanan agar hanya menampilkan 'Terjadwal' dan 'Selesai'
-        $query->whereIn('status_perjalanan', ['Terjadwal', 'Selesai']);
+        // Tambahkan filter default untuk status agar hanya menampilkan 'Terjadwal' dan 'Selesai'
+        $query->whereIn('status', ['Terjadwal', 'Selesai']);
 
         return $query;
     }
