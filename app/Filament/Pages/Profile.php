@@ -33,6 +33,7 @@ class Profile extends Page implements HasForms
     public function mount(): void
     {
         $user = auth()->user();
+        dd($user->staf_id, $user->staf); // Temporary debug statement
         $staf = $user->staf;
 
         $this->form->fill([

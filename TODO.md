@@ -1,7 +1,3 @@
-- [ ] Move calculateRetirementCountdown method to Staf model
-- [ ] Add menuju_pensiun to appends in Staf model
-- [ ] Remove menuju_pensiun from fillable in Staf model
-- [ ] Update Profile.php mount to use $staf->menuju_pensiun
-- [ ] Remove calculateRetirementCountdown from Profile.php
-- [ ] Update Profile.php save to not update menuju_pensiun
-- [ ] Update form TextInput for menuju_pensiun to remove formatStateUsing
+- [ ] Delete models: app/Models/Infra.php, app/Models/Teknik.php, app/Models/Urbang.php
+- [ ] Delete policies: app/Policies/InfraPolicy.php, app/Policies/TeknikPolicy.php, app/Policies/UrbangPolicy.php
+- [ ] Delete migrations: database/migrations/2025_10_21_091331_create_infras_table.php, database/migrations/2025_10_21_101509_create_tekniks_table.php, database/migrations/2025_10_21_094004_create_urbangs_table.php

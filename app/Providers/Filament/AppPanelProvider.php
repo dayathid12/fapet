@@ -74,27 +74,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
-                NavigationGroup::make()
-                    ->label('Asset')
-                     ->icon('heroicon-s-squares-2x2'),
 
-
-                NavigationGroup::make()
-                    ->label('Teknik')
-                     ->icon('heroicon-s-wrench-screwdriver'),
-
-
-                 NavigationGroup::make()
-                    ->label('Urbang')
-                     ->icon('heroicon-s-building-library'),
-
-                NavigationGroup::make()
-                    ->label('Infrastruktur')
-                     ->icon('heroicon-s-building-storefront'),
-
-                NavigationGroup::make()
-                    ->label('Logistik')
-                     ->icon('heroicon-s-pencil'),
 
                 NavigationGroup::make()
                     ->label('Poll Kendaraan')
@@ -103,8 +83,6 @@ class AppPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Pelaporan')
                      ->icon('heroicon-s-document'),
-
-
 
             ])
             ->middleware([

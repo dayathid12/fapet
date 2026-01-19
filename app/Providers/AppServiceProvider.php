@@ -15,13 +15,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (app()->environment('production')) {
-            URL::forceScheme('https');
-        }
-
-        ini_set('max_execution_time', 300);
-
-        Livewire::component('filament.pages.peminjaman-kendaraan-unpad', \App\Filament\Pages\PeminjamanKendaraanUnpad::class);
-        Livewire::component('booking-kendaraan-calendar', \App\Livewire\BookingKendaraanCalendar::class);
+        //
     }
 }
