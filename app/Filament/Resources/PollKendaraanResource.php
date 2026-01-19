@@ -62,4 +62,9 @@ class PollKendaraanResource extends Resource
             'edit' => Pages\EditPollKendaraan::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->can('view_any_poll::kendaraan');
+    }
 }

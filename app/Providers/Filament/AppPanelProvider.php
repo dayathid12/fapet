@@ -21,6 +21,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use App\Filament\Pages\Profile;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -32,6 +33,9 @@ class AppPanelProvider extends PanelProvider
             ->path('app')
             ->homeUrl('/app/halaman-utama')
             ->login()
+            ->plugins([
+                FilamentShieldPlugin::make()
+            ])
             ->renderHook(
                 'panels::auth.login.form.before',
                 fn (): View => view('filament.google-login-button')

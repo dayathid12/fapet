@@ -77,4 +77,9 @@ class InfraResource extends Resource
             'edit' => Pages\EditInfra::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->can('view_any_infra');
+    }
 }

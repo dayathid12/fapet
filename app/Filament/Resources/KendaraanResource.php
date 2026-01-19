@@ -21,31 +21,6 @@ class KendaraanResource extends Resource
     protected static ?string $navigationGroup = 'Poll Kendaraan';
     protected static ?int $navigationSort = 2;
 
-    public static function canViewAny(): bool
-    {
-        return true;
-    }
-
-    public static function canView($record): bool
-    {
-        return true;
-    }
-
-    public static function canCreate(): bool
-    {
-        return true;
-    }
-
-    public static function canEdit($record): bool
-    {
-        return true;
-    }
-
-    public static function canDelete($record): bool
-    {
-        return true;
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -186,5 +161,10 @@ class KendaraanResource extends Resource
             'view' => Pages\ViewKendaraan::route('/{record}'),
             'edit' => Pages\EditKendaraan::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->can('view_any_kendaraan');
     }
 }

@@ -16,4 +16,9 @@ class HalamanUtama extends Page
 
     // This will make it appear at the top of the navigation
     protected static ?int $navigationSort = -3;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->can('page_HalamanUtama');
+    }
 }

@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Select;
+use Spatie\Permission\Models\Role; // Add this use statement
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\UserResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -44,6 +45,12 @@ class UserResource extends Resource
                     ->dehydrated(fn ($state) => filled($state))
                     ->required(fn (string $context): bool => $context === 'create')
                     ->same('password'),
+
+                Forms\Components\CheckboxList::make('roles')
+                    ->relationship('roles', 'name')
+                    ->columns(2)
+                    ->helperText('Hanya Super Admin yang dapat memberikan peran Super Admin')
+                    ->required(),
             ]);
     }
 

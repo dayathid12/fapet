@@ -26,4 +26,9 @@ class ScheduleOverview extends Page
     {
         return MaxWidth::Full;
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->can('page_ScheduleOverview');
+    }
 }

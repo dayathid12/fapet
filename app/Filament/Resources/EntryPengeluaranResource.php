@@ -125,20 +125,44 @@ class EntryPengeluaranResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withSum(['rincianBiayas as total_bbm' => function ($query) {
-                $query->where('tipe', 'BBM');
-            }], 'biaya')
-            ->withSum(['rincianBiayas as total_toll' => function ($query) {
-                $query->where('tipe', 'Toll');
-            }], 'biaya')
-            ->withSum(['rincianBiayas as total_parkir_biaya' => function ($query) {
-                $query->where('tipe', 'Parkir');
-            }], 'biaya')
-            ->withSum('rincianPengeluarans as total_parkir_pengeluaran', 'biaya_parkir')
-            ->withSum('rincianBiayas as total_rincian_biayas', 'biaya');
-    }
+        public static function getEloquentQuery(): Builder
 
-}
+        {
+
+            return parent::getEloquentQuery()
+
+                ->withSum(['rincianBiayas as total_bbm' => function ($query) {
+
+                    $query->where('tipe', 'BBM');
+
+                }], 'biaya')
+
+                ->withSum(['rincianBiayas as total_toll' => function ($query) {
+
+                    $query->where('tipe', 'Toll');
+
+                }], 'biaya')
+
+                ->withSum(['rincianBiayas as total_parkir_biaya' => function ($query) {
+
+                    $query->where('tipe', 'Parkir');
+
+                }], 'biaya')
+
+                ->withSum('rincianPengeluarans as total_parkir_pengeluaran', 'biaya_parkir')
+
+                ->withSum('rincianBiayas as total_rincian_biayas', 'biaya');
+
+        }
+
+    
+
+        public static function shouldRegisterNavigation(): bool
+
+        {
+
+            return auth()->user()->can('view_any_entry::pengeluaran');
+
+        }
+
+    }

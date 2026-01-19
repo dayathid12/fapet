@@ -75,4 +75,9 @@ class UrbangResource extends Resource
             'edit' => Pages\EditUrbang::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->can('view_any_urbang');
+    }
 }

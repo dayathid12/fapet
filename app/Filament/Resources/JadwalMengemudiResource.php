@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 
+
 class JadwalMengemudiResource extends Resource
 {
     protected static ?string $model = JadwalMengemudi::class;
