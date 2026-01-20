@@ -22,7 +22,7 @@ class SPTJBUangPengemudiDetail extends Model
         'nomor_rekening',
         'golongan',
         'no_sptjb',
-        'nomor_perjalanan',
+        'nomor_surat',
     ];
 
     protected $casts = [

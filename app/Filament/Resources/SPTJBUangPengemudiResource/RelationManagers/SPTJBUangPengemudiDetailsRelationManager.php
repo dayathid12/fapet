@@ -90,13 +90,13 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                     ->label('Golongan')
                     ->maxLength(255)
                     ->disabled(),
-                Forms\Components\TextInput::make('nomor_perjalanan')
-                    ->label('Nomor Perjalanan')
+                Forms\Components\TextInput::make('nomor_surat')
+                    ->label('Nomor Surat')
                     ->maxLength(255)
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                         if ($state) {
-                            $perjalanan = \App\Models\Perjalanan::where('nomor_perjalanan', $state)->first();
+                            $perjalanan = \App\Models\Perjalanan::where('no_surat_tugas', $state)->first();
                             if ($perjalanan) {
                                 $besaran = 150000;
                                 $set('besaran_uang_per_hari', $besaran);
@@ -126,8 +126,8 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('no')
                     ->label('No')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('nomor_perjalanan')
-                    ->label('Nomor Perjalanan'),
+                Tables\Columns\TextColumn::make('nomor_surat')
+                    ->label('Nomor Surat'),
                 Tables\Columns\TextColumn::make('nama')
                     ->label('Nama')
                     ->searchable(),

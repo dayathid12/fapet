@@ -170,7 +170,7 @@ class SPTJBPengemudiResource extends Resource
                             foreach ($records as $record) {
                                 $filePath = $record->perjalanan->upload_surat_tugas;
                                 if (!$filePath) {
-                                    $content .= '<p>Tidak ada file Scan Surat Tugas untuk ' . ($record->perjalanan->nomor_perjalanan ?? 'N/A') . '.</p>';
+                                    $content .= '<p>Tidak ada file Scan Surat Tugas untuk ' . ($record->perjalanan->no_surat_tugas ?? 'N/A') . '.</p>';
                                     continue;
                                 }
 
@@ -179,7 +179,7 @@ class SPTJBPengemudiResource extends Resource
                                 $fileMimeType = Storage::mimeType($filePath);
 
                                 if (!Storage::disk('public')->exists($filePath)) {
-                                    $content .= '<p>File tidak ditemukan untuk ' . ($record->perjalanan->nomor_perjalanan ?? 'N/A') . '.</p>';
+                                    $content .= '<p>File tidak ditemukan untuk ' . ($record->perjalanan->no_surat_tugas ?? 'N/A') . '.</p>';
                                     continue;
                                 }
 
@@ -192,7 +192,7 @@ class SPTJBPengemudiResource extends Resource
                                                 <img src="' . $fileUrl . '" alt="Scan Surat Tugas" style="max-width: 100%; height: auto; display: block; margin: auto;">
                                             </div>';
                                 } else {
-                                    $content .= '<p>Format file tidak dapat dipratinjau langsung untuk ' . ($record->perjalanan->nomor_perjalanan ?? 'N/A') . '. <a href="' . $fileUrl . '" target="_blank" class="text-blue-500 underline">Download file</a></p>';
+                                    $content .= '<p>Format file tidak dapat dipratinjau langsung untuk ' . ($record->perjalanan->no_surat_tugas ?? 'N/A') . '. <a href="' . $fileUrl . '" target="_blank" class="text-blue-500 underline">Download file</a></p>';
                                 }
                             }
                             return new HtmlString($content);
@@ -246,7 +246,7 @@ class SPTJBPengemudiResource extends Resource
                                         'nomor_rekening' => null,
                                         'golongan' => null,
                                         'no_sptjb' => $data['no_sptjb'],
-                                        'nomor_perjalanan' => $record->perjalanan->nomor_perjalanan,
+                                        'nomor_surat' => $record->perjalanan->no_surat_tugas,
                                     ]);
                                 }
 
@@ -265,7 +265,7 @@ class SPTJBPengemudiResource extends Resource
                                         'nomor_rekening' => null,
                                         'golongan' => null,
                                         'no_sptjb' => $data['no_sptjb'],
-                                        'nomor_perjalanan' => $record->perjalanan->nomor_perjalanan,
+                                        'nomor_surat' => $record->perjalanan->no_surat_tugas,
                                     ]);
                                 }
                             }
