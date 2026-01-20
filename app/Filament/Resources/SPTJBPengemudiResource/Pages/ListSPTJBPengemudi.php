@@ -12,6 +12,8 @@ class ListSPTJBPengemudi extends ListRecords
 {
     protected static string $resource = SPTJBPengemudiResource::class;
 
+    protected static ?string $title = 'Daftar SPTJB Pengemudi';
+
     protected function getHeaderActions(): array
     {
         return [

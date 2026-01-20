@@ -13,6 +13,8 @@ class ListSuratTugas extends ListRecords
 {
     protected static string $resource = SuratTugasResource::class;
 
+    protected static ?string $title = 'Surat Tugas';
+
     protected function getHeaderActions(): array
     {
         return [
@@ -28,9 +30,6 @@ class ListSuratTugas extends ListRecords
     public function getTabs(): array
     {
         return [
-            'semua' => Tab::make('Semua')
-                ->icon('heroicon-o-queue-list'),
-
             'pengajuan' => Tab::make('Pengajuan')
                 ->icon('heroicon-o-document')
                 ->badge(function () {
