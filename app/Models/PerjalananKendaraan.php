@@ -78,6 +78,40 @@ class PerjalananKendaraan extends Model
             return $this->hasMany(RincianPengeluaran::class, 'perjalanan_id');
         }
 
+        /**
+         * Scope a query to only include records that have been processed into SPTJB.
+         *
+         * @param  \Illuminate\Database\Eloquent\Builder  $query
+         * @return \Illuminate\Database\Eloquent\Builder
+         */
+        public function scopeWhereHasBeenProcessed($query)
+        {
+            return $query->whereHas('perjalanan', function ($q) {
+                $q->whereExists(function ($sub) {
+                    $sub->selectRaw('1')
+                        ->from('sptjb_uang_pengemudi_details')
+                        ->whereColumn('nomor_surat', 'perjalanans.no_surat_tugas');
+                });
+            });
+        }
+
+        /**
+         * Scope a query to only include records that have NOT been processed into SPTJB.
+         *
+         * @param  \Illuminate\Database\Eloquent\Builder  $query
+         * @return \Illuminate\Database\Eloquent\Builder
+         */
+        public function scopeWhereHasNotBeenProcessed($query)
+        {
+            return $query->whereHas('perjalanan', function ($q) {
+                $q->whereNotExists(function ($sub) {
+                    $sub->selectRaw('1')
+                        ->from('sptjb_uang_pengemudi_details')
+                        ->whereColumn('nomor_surat', 'perjalanans.no_surat_tugas');
+                });
+            });
+        }
+
         public function hasBeenProcessed(): bool
         {
             if (!$this->perjalanan || !$this->perjalanan->no_surat_tugas) {
