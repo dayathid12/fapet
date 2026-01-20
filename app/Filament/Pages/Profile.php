@@ -86,7 +86,7 @@ class Profile extends Page implements HasForms
                         Forms\Components\TextInput::make('current_password')
                             ->label('Password Saat Ini')
                             ->password()
-                            ->required()
+                            ->hidden()
                             ->currentPassword()
                             ->revealable(),
 
