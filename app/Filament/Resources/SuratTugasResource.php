@@ -7,6 +7,7 @@ use App\Models\Perjalanan;
 use App\Models\Kendaraan;
 use App\Models\Staf;
 use App\Models\PerjalananKendaraan;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -115,10 +116,15 @@ class SuratTugasResource extends Resource
                         Section::make('Status & Dokumen')
                             ->icon('heroicon-o-document-check')
                             ->schema([
-                                TextInput::make('no_surat_tugas')
+                                TextInput::make('perjalanan.no_surat_tugas')
                                     ->label('No. Surat Tugas')
                                     ->placeholder('Auto / Input Manual')
                                     ->maxLength(255),
+                                
+                                DatePicker::make('perjalanan.tanggal_surat_tugas')
+                                    ->label('Tanggal Surat Tugas')
+                                    ->default(now())
+                                    ->required(),
 
                                 FileUpload::make('upload_tte')
                                     ->label('File TTE')
