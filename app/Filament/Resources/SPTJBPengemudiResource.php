@@ -215,7 +215,15 @@ class SPTJBPengemudiResource extends Resource
                                 'penerima' => 'Pengemudi dkk',
                             ]);
 
+                            // Count initial details
+                            $initialCount = SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $sptjb->id)->count();
+                            $newDetailsCount = 0;
+
                             foreach ($records as $record) {
+                                \Log::info('Processing record ID: ' . $record->id);
+                                \Log::info('Pengemudi: ' . ($record->pengemudi ? $record->pengemudi->nama_staf : 'N/A'));
+                                \Log::info('Asisten: ' . ($record->asisten ? $record->asisten->nama_staf : 'N/A'));
+
                                 // Calculate tanggal_penugasan and jumlah_hari from perjalanan dates
                                 $waktuKeberangkatan = $record->perjalanan->waktu_keberangkatan;
                                 $waktuKepulangan = $record->perjalanan->waktu_kepulangan;
@@ -233,40 +241,60 @@ class SPTJBPengemudiResource extends Resource
 
                                 // For pengemudi
                                 if ($record->pengemudi) {
-                                    SPTJBUangPengemudiDetail::create([
-                                        'sptjb_pengemudi_id' => $sptjb->id,
-                                        'no' => null,
-                                        'nama' => $record->pengemudi->nama_staf,
-                                        'jabatan' => 'Pengemudi',
-                                        'tanggal_penugasan' => $tanggalPenugasan,
-                                        'jumlah_hari' => $jumlahHari,
-                                        'besaran_uang_per_hari' => 150000,
-                                        'jumlah_rp' => null,
-                                        'jumlah_uang_diterima' => null,
-                                        'nomor_rekening' => null,
-                                        'golongan' => null,
-                                        'no_sptjb' => $data['no_sptjb'],
-                                        'nomor_surat' => $record->perjalanan->no_surat_tugas,
-                                    ]);
+                                    // Check if detail already exists
+                                    $existing = SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $sptjb->id)
+                                        ->where('nomor_surat', $record->perjalanan->no_surat_tugas)
+                                        ->where('jabatan', 'Pengemudi')
+                                        ->exists();
+                                    if (!$existing) {
+                                        SPTJBUangPengemudiDetail::create([
+                                            'sptjb_pengemudi_id' => $sptjb->id,
+                                            'no' => null,
+                                            'nama' => $record->pengemudi->nama_staf,
+                                            'jabatan' => 'Pengemudi',
+                                            'tanggal_penugasan' => $tanggalPenugasan,
+                                            'jumlah_hari' => $jumlahHari,
+                                            'besaran_uang_per_hari' => 150000,
+                                            'jumlah_rp' => null,
+                                            'jumlah_uang_diterima' => null,
+                                            'nomor_rekening' => null,
+                                            'golongan' => null,
+                                            'no_sptjb' => $data['no_sptjb'],
+                                            'nomor_surat' => $record->perjalanan->no_surat_tugas,
+                                        ]);
+                                        $newDetailsCount++;
+                                    }
+                                } else {
+                                    \Log::warning('Pengemudi not found for record ID: ' . $record->id);
                                 }
 
                                 // For asisten
                                 if ($record->asisten) {
-                                    SPTJBUangPengemudiDetail::create([
-                                        'sptjb_pengemudi_id' => $sptjb->id,
-                                        'no' => null,
-                                        'nama' => $record->asisten->nama_staf,
-                                        'jabatan' => 'Asisten',
-                                        'tanggal_penugasan' => $tanggalPenugasan,
-                                        'jumlah_hari' => $jumlahHari,
-                                        'besaran_uang_per_hari' => 150000,
-                                        'jumlah_rp' => null,
-                                        'jumlah_uang_diterima' => null,
-                                        'nomor_rekening' => null,
-                                        'golongan' => null,
-                                        'no_sptjb' => $data['no_sptjb'],
-                                        'nomor_surat' => $record->perjalanan->no_surat_tugas,
-                                    ]);
+                                    // Check if detail already exists
+                                    $existing = SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $sptjb->id)
+                                        ->where('nomor_surat', $record->perjalanan->no_surat_tugas)
+                                        ->where('jabatan', 'Asisten')
+                                        ->exists();
+                                    if (!$existing) {
+                                        SPTJBUangPengemudiDetail::create([
+                                            'sptjb_pengemudi_id' => $sptjb->id,
+                                            'no' => null,
+                                            'nama' => $record->asisten->nama_staf,
+                                            'jabatan' => 'Asisten',
+                                            'tanggal_penugasan' => $tanggalPenugasan,
+                                            'jumlah_hari' => $jumlahHari,
+                                            'besaran_uang_per_hari' => 150000,
+                                            'jumlah_rp' => null,
+                                            'jumlah_uang_diterima' => null,
+                                            'nomor_rekening' => null,
+                                            'golongan' => null,
+                                            'no_sptjb' => $data['no_sptjb'],
+                                            'nomor_surat' => $record->perjalanan->no_surat_tugas,
+                                        ]);
+                                        $newDetailsCount++;
+                                    }
+                                } else {
+                                    \Log::warning('Asisten not found for record ID: ' . $record->id);
                                 }
                             }
 
@@ -279,7 +307,7 @@ class SPTJBPengemudiResource extends Resource
                             // Notification
                             Notification::make()
                                 ->title('Berhasil!')
-                                ->body('Data pengemudi telah dimasukkan ke SPTJB ' . $data['no_sptjb'] . ' (ID: ' . $sptjb->id . '). Total detail: ' . $details->count())
+                                ->body('Data pengemudi telah dimasukkan ke SPTJB ' . $data['no_sptjb'] . ' (ID: ' . $sptjb->id . '). Detail baru ditambahkan: ' . $newDetailsCount)
                                 ->success()
                                 ->send();
 
