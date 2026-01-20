@@ -80,16 +80,10 @@ class PerjalananKendaraan extends Model
 
         public function hasBeenProcessed(): bool
         {
-            $namaPengemudi = $this->pengemudi?->nama_staf;
-            $namaAsisten = $this->asisten?->nama_staf;
+            if (!$this->perjalanan || !$this->perjalanan->no_surat_tugas) {
+                return false;
+            }
 
-            return \App\Models\SPTJBUangPengemudiDetail::where(function ($query) use ($namaPengemudi, $namaAsisten) {
-                if ($namaPengemudi) {
-                    $query->orWhere('nama', $namaPengemudi);
-                }
-                if ($namaAsisten) {
-                    $query->orWhere('nama', $namaAsisten);
-                }
-            })->exists();
+            return \App\Models\SPTJBUangPengemudiDetail::where('nomor_surat', $this->perjalanan->no_surat_tugas)->exists();
         }
     }

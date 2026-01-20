@@ -191,10 +191,17 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->after(function () {
+                        $this->resequenceNumbers();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->after(function () {
+                            $this->resequenceNumbers();
+                        }),
                 ]),
             ]);
     }
@@ -202,5 +209,21 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
     protected static function getNextNo($sptjbPengemudiId)
     {
         return SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $sptjbPengemudiId)->count() + 1;
+    }
+
+    protected function resequenceNumbers(): void
+    {
+        // Get the parent SPTJBPengemudi ID
+        $sptjbPengemudiId = $this->ownerRecord->id;
+
+        // Fetch all details for this parent, ordered by id to maintain creation order
+        $details = SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $sptjbPengemudiId)
+                                            ->orderBy('id')
+                                            ->get();
+
+        // Resequence the 'no' column
+        foreach ($details as $index => $detail) {
+            $detail->update(['no' => $index + 1]);
+        }
     }
 }

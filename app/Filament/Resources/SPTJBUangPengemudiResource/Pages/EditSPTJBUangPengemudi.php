@@ -31,9 +31,17 @@ class EditSPTJBUangPengemudi extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         \Log::info('SPTJBUangPengemudi ID: ' . $data['id']);
-        $totalJumlahUangDiterima = SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $data['id'])->sum('jumlah_uang_diterima');
+        $totalJumlahUangDiterima = SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $data['id'])->sum(\DB::raw('besaran_uang_per_hari * jumlah_hari'));
         \Log::info('Total Jumlah Uang Diterima: ' . $totalJumlahUangDiterima);
         $data['total_jumlah_uang_diterima'] = $totalJumlahUangDiterima;
+
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Remove the calculated field to avoid validation errors during save
+        unset($data['total_jumlah_uang_diterima']);
 
         return $data;
     }

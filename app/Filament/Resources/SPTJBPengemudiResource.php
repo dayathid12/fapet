@@ -218,6 +218,7 @@ class SPTJBPengemudiResource extends Resource
                             // Count initial details
                             $initialCount = SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $sptjb->id)->count();
                             $newDetailsCount = 0;
+                            $hasDuplicates = false; // Initialize flag
 
                             foreach ($records as $record) {
                                 \Log::info('Processing record ID: ' . $record->id);
@@ -240,13 +241,14 @@ class SPTJBPengemudiResource extends Resource
                                 }
 
                                 // For pengemudi
-                                if ($record->pengemudi) {
-                                    // Check if detail already exists
-                                    $existing = SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $sptjb->id)
-                                        ->where('nomor_surat', $record->perjalanan->no_surat_tugas)
-                                        ->where('jabatan', 'Pengemudi')
-                                        ->exists();
-                                    if (!$existing) {
+                                if ($record->pengemudi && !empty($record->perjalanan->no_surat_tugas)) { // Added empty check
+                                    $nomorSurat = $record->perjalanan->no_surat_tugas;
+                                    \Log::info("Checking for existing pengemudi detail: sptjb_pengemudi_id={$sptjb->id}, nomor_surat={$nomorSurat}, jabatan=Pengemudi");
+                                                                         $existingDetail = SPTJBUangPengemudiDetail::where('nomor_surat', $nomorSurat)
+                                                                            ->where('nama', $record->pengemudi->nama_staf)
+                                                                            ->where('jabatan', 'Pengemudi')
+                                                                            ->first();
+                                    if (!$existingDetail) {
                                         SPTJBUangPengemudiDetail::create([
                                             'sptjb_pengemudi_id' => $sptjb->id,
                                             'no' => null,
@@ -263,19 +265,29 @@ class SPTJBPengemudiResource extends Resource
                                             'nomor_surat' => $record->perjalanan->no_surat_tugas,
                                         ]);
                                         $newDetailsCount++;
+                                    } else {
+                                        \Log::info("Pengemudi detail already exists for nomor_surat: {$nomorSurat}, SPTJB ID: {$sptjb->id}");
+                                        $existingSptjbNo = SPTJBPengemudi::find($existingDetail->sptjb_pengemudi_id)->no_sptjb ?? 'N/A';
+                                        Notification::make()
+                                            ->title('Duplikat Ditemukan!')
+                                            ->body("Entri untuk Pengemudi ({$record->pengemudi->nama_staf}) dengan Nomor Surat Tugas '{$nomorSurat}' sudah ada di SPTJB '{$existingSptjbNo}'.")
+                                            ->danger()
+                                            ->send();
+                                        $hasDuplicates = true; // Set flag
                                     }
                                 } else {
-                                    \Log::warning('Pengemudi not found for record ID: ' . $record->id);
+                                    \Log::warning('Pengemudi not found or no_surat_tugas is empty for record ID: ' . $record->id);
                                 }
 
                                 // For asisten
-                                if ($record->asisten) {
-                                    // Check if detail already exists
-                                    $existing = SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $sptjb->id)
-                                        ->where('nomor_surat', $record->perjalanan->no_surat_tugas)
-                                        ->where('jabatan', 'Asisten')
-                                        ->exists();
-                                    if (!$existing) {
+                                if ($record->asisten && !empty($record->perjalanan->no_surat_tugas)) { // Added empty check
+                                    $nomorSurat = $record->perjalanan->no_surat_tugas;
+                                    \Log::info("Checking for existing asisten detail: sptjb_pengemudi_id={$sptjb->id}, nomor_surat={$nomorSurat}, jabatan=Asisten");
+                                                                         $existingDetail = SPTJBUangPengemudiDetail::where('nomor_surat', $nomorSurat)
+                                                                            ->where('nama', $record->asisten->nama_staf)
+                                                                            ->where('jabatan', 'Asisten')
+                                                                            ->first();
+                                    if (!$existingDetail) {
                                         SPTJBUangPengemudiDetail::create([
                                             'sptjb_pengemudi_id' => $sptjb->id,
                                             'no' => null,
@@ -292,9 +304,18 @@ class SPTJBPengemudiResource extends Resource
                                             'nomor_surat' => $record->perjalanan->no_surat_tugas,
                                         ]);
                                         $newDetailsCount++;
+                                    } else {
+                                        \Log::info("Asisten detail already exists for nomor_surat: {$nomorSurat}, SPTJB ID: {$sptjb->id}");
+                                        $existingSptjbNo = SPTJBPengemudi::find($existingDetail->sptjb_pengemudi_id)->no_sptjb ?? 'N/A';
+                                        Notification::make()
+                                            ->title('Duplikat Ditemukan!')
+                                            ->body("Entri untuk Asisten ({$record->asisten->nama_staf}) dengan Nomor Surat Tugas '{$nomorSurat}' sudah ada di SPTJB '{$existingSptjbNo}'.")
+                                            ->danger()
+                                            ->send();
+                                        $hasDuplicates = true; // Set flag
                                     }
                                 } else {
-                                    \Log::warning('Asisten not found for record ID: ' . $record->id);
+                                    \Log::warning('Asisten not found or no_surat_tugas is empty for record ID: ' . $record->id);
                                 }
                             }
 
@@ -305,11 +326,19 @@ class SPTJBPengemudiResource extends Resource
                             }
 
                             // Notification
-                            Notification::make()
-                                ->title('Berhasil!')
-                                ->body('Data pengemudi telah dimasukkan ke SPTJB ' . $data['no_sptjb'] . ' (ID: ' . $sptjb->id . '). Detail baru ditambahkan: ' . $newDetailsCount)
-                                ->success()
-                                ->send();
+                            if (!$hasDuplicates) { // Only show success if no duplicates were found
+                                Notification::make()
+                                    ->title('Berhasil!')
+                                    ->body('Data pengemudi telah dimasukkan ke SPTJB ' . $data['no_sptjb'] . ' (ID: ' . $sptjb->id . '). Detail baru ditambahkan: ' . $newDetailsCount)
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('Proses Selesai dengan Duplikat!')
+                                    ->body('Beberapa data pengemudi mungkin tidak dimasukkan karena duplikasi. Detail baru ditambahkan: ' . $newDetailsCount)
+                                    ->danger()
+                                    ->send();
+                            }
 
                             // Redirect to edit page
                             return redirect()->to(\App\Filament\Resources\SPTJBUangPengemudiResource::getUrl('edit', ['record' => $sptjb->id]));

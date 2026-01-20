@@ -12,7 +12,6 @@ class SPTJBPengemudi extends Model
         'no_sptjb',
         'uraian',
         'penerima',
-        'total_jumlah_uang_diterima',
         'tanggal_surat',
     ];
 

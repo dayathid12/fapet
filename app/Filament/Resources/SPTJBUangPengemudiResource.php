@@ -30,26 +30,21 @@ class SPTJBUangPengemudiResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('no_sptjb')
                     ->label('No. SPTJB')
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\DatePicker::make('tanggal_surat')
-                    ->label('Tanggal Surat')
-                    ->required(),
+                    ->label('Tanggal Surat'),
                 Forms\Components\TextInput::make('uraian')
                     ->label('Uraian')
                     ->default('Uang Saku Pengemudi dalam rangka melayani Kegiatan Civitas Akademika Unpad tgl 5 s.d. 9 ' . date('F') . ' ' . date('Y'))
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('penerima')
                     ->label('Penerima')
                     ->default('Amin dkk 14 org')
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('total_jumlah_uang_diterima')
                     ->label('Total Uang Diterima')
                     ->prefix('Rp')
                     ->readOnly()
-                    ->numeric()
                     ->formatStateUsing(function ($state, $record) {
                         if (!$record) {
                             return '0';
