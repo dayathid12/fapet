@@ -140,8 +140,9 @@ class SuratTugasResource extends Resource
                                     ->maxSize(10240)
                                     ->directory('tte')
                                     ->imagePreviewHeight('100')
-                                    ->openable(),
-
+                                    ->openable()
+                                    ->image()
+                                    ->imageEditor(),
                                 FileUpload::make('upload_surat_tugas')
                                     ->label('Scan Surat Tugas')
                                     ->acceptedFileTypes(['application/pdf'])

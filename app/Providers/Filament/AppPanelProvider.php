@@ -60,7 +60,43 @@ class AppPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->renderHook(
                 PanelsRenderHook::BODY_END,
-                fn (): string => '<script>if ("serviceWorker" in navigator) {navigator.serviceWorker.register("/serviceworker.js").then(registration => {console.log("Service Worker registered with scope:", registration.scope);}).catch(error => {console.error("Service Worker registration failed:", error);});}</script>',
+                fn (): string => '<script>if ("serviceWorker" in navigator) {navigator.serviceWorker.register("/serviceworker.js").then(registration => {console.log("Service Worker registered with scope:", registration.scope);}).catch(error => {console.error("Service Worker registration failed:", error);});}</script>' .
+                                 '<script>' .
+                                 'document.addEventListener(\'livewire:navigated\', () => {' .
+                                     'const fileInput = document.querySelector(\'input[type="file"][name*="upload_tte"]\');' .
+                                     'if (fileInput) {' .
+                                         'fileInput.addEventListener(\'paste\', (event) => {' .
+                                             'const items = (event.clipboardData || event.originalEvent.clipboardData).items;' .
+                                             'let imageFound = false;' .
+                                             'for (const item of items) {' .
+                                                 'if (item.type.indexOf(\'image\') !== -1) {' .
+                                                     'imageFound = true;' .
+                                                     'event.preventDefault();' .
+                                                     'const blob = item.getAsFile();' .
+                                                     'if (blob) {' .
+                                                         'let fileType = blob.type;' .
+                                                         'if (!fileType.startsWith(\'image/\')) {' .
+                                                             'fileType = \'image/png\';' .
+                                                         '} else if (fileType === \'image/x-png\') {' .
+                                                             'fileType = \'image/png\';' .
+                                                         '} else if (fileType === \'image/pjpeg\' || fileType === \'image/jpg\') {' .
+                                                             'fileType = \'image/jpeg\';' .
+                                                         '}' .
+                                                         'const filename = `pasted_image_${Date.now()}.png`;' .
+                                                         'const file = new File([blob], filename, { type: fileType });' .
+                                                         'const dataTransfer = new DataTransfer();' .
+                                                         'dataTransfer.items.add(file);' .
+                                                         'fileInput.files = dataTransfer.files;' .
+                                                         'fileInput.dispatchEvent(new Event(\'change\', { bubbles: true }));' .
+                                                         'console.log(\'Pasted image handled:\', file);' .
+                                                     '}' .
+                                                     'break;' .
+                                                 '}' .
+                                             '}' .
+                                         '});' .
+                                     '}' .
+                                 '});' .
+                                 '</script>',
             )
             ->widgets([
                 Widgets\AccountWidget::class,
