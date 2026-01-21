@@ -1,3 +1,36 @@
+    @php
+        use Carbon\Carbon;
+        use Carbon\CarbonPeriod;
+
+        $minDate = null;
+        $maxDate = null;
+
+        if ($sptjb && $sptjb->details->isNotEmpty()) {
+            foreach ($sptjb->details as $detail) {
+                $currentDate = Carbon::parse($detail->tanggal_penugasan);
+                if ($minDate === null || $currentDate->lt($minDate)) {
+                    $minDate = $currentDate;
+                }
+                if ($maxDate === null || $currentDate->gt($maxDate)) {
+                    $maxDate = $currentDate;
+                }
+            }
+        }
+
+        $dateRangeString = '';
+        if ($minDate && $maxDate) {
+            $minDate->locale('id');
+            $maxDate->locale('id');
+
+            if ($minDate->month === $maxDate->month && $minDate->year === $maxDate->year) {
+                // Same month and year: "3 - 16 Januari 2026"
+                $dateRangeString = $minDate->isoFormat('D') . ' - ' . $maxDate->isoFormat('D MMMM Y');
+            } else {
+                // Different months or years: "3 Desember 2026 s.d 11 Januari 2026"
+                $dateRangeString = $minDate->isoFormat('D MMMM Y') . ' s.d ' . $maxDate->isoFormat('D MMMM Y');
+            }
+        }
+    @endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -69,7 +102,7 @@
                     <p class="address" style="margin: 0; padding: 0;">JALAN RAYA BANDUNG - SUMEDANG KM.21 JATINANGOR</p>
                 </td>
                 <td style="width: 30%; text-align: right; border: none; padding: 0;">
-                    <p class="description" style="font-size: 8pt; margin: 0; padding: 0;">Uang Saku Pengemudi dalam rangka melayani Kegiatan Civitas Akademika Unpad/UN6.PK/KU/2026</p>
+                    <p class="description" style="font-size: 8pt; margin: 0; padding: 0;">Uang Saku Pengemudi dalam rangka melayani Kegiatan Civitas Akademika {{ $dateRangeString }}</p>
                 </td>
             </tr>
         </table>
