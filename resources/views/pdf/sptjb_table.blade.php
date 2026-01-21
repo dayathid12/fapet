@@ -7,14 +7,19 @@
 
         if ($sptjb && $sptjb->details->isNotEmpty()) {
             foreach ($sptjb->details as $detail) {
-                // Add a check here
-                if (!empty($detail->tanggal_penugasan) && Carbon::parse($detail->tanggal_penugasan)->isValid()) {
-                    $currentDate = Carbon::parse($detail->tanggal_penugasan);
-                    if ($minDate === null || $currentDate->lt($minDate)) {
-                        $minDate = $currentDate;
-                    }
-                    if ($maxDate === null || $currentDate->gt($maxDate)) {
-                        $maxDate = $currentDate;
+                $tanggal = $detail->tanggal_penugasan;
+                if ($tanggal && strlen($tanggal) > 4) { // Check if tanggal is not empty and has a reasonable length
+                    try {
+                        $currentDate = Carbon::parse($tanggal);
+                        if ($minDate === null || $currentDate->lt($minDate)) {
+                            $minDate = $currentDate;
+                        }
+                        if ($maxDate === null || $currentDate->gt($maxDate)) {
+                            $maxDate = $currentDate;
+                        }
+                    } catch (\Exception $e) {
+                        // Log the error or handle it as needed, e.g., skip this detail
+                        // For now, we just skip parsing this invalid date
                     }
                 }
             }
@@ -177,7 +182,19 @@
                 NIP.{{ $penandatangan->direktur_nip ?? '196910232002121001' }}
             </td>
             <td>
-                Jatinangor, {{ !empty($sptjb->tanggal_surat) && \Carbon\Carbon::parse($sptjb->tanggal_surat)->isValid() ? \Carbon\Carbon::parse($sptjb->tanggal_surat)->locale('id_ID')->isoFormat('D MMMM Y') : '' }}<br>
+                Jatinangor, 
+                @php
+                    $tanggalSurat = $sptjb->tanggal_surat;
+                    $displayTanggalSurat = '';
+                    if ($tanggalSurat && strlen($tanggalSurat) > 4) {
+                        try {
+                            $displayTanggalSurat = \Carbon\Carbon::parse($tanggalSurat)->locale('id_ID')->isoFormat('D MMMM Y');
+                        } catch (\Exception $e) {
+                            $displayTanggalSurat = $tanggalSurat; // Fallback to raw string if parsing fails
+                        }
+                    }
+                @endphp
+                {{ $displayTanggalSurat }}<br>
                 Pembuat Daftar
                 <div class="sign-space"></div>
                 <strong>{{ $penandatangan->pembuat_nama ?? 'Agah Gunadi Ramdhan' }}</strong><br>
