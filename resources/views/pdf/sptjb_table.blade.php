@@ -7,12 +7,15 @@
 
         if ($sptjb && $sptjb->details->isNotEmpty()) {
             foreach ($sptjb->details as $detail) {
-                $currentDate = Carbon::parse($detail->tanggal_penugasan);
-                if ($minDate === null || $currentDate->lt($minDate)) {
-                    $minDate = $currentDate;
-                }
-                if ($maxDate === null || $currentDate->gt($maxDate)) {
-                    $maxDate = $currentDate;
+                // Add a check here
+                if (!empty($detail->tanggal_penugasan) && Carbon::parse($detail->tanggal_penugasan)->isValid()) {
+                    $currentDate = Carbon::parse($detail->tanggal_penugasan);
+                    if ($minDate === null || $currentDate->lt($minDate)) {
+                        $minDate = $currentDate;
+                    }
+                    if ($maxDate === null || $currentDate->gt($maxDate)) {
+                        $maxDate = $currentDate;
+                    }
                 }
             }
         }
