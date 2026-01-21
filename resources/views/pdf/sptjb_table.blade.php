@@ -177,7 +177,7 @@
                 NIP.{{ $penandatangan->direktur_nip ?? '196910232002121001' }}
             </td>
             <td>
-                Jatinangor, {{ \Carbon\Carbon::parse($sptjb->tanggal_surat)->locale('id_ID')->isoFormat('D MMMM Y') }}<br>
+                Jatinangor, {{ !empty($sptjb->tanggal_surat) && \Carbon\Carbon::parse($sptjb->tanggal_surat)->isValid() ? \Carbon\Carbon::parse($sptjb->tanggal_surat)->locale('id_ID')->isoFormat('D MMMM Y') : '' }}<br>
                 Pembuat Daftar
                 <div class="sign-space"></div>
                 <strong>{{ $penandatangan->pembuat_nama ?? 'Agah Gunadi Ramdhan' }}</strong><br>
