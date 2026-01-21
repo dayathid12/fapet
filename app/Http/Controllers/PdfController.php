@@ -94,7 +94,36 @@ class PdfController extends Controller
         // Set locale to Indonesian
         \Carbon\Carbon::setLocale('id');
 
-        $pdf = Pdf::loadView('pdf.sptjb_table', compact('sptjb'))->setPaper('a4', 'landscape');
+        $earliestStartDate = null;
+        $latestEndDate = null;
+
+        foreach ($sptjb->details as $detail) {
+            $perjalanan = Perjalanan::where('no_surat_tugas', $detail->nomor_surat)->first();
+            if ($perjalanan && $perjalanan->waktu_keberangkatan && $perjalanan->waktu_kepulangan) {
+                $currentStartDate = \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan);
+                $currentEndDate = \Carbon\Carbon::parse($perjalanan->waktu_kepulangan);
+
+                if ($earliestStartDate === null || $currentStartDate->lt($earliestStartDate)) {
+                    $earliestStartDate = $currentStartDate;
+                }
+                if ($latestEndDate === null || $currentEndDate->gt($latestEndDate)) {
+                    $latestEndDate = $currentEndDate;
+                }
+            }
+        }
+
+        $dateRangeString = '';
+        if ($earliestStartDate && $latestEndDate) {
+            if ($earliestStartDate->format('Ym') === $latestEndDate->format('Ym')) {
+                // Same month and year: "3 - 16 Januari 2026"
+                $dateRangeString = $earliestStartDate->format('j') . ' - ' . $latestEndDate->translatedFormat('j F Y');
+            } else {
+                // Different month or year: "3 Desember 2026 s.d 11 Januari 2027"
+                $dateRangeString = $earliestStartDate->translatedFormat('j F Y') . ' s.d ' . $latestEndDate->translatedFormat('j F Y');
+            }
+        }
+
+        $pdf = Pdf::loadView('pdf.sptjb_table', compact('sptjb', 'dateRangeString'))->setPaper('a4', 'landscape');
 
         $fileName = 'sptjb-table-' . preg_replace('/[^a-zA-Z0-9_-]/', '', $sptjb->no_sptjb) . '.pdf';
 
