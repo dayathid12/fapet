@@ -26,6 +26,7 @@ class Perjalanan extends Model
         'jenis_operasional',
         'status_operasional',
         'no_surat_tugas',
+        'tanggal_surat_tugas',
         'file_surat_jalan',
         'docs_surat_tugas',
         'upload_surat_tugas',
@@ -53,6 +54,7 @@ class Perjalanan extends Model
     protected $casts = [
         'waktu_keberangkatan' => 'datetime',
         'waktu_kepulangan' => 'datetime',
+        'tanggal_surat_tugas' => 'date',
     ];
 
 

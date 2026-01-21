@@ -7,7 +7,6 @@ use App\Models\Perjalanan;
 use App\Models\Kendaraan;
 use App\Models\Staf;
 use App\Models\PerjalananKendaraan;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -32,12 +31,18 @@ class SuratTugasResource extends Resource
 
     protected static ?string $navigationLabel = 'Surat Tugas';
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('perjalanan');
+    }
+
 
         protected static ?string $navigationGroup = 'Pelaporan';
 
     public static function form(Form $form): Form
     {
         return $form
+
             ->schema([
                 Group::make()
                     ->schema([
@@ -116,15 +121,18 @@ class SuratTugasResource extends Resource
                         Section::make('Status & Dokumen')
                             ->icon('heroicon-o-document-check')
                             ->schema([
-                                TextInput::make('perjalanan.no_surat_tugas')
+                                TextInput::make('no_surat_tugas')
                                     ->label('No. Surat Tugas')
                                     ->placeholder('Auto / Input Manual')
                                     ->maxLength(255),
-                                
-                                DatePicker::make('perjalanan.tanggal_surat_tugas')
+
+                                DateTimePicker::make('perjalanan.tanggal_surat_tugas')
                                     ->label('Tanggal Surat Tugas')
-                                    ->default(now())
-                                    ->required(),
+                                    ->date()
+                                    ->withoutTime()
+                                    ->format('d F Y')
+                                    ->required()
+                                    ->default(now()),
 
                                 FileUpload::make('upload_tte')
                                     ->label('File TTE')
@@ -202,7 +210,7 @@ class SuratTugasResource extends Resource
 
                                 ],
                                 'Pengajuan' => [
-                                  
+
                                 ],
                                 default => [],
 

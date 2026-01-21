@@ -51,6 +51,7 @@ class EditSuratTugas extends EditRecord
             $data['perjalanan']['lokasi_keberangkatan'] = $perjalanan->lokasi_keberangkatan;
             $data['perjalanan']['alamat_tujuan'] = $perjalanan->alamat_tujuan;
             $data['perjalanan']['kota_kabupaten'] = $perjalanan->kota_kabupaten;
+            $data['perjalanan']['tanggal_surat_tugas'] = $perjalanan->tanggal_surat_tugas;
         }
         return $data;
     }
@@ -64,6 +65,7 @@ class EditSuratTugas extends EditRecord
             'upload_surat_tugas' => $data['upload_surat_tugas'] ?? null,
             'waktu_keberangkatan' => $data['perjalanan']['waktu_keberangkatan'] ?? null,
             'waktu_kepulangan' => $data['perjalanan']['waktu_kepulangan'] ?? null,
+            'tanggal_surat_tugas' => $data['perjalanan']['tanggal_surat_tugas'] ?? null,
         ];
 
         // Store in a temporary property to use in afterSave
@@ -71,7 +73,7 @@ class EditSuratTugas extends EditRecord
 
         // Remove from data so they don't save to PerjalananKendaraan
         unset($data['no_surat_tugas'], $data['upload_tte'], $data['upload_surat_tugas']);
-        unset($data['perjalanan']['waktu_keberangkatan'], $data['perjalanan']['waktu_kepulangan']);
+        unset($data['perjalanan']['waktu_keberangkatan'], $data['perjalanan']['waktu_kepulangan'], $data['perjalanan']['tanggal_surat_tugas']);
         // Unset the whole 'perjalanan' array if it's empty after unsetting its elements
         if (empty($data['perjalanan'])) {
             unset($data['perjalanan']);

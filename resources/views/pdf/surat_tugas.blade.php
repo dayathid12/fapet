@@ -244,7 +244,7 @@
 
             <td style="width: 90%; vertical-align: top;">
                 <div class="signature-content">
-                    <p style="margin: 0;">Jatinangor, {{ now()->translatedFormat('d F Y') }}</p>
+                    <p style="margin: 0;">Jatinangor, {{ $perjalanan->tanggal_surat_tugas ? \Carbon\Carbon::parse($perjalanan->tanggal_surat_tugas)->translatedFormat('d F Y') : now()->translatedFormat('d F Y') }}</p>
                     <p style="margin: 0;">a.n. Direktur</p>
                     <p style="margin: 0;">Sekretaris Direktorat Pengelolaan</p>
                     <p style="margin: 0;">Aset dan Sarana Prasarana,</p>
