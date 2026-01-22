@@ -1,6 +1,8 @@
 <x-filament-panels::page>
     {{ $this->infolist }}
 
+    <input type="hidden" wire:model.live="hideElements">
+
     @php
         // Data Query & Helpers
         $rincianBiayas = $this->rincianPengeluaran->rincianBiayas;
@@ -101,6 +103,7 @@
                         @if($item->deskripsi)
                             <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100/50 dark:border-gray-700/30">
                                 <p class="text-[11px] text-gray-400 italic line-clamp-1 group-hover:text-gray-500 dark:group-hover:text-gray-300 transition-colors">{{ $item->deskripsi }}</p>
+                                @if(!$hideElements)
                                 <form action="{{ route('biaya.delete', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item ini?')" class="inline opacity-50">
                                     @csrf
                                     @method('DELETE')
@@ -110,6 +113,7 @@
                                         </svg>
                                     </button>
                                 </form>
+                                @endif
                             </div>
                         @endif
                     </div>

@@ -18,7 +18,7 @@ class EntryPengeluaran extends Model
      */
     protected $table = 'entry_pengeluarans'; // Ganti dengan nama tabel Anda yang sebenarnya
 
-    protected $fillable = ['nomor_berkas', 'nama_berkas'];
+    protected $fillable = ['nomor_berkas', 'nama_berkas', 'hide_elements'];
 
     public function perjalanans(): HasMany
     {

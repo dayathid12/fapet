@@ -47,7 +47,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
     public $bbm;
     public $toll;
     public $parkir;
-    public $hideElements = false;
+    public $hideElements; // Deklarasikan properti public
 
     public function mount(EntryPengeluaran $record, $rincianPengeluaranId): void
     {
@@ -68,6 +68,16 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
         $this->parkir = RincianBiaya::where('rincian_pengeluaran_id', $this->rincianPengeluaran->id)
             ->where('tipe', 'parkir')
             ->get();
+
+        $this->hideElements = $this->record->hide_elements; // Inisialisasi dari model
+    }
+
+    public function toggleHideElements(): void
+    {
+        $this->record->hide_elements = !$this->record->hide_elements;
+        $this->record->save();
+        $this->hideElements = $this->record->hide_elements; // Update component property
+        $this->dispatch('refresh');
     }
 
     public function infolist(Infolist $infolist): Infolist
@@ -149,7 +159,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                 ->icon(fn () => $this->hideElements ? 'heroicon-o-eye' : 'heroicon-o-eye-slash')
                 ->color('warning')
                 ->action(function (): void {
-                    $this->hideElements = !$this->hideElements;
+                    $this->toggleHideElements();
                 });
         }
 
