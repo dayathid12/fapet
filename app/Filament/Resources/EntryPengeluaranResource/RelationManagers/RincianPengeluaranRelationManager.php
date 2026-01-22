@@ -289,6 +289,14 @@ class RincianPengeluaranRelationManager extends RelationManager
                     ->action(function () {
                         return Excel::download(new RincianBiayaExport($this->getOwnerRecord()), 'rincian-biaya-' . $this->getOwnerRecord()->id . '.xlsx');
                     }),
+                Action::make('toggle_pertama_retail')
+                    ->label(fn () => session('include_pertama_retail', true) ? 'Exclude Pertama Retail' : 'Include Pertama Retail')
+                    ->icon(fn () => session('include_pertama_retail', true) ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
+                    ->color(fn () => session('include_pertama_retail', true) ? 'success' : 'warning')
+                    ->action(function () {
+                        $current = session('include_pertama_retail', true);
+                        session(['include_pertama_retail' => !$current]);
+                    }),
                 Tables\Actions\CreateAction::make(),
             ])
             ->actions([
@@ -309,6 +317,9 @@ class RincianPengeluaranRelationManager extends RelationManager
 
     protected function getTableQuery(): Builder
     {
+        $includePertamaRetail = session('include_pertama_retail', true);
+        $bbmCondition = $includePertamaRetail ? '1=1' : 'bbm_biayas.pertama_retail = false';
+
         return $this->getRelationship()->getQuery()
             ->with([
                 'rincianBiayas',
@@ -330,7 +341,7 @@ class RincianPengeluaranRelationManager extends RelationManager
                      ->where('parkir_biayas.tipe', '=', 'parkir');
             })
             ->select('rincian_pengeluarans.*')
-            ->selectRaw('COALESCE(SUM(bbm_biayas.biaya), 0) as total_bbm')
+            ->selectRaw("COALESCE(SUM(CASE WHEN {$bbmCondition} THEN bbm_biayas.biaya ELSE 0 END), 0) as total_bbm")
             ->selectRaw('COALESCE(SUM(toll_biayas.biaya), 0) as total_toll')
             ->selectRaw('COALESCE(SUM(parkir_biayas.biaya), 0) + COALESCE(rincian_pengeluarans.biaya_parkir, 0) as total_parkir')
             ->groupBy('rincian_pengeluarans.id');
