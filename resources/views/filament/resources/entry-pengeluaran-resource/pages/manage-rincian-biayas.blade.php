@@ -91,6 +91,9 @@
                             <div class="flex-1">
                                 <h4 class="font-bold text-gray-700 dark:text-gray-200 text-sm">{{ $item->jenis_bbm }}</h4>
                                 <span class="text-xs text-gray-400">{{ $item->volume }} Liter</span>
+                                @if($item->pertama_retail)
+                                    <span class="inline-block text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2 py-1 rounded-full mt-1">Pertamina Retail</span>
+                                @endif
                             </div>
                             <span class="font-bold text-sm text-rose-600 dark:text-rose-400">{{ $rp($item->biaya) }}</span>
                         </div>
