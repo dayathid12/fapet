@@ -33,7 +33,10 @@ class SuratTugasResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with('perjalanan');
+        return parent::getEloquentQuery()
+            ->leftJoin('perjalanans', 'perjalanan_kendaraans.perjalanan_id', '=', 'perjalanans.id')
+            ->select('perjalanan_kendaraans.*', 'perjalanans.waktu_keberangkatan as perjalanan_waktu_keberangkatan_sort') // Select all columns from perjalanan_kendaraans and alias waktu_keberangkatan from perjalanans
+            ->with('perjalanan');
     }
 
 
@@ -344,6 +347,7 @@ class SuratTugasResource extends Resource
                              ->where('jenis_kegiatan', '!=', 'DK');
                 });
             })
+            ->defaultSort('perjalanan_waktu_keberangkatan_sort', 'asc')
             ->actions([
                 Tables\Actions\Action::make('download_pdf')
                     ->label('Unduh PDF')

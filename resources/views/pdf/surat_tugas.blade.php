@@ -256,7 +256,11 @@
                 </div>
             </td>
         </tr>
-    </table>x
+    </table>
+
+    <div style="position: fixed; bottom: -15px; left: 0; right: 0; text-align: center;">
+        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('Footor.png'))) }}" style="display: block; margin: 0 auto; width: auto; max-width: 100%;">
+    </div>
 
 </body>
 </html>
