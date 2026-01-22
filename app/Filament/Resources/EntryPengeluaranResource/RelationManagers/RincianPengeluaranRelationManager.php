@@ -290,7 +290,7 @@ class RincianPengeluaranRelationManager extends RelationManager
                         return Excel::download(new RincianBiayaExport($this->getOwnerRecord()), 'rincian-biaya-' . $this->getOwnerRecord()->id . '.xlsx');
                     }),
                 Action::make('toggle_pertama_retail')
-                    ->label(fn () => session('include_pertama_retail', true) ? 'Exclude Pertama Retail' : 'Include Pertama Retail')
+                    ->label(fn () => session('include_pertama_retail', true) ? 'Exclude Pertamina Retail' : 'Include Pertamina Retail')
                     ->icon(fn () => session('include_pertama_retail', true) ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
                     ->color(fn () => session('include_pertama_retail', true) ? 'success' : 'warning')
                     ->action(function () {

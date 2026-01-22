@@ -204,7 +204,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                     ])->required(),
                     TextInput::make('volume')->label('Volume (Liter)')->numeric()->required(),
                     TextInput::make('deskripsi')->label('Kode ATM/Keterangan')->required(),
-                    Checkbox::make('pertama_retail')->label('Pertama Retail'),
+                    Checkbox::make('pertama_retail')->label('Pertamina Retail'),
                     FileUpload::make('bukti_path_bbm')
                         ->label('Upload Struk BBM')
                         ->directory('struk-bbm'),
