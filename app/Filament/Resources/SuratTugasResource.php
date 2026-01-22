@@ -369,6 +369,13 @@ class SuratTugasResource extends Resource
             ]);
     }
 
+    public static function resolveRecordRouteBinding(string|int $key): ?\Illuminate\Database\Eloquent\Model
+    {
+        return static::getEloquentQuery()
+            ->where('perjalanan_kendaraans.id', $key)
+            ->first();
+    }
+
     public static function getRelations(): array
     {
         return [];
