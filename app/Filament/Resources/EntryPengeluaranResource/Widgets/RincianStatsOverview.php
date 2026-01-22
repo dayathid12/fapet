@@ -27,7 +27,16 @@ class RincianStatsOverview extends BaseWidget
             ->groupBy('tipe')
             ->pluck('total', 'tipe');
 
-        $totalBBM = $biayaTotals->get('bbm', 0);
+        // Apply the same condition as the table for Total BBM
+        $includePertamaRetail = session('include_pertama_retail', true);
+        if ($includePertamaRetail) {
+            $totalBBM = $biayaTotals->get('bbm', 0);
+        } else {
+            $totalBBM = RincianBiaya::whereIn('rincian_pengeluaran_id', $rincianPengeluaranIds)
+                ->where('tipe', 'bbm')
+                ->where('pertama_retail', false)
+                ->sum('biaya');
+        }
         $totalToll = $biayaTotals->get('toll', 0);
 
         // Parkir cost is split between two tables, so we sum them.
