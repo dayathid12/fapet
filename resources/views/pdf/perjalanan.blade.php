@@ -220,12 +220,12 @@
             <tr>
                 <td class="label">Lokasi Keberangkatan</td>
                 <td class="separator">:</td>
-                <td class="value">{{ str_replace('06 January 2026', $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->format('H:i') : 'BERANGKAT', $perjalanan->lokasi_keberangkatan ?? 'N/A') }}, {{ $perjalanan->wilayah->nama_wilayah ?? 'N/A' }}</td>
+                <td class="value">{{ str_replace('06 January 2026', $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->format('H:i') : 'BERANGKAT', $perjalanan->lokasi_keberangkatan ?? 'N/A') }}</td>
             </tr>
             <tr>
                 <td class="label">Alamat Tujuan</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->alamat_tujuan ?? 'N/A' }}</td>
+                <td class="value">{{ $perjalanan->alamat_tujuan ?? 'N/A' }}, {{ $perjalanan->wilayah->nama_wilayah ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td class="label">Pengguna</td>
