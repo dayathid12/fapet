@@ -385,6 +385,59 @@ class PerjalananResource extends Resource
                     ->description('Informasi kendaraan dan pengemudi yang bertugas')
                     ->icon('heroicon-o-truck')
                     ->headerActions([
+                        FormAction::make('surat_tugas')
+                            ->label('Surat Tugas')
+                            ->icon('heroicon-o-document')
+                            ->color('primary')
+                            ->modalHeading('Pratinjau Surat Tugas')
+                            ->modalSubmitAction(false)
+                            ->modalCancelAction(false)
+                            ->modalContent(function ($record) {
+                                if (!$record->upload_surat_tugas) {
+                                    return new HtmlString('<p>Tidak ada file Surat Tugas yang diunggah.</p>');
+                                }
+
+                                $filePath = $record->upload_surat_tugas;
+                                $fileUrl = Storage::url($filePath);
+                                $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
+                                $fileMimeType = Storage::mimeType($filePath);
+
+                                if (!Storage::disk('public')->exists($filePath)) {
+                                    return new HtmlString('<p>File tidak ditemukan.</p>');
+                                }
+
+                                if (in_array(strtolower($fileExtension), ['pdf'])) {
+                                    return new HtmlString("
+                                        <div style='width: 100%; height: 600px; border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden;'>
+                                            <iframe src='{$fileUrl}' style='width: 100%; height: 100%; border: none;'></iframe>
+                                        </div>
+                                    ");
+                                } elseif (Str::contains($fileMimeType, 'image')) {
+                                    return new HtmlString("
+                                        <div style='width: 100%; text-align: center; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem;'>
+                                            <img src='{$fileUrl}' alt='Gambar Surat Tugas' style='max-width: 100%; height: auto; display: block; margin: auto;'>
+                                        </div>
+                                    ");
+                                } else {
+                                    return new HtmlString('<p>Format file tidak dapat dipratinjau langsung.</p>');
+                                }
+                            })
+                            ->visible(fn ($record) => $record->upload_surat_tugas && Storage::disk('public')->exists($record->upload_surat_tugas)),
+                        FormAction::make('surat_perjalanan')
+                            ->label('Surat Perjalanan')
+                            ->icon('heroicon-o-document')
+                            ->color('primary')
+                            ->modalHeading('Pratinjau Surat Perjalanan')
+                            ->modalSubmitAction(false)
+                            ->modalCancelAction(false)
+                            ->modalContent(function ($record) {
+                                $pdfUrl = route('perjalanan.pdf', ['nomor_perjalanan' => $record->nomor_perjalanan]);
+                                return new HtmlString("
+                                    <div style='width: 100%; height: 600px; border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden;'>
+                                        <iframe src='{$pdfUrl}' style='width: 100%; height: 100%; border: none;'></iframe>
+                                    </div>
+                                ");
+                            }),
                         FormAction::make('edit')
                             ->label('Edit')
                             ->action(fn ($record) => redirect(PerjalananResource::getUrl('edit', ['record' => $record])))
