@@ -167,7 +167,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
             $actions[] = Action::make('Tambah Biaya')
                 ->label('Tambah Rincian Biaya')
                 ->icon('heroicon-o-plus')
-                ->action(function (array $data): void {
+                ->action(function (array $data, array $arguments, Action $action, Form $form): void {
                     // Unify the 'biaya' and 'bukti_path' fields
                     $data['biaya'] = $data['biaya_toll'] ?? $data['biaya_bbm'] ?? $data['biaya_parkir'] ?? null;
                     $data['bukti_path'] = $data['bukti_path_toll'] ?? $data['bukti_path_bbm'] ?? $data['bukti_path_parkir'] ?? null;
@@ -177,8 +177,22 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                     unset($data['bukti_path_toll'], $data['bukti_path_bbm'], $data['bukti_path_parkir']);
 
                     $this->rincianPengeluaran->rincianBiayas()->create($data);
+
+                    // If 'create another' was clicked, reset the form and halt closing the modal
+                    if ($arguments['another'] ?? false) {
+                        $action->callAfter(); // Call any after() hooks
+                        $form->fill(); // Reset form fields
+                        $action->halt(); // Prevent modal from closing
+                    } else {
+                        // Refresh the page to show the new item
+                        $this->dispatch('refresh');
+                    }
                 })
-                ->form(fn(Form $form) => $this->getBiayaForm($form));
+                ->form(fn(Form $form) => $this->getBiayaForm($form))
+                ->extraModalFooterActions(fn (Action $action): array => [
+                    $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
+                        ->label(__('filament-forms::components.select.actions.create_option.modal.actions.create_another.label')),
+                ]);
         }
 
         return $actions;
