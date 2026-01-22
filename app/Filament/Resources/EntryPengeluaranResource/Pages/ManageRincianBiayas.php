@@ -22,6 +22,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -203,6 +204,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                     ])->required(),
                     TextInput::make('volume')->label('Volume (Liter)')->numeric()->required(),
                     TextInput::make('deskripsi')->label('Kode ATM/Keterangan')->required(),
+                    Checkbox::make('pertama_retail')->label('Pertama Retail'),
                     FileUpload::make('bukti_path_bbm')
                         ->label('Upload Struk BBM')
                         ->directory('struk-bbm'),

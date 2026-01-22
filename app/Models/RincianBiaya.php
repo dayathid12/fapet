@@ -17,5 +17,6 @@ class RincianBiaya extends Model
         'jenis_bbm',
         'biaya',
         'bukti_path',
+        'pertama_retail',
     ];
 }
