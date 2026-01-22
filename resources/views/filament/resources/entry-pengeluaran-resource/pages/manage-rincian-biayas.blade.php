@@ -8,6 +8,7 @@
         $toll = $rincianBiayas->where('tipe', 'toll');
         $parkir = $rincianBiayas->where('tipe', 'parkir');
         $rp = fn($v) => 'Rp' . number_format($v, 0, ',', '.');
+        $hideElements = $this->hideElements;
     @endphp
 
     <div class="mt-8 mb-10 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -129,15 +130,17 @@
             <div class="space-y-3">
                 @forelse($toll as $item)
                     <div class="flex items-center gap-2 p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/40 border border-gray-100/50 dark:border-gray-700/30 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors">
-                        <form action="{{ route('biaya.delete', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item ini?')" class="inline opacity-50">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500 hover:text-red-700 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                        </form>
+                        @if(!$hideElements)
+                            <form action="{{ route('biaya.delete', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item ini?')" class="inline opacity-50">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-500 hover:text-red-700 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </form>
+                        @endif
                         <h4 class="font-bold text-gray-700 dark:text-gray-200 text-sm leading-tight flex-1">
                             {{ $item->deskripsi ?? 'Gerbang Toll' }}
                         </h4>
@@ -160,15 +163,17 @@
             <div class="space-y-3">
                 @forelse($parkir as $item)
                     <div class="flex items-center gap-2 p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/40 border border-gray-100/50 dark:border-gray-700/30 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-colors">
-                        <form action="{{ route('biaya.delete', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item ini?')" class="inline opacity-50">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500 hover:text-red-700 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                        </form>
+                        @if(!$hideElements)
+                            <form action="{{ route('biaya.delete', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item ini?')" class="inline opacity-50">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-500 hover:text-red-700 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </form>
+                        @endif
                         <h4 class="font-bold text-gray-700 dark:text-gray-200 text-sm leading-tight flex-1">
                             {{ $item->deskripsi ?? 'Lokasi Parkir' }}
                         </h4>

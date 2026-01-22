@@ -47,6 +47,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
     public $bbm;
     public $toll;
     public $parkir;
+    public $hideElements = false;
 
     public function mount(EntryPengeluaran $record, $rincianPengeluaranId): void
     {
@@ -132,13 +133,28 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
 
     protected function getHeaderActions(): array
     {
-        return [
+        $actions = [
             \Filament\Actions\Action::make('back')
                 ->label('Kembali')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
                 ->url(fn (): string => static::getResource()::getUrl('edit', ['record' => $this->record])),
-            Action::make('Tambah Biaya')
+        ];
+
+        // Check if user email is allowed
+        $allowedEmails = ['dayat.hidayat@unpad.ac.id', 'alya.silvianti@unpad.ac.id'];
+        if (in_array(auth()->user()->email, $allowedEmails)) {
+            $actions[] = \Filament\Actions\Action::make('toggle_hide')
+                ->label(fn () => $this->hideElements ? 'Hidup' : 'Edit')
+                ->icon(fn () => $this->hideElements ? 'heroicon-o-eye' : 'heroicon-o-eye-slash')
+                ->color('warning')
+                ->action(function (): void {
+                    $this->hideElements = !$this->hideElements;
+                });
+        }
+
+        if (!$this->hideElements) {
+            $actions[] = Action::make('Tambah Biaya')
                 ->label('Tambah Rincian Biaya')
                 ->icon('heroicon-o-plus')
                 ->action(function (array $data): void {
@@ -152,8 +168,10 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
 
                     $this->rincianPengeluaran->rincianBiayas()->create($data);
                 })
-                ->form(fn(Form $form) => $this->getBiayaForm($form)),
-        ];
+                ->form(fn(Form $form) => $this->getBiayaForm($form));
+        }
+
+        return $actions;
     }
 
 
