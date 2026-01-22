@@ -71,39 +71,65 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 'rincianBiayas'
             ])
             ->get()
+            ->filter(function ($rincianPengeluaran) {
+                // Skip if perjalananKendaraan is null
+                return $rincianPengeluaran->perjalananKendaraan !== null;
+            })
             ->map(function ($rincianPengeluaran) {
                 $totalBBM = 0;
                 $totalTol = 0;
                 $totalParkir = 0;
-                $jenisBBM = ''; // Will hold the first encountered jenis_bbm
-                $volumeBBM = ''; // Will hold the first encountered volume
-                $kodeKartuTol = '-'; // Default
-                $kodeAT = 'KK'; // Default, as per user's hardcoded example
+                $jenisBBM = '';
+                $volumeBBM = '';
+                $kodeKartuTol = '-';
+                $kodeAT = 'KK';
 
-                foreach ($rincianPengeluaran->rincianBiayas as $biaya) {
-                    if ($biaya->tipe === 'bbm') {
-                        $totalBBM += $biaya->biaya;
-                        // Only set if not already set, or if current is empty and new is not
-                        if (empty($jenisBBM) && !empty($biaya->jenis_bbm)) {
-                            $jenisBBM = $biaya->jenis_bbm;
+                $bbmBiayas = $rincianPengeluaran->rincianBiayas->where('tipe', 'bbm');
+                $otherBiayas = $rincianPengeluaran->rincianBiayas->where('tipe', '!=', 'bbm');
+
+                $hasPertaminaRetailBBM = $bbmBiayas->contains(function ($biaya) {
+                    return $biaya->pertama_retail;
+                });
+
+                if ($hasPertaminaRetailBBM) {
+                    $filteredBbmBiayas = $bbmBiayas->filter(function ($biaya) {
+                        return !$biaya->pertama_retail;
+                    });
+                } else {
+                    $filteredBbmBiayas = $bbmBiayas;
+                }
+
+                $filteredBiayas = $filteredBbmBiayas->concat($otherBiayas);
+
+                $rincianPengeluaran->should_skip = false; // Default
+
+                if ($filteredBiayas->isEmpty() && ($bbmBiayas->isNotEmpty() || $otherBiayas->isNotEmpty())) {
+                     // If there were biayas initially, but all were filtered out, mark to skip this rincianPengeluaran
+                    $rincianPengeluaran->should_skip = true;
+                } else {
+                    foreach ($filteredBiayas as $biaya) {
+                        if ($biaya->tipe === 'bbm') {
+                            $totalBBM += $biaya->biaya;
+                            if (empty($jenisBBM) && !empty($biaya->jenis_bbm)) {
+                                $jenisBBM = $biaya->jenis_bbm;
+                            }
+                            if (empty($volumeBBM) && !empty($biaya->volume)) {
+                                $volumeBBM = $biaya->volume;
+                            }
+                        } elseif ($biaya->tipe === 'toll') {
+                            $totalTol += $biaya->biaya;
+                            $kodeKartuTol = $biaya->deskripsi ?? '-';
+                        } elseif ($biaya->tipe === 'parkir') {
+                            $totalParkir += $biaya->biaya;
                         }
-                        if (empty($volumeBBM) && !empty($biaya->volume)) {
-                            $volumeBBM = $biaya->volume;
-                        }
-                    } elseif ($biaya->tipe === 'toll') { // Mengubah 'tol' menjadi 'toll'
-                        $totalTol += $biaya->biaya;
-                        $kodeKartuTol = $biaya->deskripsi ?? '-'; // Menggunakan kolom deskripsi
-                    } elseif ($biaya->tipe === 'parkir') { // Mengubah 'parkir_lainnya' menjadi 'parkir'
-                        $totalParkir += $biaya->biaya;
                     }
                 }
 
-                // Accumulate grand totals
+
                 $this->totalBBM += $totalBBM;
                 $this->totalTol += $totalTol;
                 $this->totalParkir += $totalParkir;
 
-                // Attach aggregated data and relationships directly to the rincianPengeluaran object for easier mapping
                 $rincianPengeluaran->aggregated_total_bbm = $totalBBM;
                 $rincianPengeluaran->aggregated_jenis_bbm = $jenisBBM;
                 $rincianPengeluaran->aggregated_volume_bbm = $volumeBBM;
@@ -112,13 +138,18 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 $rincianPengeluaran->aggregated_total_parkir = $totalParkir;
                 $rincianPengeluaran->aggregated_kode_at = $kodeAT;
 
-                return $rincianPengeluaran;
-            });
-    }
 
-    public function map($row): array
-    {
-        static $no = 1;
+                return $rincianPengeluaran;
+            })
+                        ->filter(function ($rincianPengeluaran) {
+                            // Filter out entries that were marked to be skipped
+                            return !$rincianPengeluaran->should_skip;
+                        });
+                }
+            
+                public function map($row): array
+                {
+                    static $no = 1;
 
         // Defensive checks for relationships
         $perjalananKendaraan = $row->perjalananKendaraan;

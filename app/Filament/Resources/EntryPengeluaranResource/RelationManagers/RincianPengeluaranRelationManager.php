@@ -287,7 +287,8 @@ class RincianPengeluaranRelationManager extends RelationManager
                     ->color('success')
                     ->icon('heroicon-o-document-arrow-down')
                     ->action(function () {
-                        return Excel::download(new RincianBiayaExport($this->getOwnerRecord()), 'rincian-biaya-' . $this->getOwnerRecord()->id . '.xlsx');
+                        $includePertamaRetail = session('include_pertama_retail', true);
+                        return Excel::download(new RincianBiayaExport($this->getOwnerRecord(), $includePertamaRetail), 'rincian-biaya-' . $this->getOwnerRecord()->id . '.xlsx');
                     }),
                 Action::make('toggle_pertama_retail')
                     ->label(fn () => session('include_pertama_retail', true) ? 'Exclude Pertamina Retail' : 'Include Pertamina Retail')
