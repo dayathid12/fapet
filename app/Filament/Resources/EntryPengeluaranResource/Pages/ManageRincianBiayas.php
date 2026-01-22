@@ -180,8 +180,10 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
 
                     // If 'create another' was clicked, reset the form and halt closing the modal
                     if ($arguments['another'] ?? false) {
+                        $tipe = $data['tipe']; // Simpan nilai 'tipe'
                         $action->callAfter(); // Call any after() hooks
                         $form->fill(); // Reset form fields
+                        $form->fill(['tipe' => $tipe]); // Setel kembali nilai 'tipe'
                         $action->halt(); // Prevent modal from closing
                     } else {
                         // Refresh the page to show the new item
