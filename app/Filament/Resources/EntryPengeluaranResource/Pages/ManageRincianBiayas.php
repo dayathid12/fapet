@@ -24,6 +24,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\UploadedFile;
@@ -177,6 +178,11 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                     unset($data['bukti_path_toll'], $data['bukti_path_bbm'], $data['bukti_path_parkir']);
 
                     $this->rincianPengeluaran->rincianBiayas()->create($data);
+
+                    Notification::make()
+                        ->title('Data berhasil disimpan')
+                        ->success()
+                        ->send();
 
                     // If 'create another' was clicked, reset the form and halt closing the modal
                     if ($arguments['another'] ?? false) {
