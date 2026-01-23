@@ -555,110 +555,24 @@ class PerjalananResource extends Resource
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                         if ($state === 'Jemput (Kepulangan)') {
                                             $set('waktu_selesai_penugasan', $get('../../waktu_kepulangan'));
+                                            $set('waktu_mulai_tugas', $get('../../waktu_kepulangan'));
                                         } elseif ($state === 'Antar (Keberangkatan)') {
                                             $set('waktu_selesai_penugasan', $get('../../waktu_keberangkatan'));
                                         } else {
                                             $set('waktu_selesai_penugasan', null);
+                                            $set('waktu_mulai_tugas', $get('../../waktu_keberangkatan'));
                                         }
                                     })
                                     ->placeholder('Pilih tipe tugas...'),
                                 \Filament\Forms\Components\Select::make('kendaraan_nopol')
                                     ->label('Nomor Polisi Kendaraan')
                                     ->disabled(fn (Forms\Get $get) => !$get('tipe_penugasan'))
-                                    ->options(function (Forms\Get $get, ?Model $record) {
-                                        // --- 1. AMBIL DATA INPUT (LEBIH ROBUST) ---
-                                        $perjalananRecord = $record?->perjalanan;
-
-                                        // Prioritaskan state live dari form, fallback ke record yang ada saat load.
-                                        $globalBerangkat = $get('../../waktu_keberangkatan') ?? $perjalananRecord?->waktu_keberangkatan;
-                                        $globalPulang    = $get('../../waktu_kepulangan') ?? $perjalananRecord?->waktu_kepulangan;
-                                        $tipeTugas       = $get('tipe_penugasan') ?? $record?->tipe_penugasan;
-                                        $waktuSelesai    = $get('waktu_selesai_penugasan') ?? $record?->waktu_selesai_penugasan;
-
-                                        // Dapatkan ID perjalanan saat ini dari record repeater atau record perjalanan utama
-                                        $currentPerjalananId = $record?->perjalanan_id ?? $perjalananRecord?->id;
-
-                                        $canFilter = false;
-                                        $proposedStart = null;
-                                        $proposedEnd = null;
-
-                                        // --- 2. TENTUKAN APAKAH BISA MELAKUKAN FILTER ---
-                                        if ($tipeTugas === 'Antar & Jemput' && $globalBerangkat && $globalPulang) {
-                                            $canFilter = true;
-                                            $proposedStart = $globalBerangkat;
-                                            $proposedEnd   = $globalPulang;
-                                        } elseif ($tipeTugas === 'Antar (Keberangkatan)' && $globalBerangkat && $waktuSelesai) {
-                                            $canFilter = true;
-                                            $proposedStart = $globalBerangkat;
-                                            $proposedEnd   = $waktuSelesai;
-                                        } elseif ($tipeTugas === 'Jemput (Kepulangan)' && $waktuSelesai) {
-                                            // Untuk jemput, waktu mulai adalah waktu selesai penugasan itu sendiri, dan akhirnya adalah waktu kepulangan global
-                                            $canFilter = true;
-                                            $proposedStart = $waktuSelesai;
-                                            $proposedEnd = $globalPulang;
-                                        }
-
-
-                                        // --- 3. JIKA DATA BELUM LENGKAP, TAMPILKAN SEMUA KENDARAAN ---
-                                        if (!$canFilter) {
-                                            return Kendaraan::all()->mapWithKeys(function ($kendaraan) {
-                                                return [$kendaraan->nopol_kendaraan => implode(' - ', array_filter([
-                                                    $kendaraan->nopol_kendaraan,
-                                                    $kendaraan->jenis_kendaraan,
-                                                    $kendaraan->merk_type
-                                                ]))];
-                                            });
-                                        }
-
-                                        // --- 4. VALIDASI RENTANG WAKTU ---
-                                        if ($proposedEnd <= $proposedStart) {
-                                            return []; // Kosongkan pilihan jika rentang waktu tidak valid.
-                                        }
-
-                                        // --- 5. JALANKAN QUERY FILTERING ---
-                                        $query = Kendaraan::whereDoesntHave('perjalananKendaraans', function (Builder $query) use ($proposedStart, $proposedEnd, $currentPerjalananId) {
-                                            $query
-                                                ->whereHas('perjalanan', function (Builder $perjalananQuery) {
-                                                    $perjalananQuery->where('status_perjalanan', 'Terjadwal');
-                                                })
-                                                // Abaikan detail perjalanan saat ini (untuk mode edit)
-                                                ->when($currentPerjalananId, function ($q) use ($currentPerjalananId) {
-                                                    // This ensures we are not comparing the trip against its own details
-                                                    $q->where('perjalanan_id', '!=', $currentPerjalananId);
-                                                })
-                                                ->where(function (Builder $overlapQuery) use ($proposedStart, $proposedEnd) {
-                                                    // Logika utama untuk mendeteksi tumpang tindih jadwal
-                                                    $overlapQuery->where(function (Builder $subQuery) use ($proposedStart, $proposedEnd) {
-                                                        // Kasus 1: Jadwal baru mulai di dalam jadwal yang ada
-                                                        $subQuery->where('waktu_mulai_tugas', '<', $proposedStart)
-                                                                 ->where('waktu_selesai_tugas', '>', $proposedStart);
-                                                    })->orWhere(function (Builder $subQuery) use ($proposedStart, $proposedEnd) {
-                                                        // Kasus 2: Jadwal baru berakhir di dalam jadwal yang ada
-                                                        $subQuery->where('waktu_mulai_tugas', '<', $proposedEnd)
-                                                                 ->where('waktu_selesai_tugas', '>', $proposedEnd);
-                                                    })->orWhere(function (Builder $subQuery) use ($proposedStart, $proposedEnd) {
-                                                        // Kasus 3: Jadwal baru mencakup sepenuhnya jadwal yang ada
-                                                        $subQuery->where('waktu_mulai_tugas', '>=', $proposedStart)
-                                                                 ->where('waktu_selesai_tugas', '<=', $proposedEnd);
-                                                    });
-                                                });
-                                        });
-
-                                        $availableKendaraan = $query->get();
-
-                                        // --- 6. PASTIKAN KENDARAAN YANG SEDANG DIEDIT SELALU ADA DALAM LIST ---
-                                        if ($record && $record->kendaraan_nopol) {
-                                            $currentKendaraan = Kendaraan::where('nopol_kendaraan', $record->kendaraan_nopol)->first();
-                                            if ($currentKendaraan && !$availableKendaraan->contains('nopol_kendaraan', $record->kendaraan_nopol)) {
-                                                $availableKendaraan->push($currentKendaraan);
-                                            }
-                                        }
-
-                                        return $availableKendaraan->sortBy('nopol_kendaraan')->mapWithKeys(function ($kendaraan) {
+                                    ->options(function () {
+                                        return Kendaraan::all()->mapWithKeys(function ($kendaraan) {
                                             return [$kendaraan->nopol_kendaraan => implode(' - ', array_filter([
                                                 $kendaraan->nopol_kendaraan,
                                                 $kendaraan->jenis_kendaraan,
-                                                $kendaraan->merk_type,
+                                                $kendaraan->merk_type
                                             ]))];
                                         });
                                     })
@@ -673,6 +587,17 @@ class PerjalananResource extends Resource
                                     ->required(fn (Forms\Get $get): bool => in_array($get('tipe_penugasan'), ['Antar (Keberangkatan)', 'Jemput (Kepulangan)']))
                                     ->nullable(fn (Forms\Get $get): bool => !in_array($get('tipe_penugasan'), ['Antar (Keberangkatan)', 'Jemput (Kepulangan)']))
                                     ->visible(fn (Forms\Get $get): bool => in_array($get('tipe_penugasan'), ['Antar (Keberangkatan)', 'Jemput (Kepulangan)']))
+                                    ->live(),
+                                \Filament\Forms\Components\DateTimePicker::make('waktu_mulai_tugas')
+                                    ->label('Waktu Mulai Tugas')
+                                    ->displayFormat('d/m/Y H:i')
+                                    ->native(false)
+                                    ->required()
+                                    ->live(),
+                                \Filament\Forms\Components\DateTimePicker::make('waktu_selesai_tugas')
+                                    ->label('Waktu Selesai Tugas')
+                                    ->displayFormat('d/m/Y H:i')
+                                    ->native(false)
                                     ->live(),
                                 \Filament\Forms\Components\Select::make('pengemudi_id')
                                     ->label('Nama Pengemudi')
@@ -699,25 +624,73 @@ class PerjalananResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->contentGrid([
-                'sm' => 1,
-                'md' => 2,
-                'xl' => 2,
-            ])
-            ->striped()
-            ->recordAction('edit')
             ->columns([
-                Tables\Columns\Layout\View::make('filament.tables.columns.travel-card'),
+                Tables\Columns\TextColumn::make('nomor_perjalanan')
+                    ->label('Nomor Perjalanan')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status_perjalanan')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Menunggu Persetujuan' => 'warning',
+                        'Terjadwal' => 'success',
+                        'Ditolak' => 'danger',
+                        'Selesai' => 'primary',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('waktu_keberangkatan')
+                    ->label('Waktu Keberangkatan')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('waktu_kepulangan')
+                    ->label('Waktu Kepulangan')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('details')
+                    ->label('Nopol Kendaraan')
+                    ->getStateUsing(fn ($record) => $record->details->first()?->kendaraan_nopol)
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('details')
+                    ->label('Jenis Kendaraan')
+                    ->getStateUsing(fn ($record) => $record->details->first()?->kendaraan?->jenis_kendaraan)
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('details')
+                    ->label('Pengemudi')
+                    ->getStateUsing(fn ($record) => $record->details->first()?->pengemudi?->nama_staf)
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('nama_pengguna')
+                    ->label('Pengguna')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('unitKerja.nama_unit_kerja')
+                    ->label('Unit Kerja')
+                    ->searchable(),
             ])
+
+            ->selectable(false)
+
             ->filters([
-                Tables\Filters\SelectFilter::make('status_perjalanan')
+                Tables\Filters\SelectFilter::make('status_filter')
+                    ->label('Status')
                     ->options([
+                        'Semua' => 'Semua',
                         'Menunggu Persetujuan' => 'Menunggu Persetujuan',
                         'Terjadwal' => 'Terjadwal',
                         'Ditolak' => 'Ditolak',
+                        'Hari Ini' => 'Hari Ini',
                         'Selesai' => 'Selesai',
                     ])
-                    ->label('Status'),
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when($data['value'], function (Builder $query, $value) {
+                            if ($value === 'Semua') {
+                                return $query;
+                            } elseif ($value === 'Hari Ini') {
+                                return $query->whereDate('waktu_keberangkatan', today());
+                            } else {
+                                return $query->where('status_perjalanan', $value);
+                            }
+                        });
+                    }),
 
                 Tables\Filters\SelectFilter::make('jenis_operasional')
                     ->options([
@@ -746,7 +719,6 @@ class PerjalananResource extends Resource
                         );
                     }),
             ])
-            ->actions([])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -754,7 +726,6 @@ class PerjalananResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->poll('30s')
-            ->selectable(false)
             ->emptyStateHeading('Tidak ada data perjalanan')
             ->emptyStateIcon('heroicon-o-truck');
     }
