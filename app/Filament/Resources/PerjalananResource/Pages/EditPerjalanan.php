@@ -11,7 +11,14 @@ use App\Filament\Pages\ScheduleOverview; // Import ScheduleOverview page
 
 class EditPerjalanan extends BaseEditRecord
 {
+    use MutatesPerjalananData;
+
     protected static string $resource = PerjalananResource::class;
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return $this->mutateDetailsData($data);
+    }
 
     protected function getHeaderActions(): array
     {

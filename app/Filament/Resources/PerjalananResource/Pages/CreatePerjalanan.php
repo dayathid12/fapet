@@ -10,7 +10,14 @@ use Filament\Notifications\Notification;
 
 class CreatePerjalanan extends CreateRecord
 {
+    use MutatesPerjalananData;
+
     protected static string $resource = PerjalananResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        return $this->mutateDetailsData($data);
+    }
 
     public function getMaxContentWidth(): ?string
     {
