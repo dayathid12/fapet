@@ -19,7 +19,7 @@
             width: 100%;
             border-bottom: 3px solid black; /* Garis tebal bawah kop */
             padding-bottom: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
             border-collapse: collapse;
         }
         .logo-container {
@@ -57,7 +57,7 @@
         /* TITLE SECTION */
         .title-section {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
         }
         .title-section h3 {
             margin: 0;
@@ -71,7 +71,7 @@
 
         /* CONTENT SECTION */
         .content-intro {
-            margin-bottom: 15px;
+            margin-bottom: 0px;
             text-align: justify;
         }
 
@@ -79,7 +79,7 @@
         .assignee-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 2px;
         }
         .assignee-table th, .assignee-table td {
             border: 1px solid black;
@@ -95,8 +95,8 @@
         .details-list-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 5px;
-            margin-bottom: 20px;
+            margin-top: 0px;
+            margin-bottom: 0px;
         }
         .details-list-table td {
             padding: 3px 5px;
@@ -120,7 +120,7 @@
         /* SIGNATURE SECTION */
         .signature-table {
             width: 100%;
-            margin-top: 30px;
+            margin-top: 5px;
             page-break-inside: avoid;
         }
         .signature-content {
@@ -196,7 +196,7 @@
             </tbody>
         </table>
 
-        <p style="margin-top: 15px; margin-bottom: 5px;">
+        <p style="margin-top: 5px; margin-bottom: 5px;">
             untuk melayani kegiatan/keberangkatan:
         </p>
 
