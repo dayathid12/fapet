@@ -393,6 +393,9 @@ class PerjalananResource extends Resource
                             ->modalSubmitAction(false)
                             ->modalCancelAction(false)
                             ->modalContent(function ($record) {
+                                if (!$record) {
+                                    return new HtmlString('<p>Record tidak ditemukan.</p>');
+                                }
                                 if (!$record->upload_surat_tugas) {
                                     return new HtmlString('<p>Tidak ada file Surat Tugas yang diunggah.</p>');
                                 }
@@ -422,7 +425,7 @@ class PerjalananResource extends Resource
                                     return new HtmlString('<p>Format file tidak dapat dipratinjau langsung.</p>');
                                 }
                             })
-                            ->visible(fn ($record) => $record->upload_surat_tugas && Storage::disk('public')->exists($record->upload_surat_tugas)),
+                            ->visible(fn ($record) => $record && $record->upload_surat_tugas && Storage::disk('public')->exists($record->upload_surat_tugas)),
                         FormAction::make('surat_perjalanan')
                             ->label('Surat Perjalanan')
                             ->icon('heroicon-o-document')
@@ -431,13 +434,17 @@ class PerjalananResource extends Resource
                             ->modalSubmitAction(false)
                             ->modalCancelAction(false)
                             ->modalContent(function ($record) {
+                                if (!$record) {
+                                    return new HtmlString('<p>Record tidak ditemukan.</p>');
+                                }
                                 $pdfUrl = route('perjalanan.pdf', ['nomor_perjalanan' => $record->nomor_perjalanan]);
                                 return new HtmlString("
                                     <div style='width: 100%; height: 600px; border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden;'>
                                         <iframe src='{$pdfUrl}' style='width: 100%; height: 100%; border: none;'></iframe>
                                     </div>
                                 ");
-                            }),
+                            })
+                            ->visible(fn ($record) => $record !== null),
                         FormAction::make('edit')
                             ->label('Edit')
                             ->action(fn ($record) => redirect(PerjalananResource::getUrl('edit', ['record' => $record])))

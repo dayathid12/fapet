@@ -25,11 +25,10 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use App\Services\GeminiReceiptExtractor; // Import Service Class
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component as Livewire;
 
 class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasForms, \Filament\Infolists\Contracts\HasInfolists
@@ -258,6 +257,50 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                     FileUpload::make('bukti_path_bbm')
                         ->label('Upload Struk BBM')
                         ->directory('struk-bbm'),
+                    // Bungkus Action di dalam Actions
+                    \Filament\Forms\Components\Actions::make([
+                        // Tombol Aksi untuk memicu ekstraksi BBM
+                        \Filament\Forms\Components\Actions\Action::make('extract_bbm_details')
+                            ->label('Ekstrak Detail dari Struk BBM')
+                            ->icon('heroicon-o-sparkles')
+                            ->action(function (callable $set, $get) {
+                                $uploadedFiles = $get('bukti_path_bbm');
+                                if (empty($uploadedFiles)) {
+                                    Notification::make()->title('Gagal Ekstrak')->body('Silakan unggah gambar struk BBM terlebih dahulu.')->warning()->send();
+                                    return;
+                                }
+
+                                // Ambil file pertama dari array, tanpa bergantung pada key numerik.
+                                $firstFile = reset($uploadedFiles);
+                                if (!$firstFile) {
+                                    Notification::make()->title('Gagal Ekstrak')->body('File tidak valid atau tidak ditemukan.')->warning()->send();
+                                    return;
+                                }
+
+                                $filePath = $firstFile->getRealPath();
+
+                                // Prompt untuk Gemini AI
+                                $prompt = "Anda adalah asisten ahli ekstraksi data dari struk SPBU.
+Lihat gambar struk ini dan ekstrak informasi berikut:
+1.  `jenis_bbm`: Nama produk bahan bakar yang dibeli (contoh: \"Pertalite\", \"Pertamax Turbo\", \"BioSolar\").
+2.  `volume`: Jumlah liter yang diisi. Cari kata kunci seperti \"Volume\", \"Ltr\", atau \"Liter\".
+3.  `total_biaya`: Jumlah total pembayaran. Cari kata kunci seperti \"Total\", \"Bayar\", atau \"Rp\".
+
+Abaikan informasi lain seperti nomor SPBU, tanggal, atau sisa saldo.
+Kembalikan hasilnya dalam format JSON yang valid. Contoh:
+{
+  \"jenis_bbm\": \"Pertamax\",
+  \"volume\": 35.5,
+  \"total_biaya\": 500000
+}
+
+Jika salah satu informasi tidak dapat ditemukan, kembalikan nilai `null` untuk kunci tersebut.";
+
+                                (new GeminiReceiptExtractor())->extractAndFill($filePath, $prompt, $set);
+                            })
+                            ->modalHeading('Konfirmasi Ekstraksi BBM')
+                            ->modalDescription('Sistem akan mencoba membaca detail dari gambar struk BBM yang diunggah. Lanjutkan?'),
+                    ]),
                 ]),
 
             \Filament\Forms\Components\Section::make('Detail Toll')
@@ -266,18 +309,45 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                     TextInput::make('biaya_toll')->label('Jumlah Toll')->numeric()->prefix('Rp')->required(),
                     FileUpload::make('bukti_path_toll')
                         ->label('Upload Struk Toll')
-                        ->directory('struk-toll')
-                        ->image()
-                        ->live()
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            if ($state && is_array($state) && count($state) > 0) {
-                                $filePath = $state[0]; // Get the first uploaded file path
-                                $extractedAmount = self::extractAmountFromReceipt($filePath);
-                                if ($extractedAmount && is_numeric($extractedAmount)) {
-                                    $set('biaya_toll', $extractedAmount);
+                        ->directory('struk-toll'),
+                    // Bungkus Action di dalam Actions
+                    \Filament\Forms\Components\Actions::make([
+                        // Tombol Aksi untuk memicu ekstraksi
+                        \Filament\Forms\Components\Actions\Action::make('extract_toll_amount')
+                            ->label('Ekstrak Jumlah dari Struk')
+                            ->icon('heroicon-o-sparkles')
+                            ->action(function (callable $set, $get) {
+                                $uploadedFiles = $get('bukti_path_toll');
+                                if (empty($uploadedFiles)) {
+                                    Notification::make()->title('Gagal Ekstrak')->body('Silakan unggah gambar struk terlebih dahulu.')->warning()->send();
+                                    return;
                                 }
-                            }
-                        }),
+
+                                // Ambil file pertama dari array.
+                                $firstFile = reset($uploadedFiles);
+                                if (!$firstFile) {
+                                    Notification::make()->title('Gagal Ekstrak')->body('File tidak valid atau tidak ditemukan.')->warning()->send();
+                                    return;
+                                }
+                                
+                                $filePath = $firstFile->getRealPath();
+
+                                $extractor = new GeminiReceiptExtractor();
+                                // Asumsi method extractAmount ada di dalam service dan berfungsi
+                                $amount = $extractor->extractAmount($filePath);
+
+                                if ($amount) {
+                                    $set('biaya_toll', $amount);
+                                    Notification::make()->title('Ekstraksi Berhasil')->body("Jumlah berhasil diekstrak: Rp " . number_format($amount))->success()->send();
+                                } else {
+                                    Notification::make()->title('Ekstraksi Gagal')->body('Tidak dapat menemukan jumlah pada struk. Mohon isi manual.')->danger()->send();
+                                }
+                            })
+                            ->requiresConfirmation() // Memberi jeda agar loading indicator terlihat
+                            ->modalHeading('Konfirmasi Ekstraksi')
+                            ->modalDescription('Sistem akan mencoba membaca jumlah biaya dari gambar struk yang diunggah. Lanjutkan?')
+                            ->modalSubmitActionLabel('Ya, Ekstrak'),
+                    ]),
                 ]),
 
             \Filament\Forms\Components\Section::make('Detail Parkir')
@@ -289,73 +359,6 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                         ->directory('bukti-parkir'),
                 ]),
         ]);
-    }
-
-    public static function extractAmountFromReceipt(string $filePath): ?string
-    {
-        $apiKey = config('services.gemini.api_key');
-        if (!$apiKey) {
-            Log::error('GEMINI_API_KEY not set in .env');
-            return null;
-        }
-
-        $fullPath = Storage::disk('public')->path($filePath);
-        if (!file_exists($fullPath)) {
-            Log::error('File not found: ' . $fullPath);
-            return null;
-        }
-
-        $fileContents = base64_encode(file_get_contents($fullPath));
-        $mimeType = mime_content_type($fullPath);
-
-        $prompt = <<<PROMPT
-Lihat gambar struk tol ini dengan teliti.
-Ekstrak nominal harga tarif tol yang dibayarkan.
-Cari teks "Rp" yang sejajar dengan kata "GOL", "TARIF", atau "TOTAL".
-Abaikan Sisa Saldo, Saldo Kartu, atau nomor seri kartu (SN).
-Kembalikan HANYA angka saja tanpa karakter lain, seperti "22000" untuk Rp 22.000.
-Jika tidak yakin, kembalikan "uncertain".
-PROMPT;
-
-        try {
-            $response = Http::post('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $apiKey, [
-                    'contents' => [
-                        [
-                            'parts' => [
-                                ['text' => $prompt],
-                                [
-                                    'inline_data' => [
-                                        'mime_type' => $mimeType,
-                                        'data' => $fileContents
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    'generationConfig' => [
-                        'temperature' => 0.1,
-                        'topK' => 1,
-                        'topP' => 1,
-                        'maxOutputTokens' => 50,
-                    ]
-                ]);
-
-            if ($response->successful()) {
-                $candidates = $response->json('candidates');
-                if (!empty($candidates[0]['content']['parts'][0]['text'])) {
-                    $text = $candidates[0]['content']['parts'][0]['text'];
-                    $numericText = preg_replace('/[^0-9]/', '', $text);
-                    return $numericText ?: null;
-                }
-            }
-
-            Log::error('Gemini API call was not successful.', ['response' => $response->json()]);
-            return null;
-
-        } catch (\Exception $e) {
-            Log::error('Gemini API call failed: ' . $e->getMessage());
-            return null;
-        }
     }
 
     public function rp($value): string

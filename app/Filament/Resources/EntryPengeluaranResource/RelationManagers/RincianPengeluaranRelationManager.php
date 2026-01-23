@@ -48,6 +48,27 @@ class RincianPengeluaranRelationManager extends RelationManager
     {
         return $form
             ->schema([
+                \Filament\Forms\Components\Textarea::make('ocr_output')
+                    ->label('OCR Output Struk BBM (Paste Teks di Sini)')
+                    ->helperText('Paste hasil teks OCR dari struk BBM di sini. Sistem akan otomatis mencoba mengekstrak data.')
+                    ->rows(5)
+                    ->live()
+                    ->afterStateUpdated(function (?string $state, Set $set) {
+                        if ($state) {
+                            // Call extraction logic here
+                            $extractedData = $this->extractDataFromOcrText($state);
+
+                            $set('jenis_bbm', $extractedData['jenis_bbm']);
+                            $set('volume', $extractedData['volume']);
+                            $set('biaya', $extractedData['total_biaya']); // Assuming 'biaya' maps to 'total_biaya'
+                        } else {
+                            // Clear fields if OCR output is empty
+                            $set('jenis_bbm', null);
+                            $set('volume', null);
+                            $set('biaya', null);
+                        }
+                    }),
+
                 Select::make('perjalanan_id')
                     ->label('Pilih Perjalanan')
                     ->searchable()
@@ -347,4 +368,82 @@ class RincianPengeluaranRelationManager extends RelationManager
             ->selectRaw('COALESCE(SUM(parkir_biayas.biaya), 0) + COALESCE(rincian_pengeluarans.biaya_parkir, 0) as total_parkir')
             ->groupBy('rincian_pengeluarans.id');
     }
+
+    private function extractDataFromOcrText(string $ocrText): array
+    {
+        Log::debug('OCR Text received: ' . $ocrText);
+
+        $jenisBbm = null;
+        $volume = null;
+        $totalBiaya = null;
+
+        // Normalize text for easier parsing (e.g., remove common typos, make case-insensitive)
+        $normalizedText = strtolower($ocrText);
+        $normalizedText = str_replace(['rp.', 'rp', 'idr', ','], ['', '', '', '.'], $normalizedText); // Remove currency symbols, replace comma with dot for decimals
+        Log::debug('Normalized OCR Text: ' . $normalizedText);
+
+        // --- Extract jenis_bbm ---
+        $fuelKeywords = [
+            'pertalite', 'pertamax turbo', 'pertamax', 'biosolar', 'dexlite', 'pertamina dex', 'solar', 'premium'
+        ];
+        foreach ($fuelKeywords as $keyword) {
+            if (str_contains($normalizedText, $keyword)) {
+                $jenisBbm = ucfirst($keyword); // Capitalize first letter
+                break;
+            }
+        }
+
+        // Fallback for generic fuel type if specific name not found (e.g., "BBM")
+        if ($jenisBbm === null && str_contains($normalizedText, 'bbm')) {
+            $jenisBbm = 'BBM Umum';
+        }
+        Log::debug('Extracted jenis_bbm: ' . $jenisBbm);
+
+        // --- Extract volume ---
+        // Look for patterns like "12.34 Ltr", "5.00 Liter", "Volume: 10.5"
+        if (preg_match('/(\d+(\.\d+)?)\s*(ltr|liter)/i', $ocrText, $matches)) {
+            $volume = (float) $matches[1];
+        } elseif (preg_match('/volume\s*:\s*(\d+(\.\d+)?)/i', $ocrText, $matches)) {
+            $volume = (float) $matches[1];
+        }
+        Log::debug('Extracted volume: ' . $volume);
+
+        // --- Extract total_biaya ---
+        // Look for patterns like "Total: 100000", "Bayar: 50000", "Rp 75.000"
+        // This is tricky as "total" or "biaya" might appear multiple times.
+        // Try to find the last significant monetary value.
+        // Look for "total", "bayar", "jumlah" followed by a number
+        if (preg_match_all('/(total|bayar|jumlah)\s*:\s*(\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?|\d+)/i', $ocrText, $matches, PREG_SET_ORDER)) {
+            $lastMatch = end($matches);
+            $totalBiaya = (int) str_replace(['.', ','], '', $lastMatch[2]); // Remove thousands separator and comma, convert to int
+        }
+
+        // If not found, try to find "Rp " followed by a number
+        if ($totalBiaya === null && preg_match_all('/rp\s*(\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?|\d+)/i', $ocrText, $matches, PREG_SET_ORDER)) {
+             $lastMatch = end($matches);
+             $totalBiaya = (int) str_replace(['.', ','], '', $lastMatch[1]);
+        }
+
+
+        // Fallback: Find any large number that might represent a total, assuming it's the last one
+        if ($totalBiaya === null) {
+            if (preg_match_all('/\b(\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?|\d+)\b/', $ocrText, $matches)) {
+                $numbers = array_map(function($n){
+                    return (int) str_replace(['.', ','], '', $n);
+                }, $matches[0]);
+                // Take the largest number found, assuming it's the total
+                if (!empty($numbers)) {
+                    $totalBiaya = max($numbers);
+                }
+            }
+        }
+        Log::debug('Extracted total_biaya: ' . $totalBiaya);
+
+        return [
+            'jenis_bbm' => $jenisBbm,
+            'volume' => $volume,
+            'total_biaya' => $totalBiaya,
+        ];
+    }
 }
+
