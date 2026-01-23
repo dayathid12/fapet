@@ -25,7 +25,7 @@ class TollOcrController extends Controller
         // Prompt yang sangat detail agar Gemini tidak salah ambil saldo
         $prompt = "Ini adalah struk tol. Cari nominal 'Rp' yang merupakan tarif masuk/perjalanan. JANGAN ambil angka sisa saldo. Berikan jawaban HANYA berupa JSON: {\"jumlah_toll\": angka_tanpa_titik}";
 
-        $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
+        $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
             'contents' => [
                 [
                     'parts' => [

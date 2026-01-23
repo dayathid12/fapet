@@ -34,7 +34,7 @@ class GeminiReceiptExtractor
             $imageData = base64_encode(file_get_contents($filePath));
             $imageMimeType = mime_content_type($filePath);
 
-            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$this->apiKey}", [
+            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$this->apiKey}", [
                 'contents' => [
                     [
                         'parts' => [
@@ -98,7 +98,7 @@ class GeminiReceiptExtractor
             $imageData = base64_encode(file_get_contents($filePath));
             $imageMimeType = mime_content_type($filePath);
 
-            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$this->apiKey}", [
+            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$this->apiKey}", [
                 'contents' => [
                     [
                         'parts' => [
@@ -119,7 +119,7 @@ class GeminiReceiptExtractor
             }
 
             $resultText = $response->json('candidates.0.content.parts.0.text', '');
-            
+
             // Mencari angka dalam teks, karena respons mungkin tidak JSON murni
             preg_match('/\d+/', $resultText, $matches);
 

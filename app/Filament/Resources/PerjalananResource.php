@@ -783,9 +783,11 @@ class PerjalananResource extends Resource
             });
         }
 
-        // Tambahkan filter default untuk status_perjalanan agar hanya menampilkan 'Terjadwal' dan 'Selesai'
+        // Tambahkan filter default untuk status_perjalanan agar hanya menampilkan 'Terjadwal', 'Selesai', dan 'Menunggu Persetujuan'
         // Jika Anda ingin semua status terlihat oleh admin, tambahkan kondisi: ->when(!$user->hasRole('admin'), function ($q) { ... })
-        $query->whereIn('status_perjalanan', ['Terjadwal', 'Selesai']);
+        $query->when(!$user->hasRole('admin'), function ($q) {
+            $q->whereIn('status_perjalanan', ['Terjadwal', 'Selesai', 'Menunggu Persetujuan']);
+        });
 
         return $query;
     }

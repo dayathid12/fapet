@@ -23,6 +23,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Actions;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use App\Services\GeminiReceiptExtractor; // Import Service Class
@@ -258,7 +259,7 @@ class ManageRincianBiayas extends Page implements \Filament\Forms\Contracts\HasF
                         ->label('Upload Struk BBM')
                         ->directory('struk-bbm'),
                     // Bungkus Action di dalam Actions
-                    \Filament\Forms\Components\Actions::make([
+                    Actions::make([
                         // Tombol Aksi untuk memicu ekstraksi BBM
                         \Filament\Forms\Components\Actions\Action::make('extract_bbm_details')
                             ->label('Ekstrak Detail dari Struk BBM')
@@ -329,7 +330,7 @@ Jika salah satu informasi tidak dapat ditemukan, kembalikan nilai `null` untuk k
                                     Notification::make()->title('Gagal Ekstrak')->body('File tidak valid atau tidak ditemukan.')->warning()->send();
                                     return;
                                 }
-                                
+
                                 $filePath = $firstFile->getRealPath();
 
                                 $extractor = new GeminiReceiptExtractor();
