@@ -48,27 +48,6 @@ class RincianPengeluaranRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                \Filament\Forms\Components\Textarea::make('ocr_output')
-                    ->label('OCR Output Struk BBM (Paste Teks di Sini)')
-                    ->helperText('Paste hasil teks OCR dari struk BBM di sini. Sistem akan otomatis mencoba mengekstrak data.')
-                    ->rows(5)
-                    ->live()
-                    ->afterStateUpdated(function (?string $state, Set $set) {
-                        if ($state) {
-                            // Call extraction logic here
-                            $extractedData = $this->extractDataFromOcrText($state);
-
-                            $set('jenis_bbm', $extractedData['jenis_bbm']);
-                            $set('volume', $extractedData['volume']);
-                            $set('biaya', $extractedData['total_biaya']); // Assuming 'biaya' maps to 'total_biaya'
-                        } else {
-                            // Clear fields if OCR output is empty
-                            $set('jenis_bbm', null);
-                            $set('volume', null);
-                            $set('biaya', null);
-                        }
-                    }),
-
                 Select::make('perjalanan_id')
                     ->label('Pilih Perjalanan')
                     ->searchable()
