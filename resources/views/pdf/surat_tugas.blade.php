@@ -71,6 +71,7 @@
 
         /* CONTENT SECTION */
         .content-intro {
+            margin-top: -9px;
             margin-bottom: 0px;
             text-align: justify;
         }
