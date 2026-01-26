@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+1<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -69,7 +69,7 @@
                     <p class="address" style="margin: 0; padding: 0;">JALAN RAYA BANDUNG - SUMEDANG KM.21 JATINANGOR</p>
                 </td>
                 <td style="width: 30%; text-align: right; border: none; padding: 0;">
-                    <p class="description" style="font-size: 8pt; margin: 0; padding: 0;">Uang Saku Pengemudi dalam rangka melayani Kegiatan Civitas Akademika {{ $dateRangeString }}</p>
+                    <p class="description" style="font-size: 8pt; margin: 0; padding: 0;">Daftar Uang Saku Pengemudi dalam rangka melayani Kegiatan Civitas Akademika {{ $dateRangeString }}</p>
                 </td>
             </tr>
         </table>
@@ -141,7 +141,7 @@
                 NIP.{{ $penandatangan->direktur_nip ?? '196910232002121001' }}
             </td>
             <td>
-                Jatinangor, 
+                Jatinangor,
                 @php
                     $tanggalSurat = $sptjb->tanggal_surat;
                     $displayTanggalSurat = '';

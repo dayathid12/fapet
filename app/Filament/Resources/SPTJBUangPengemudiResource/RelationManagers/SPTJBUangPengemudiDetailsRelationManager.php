@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
 {
@@ -122,6 +124,7 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('nama')
+            ->query(fn () => $this->getGroupedRecords())
             ->columns([
                 Tables\Columns\TextColumn::make('no')
                     ->label('No')
@@ -140,25 +143,13 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('besaran_uang_per_hari')
                     ->label('Besaran uang / Hari (Rp)')
                     ->money('IDR'),
-
                 Tables\Columns\TextColumn::make('jumlah_uang_diterima')
                     ->label('Jumlah Uang Diterima')
-                    ->money('IDR')
-                    ->state(function ($record) {
-                        return $record->besaran_uang_per_hari * $record->jumlah_hari;
-                    }),
+                    ->money('IDR'),
                 Tables\Columns\TextColumn::make('nomor_rekening')
-                    ->label('Nomor Rekening')
-                    ->state(function ($record) {
-                        $staf = Staf::where('nama_staf', $record->nama)->first();
-                        return $staf ? $staf->rekening : '';
-                    }),
+                    ->label('Nomor Rekening'),
                 Tables\Columns\TextColumn::make('golongan')
-                    ->label('Golongan')
-                    ->state(function ($record) {
-                        $staf = Staf::where('nama_staf', $record->nama)->first();
-                        return $staf ? $staf->gol_pangkat : '';
-                    }),
+                    ->label('Golongan'),
             ])
             ->filters([
                 //
@@ -189,26 +180,38 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                     ->color('success')
                     ->icon('heroicon-o-table-cells')
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
-                    ->after(function () {
-                        $this->resequenceNumbers();
-                    }),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->after(function () {
-                            $this->resequenceNumbers();
-                        }),
-                ]),
-            ]);
+            ->actions([])
+            ->bulkActions([]);
+    }
+
+    public function getTableRecordKey(Model $record): string
+    {
+        return $record->nama;
     }
 
     protected static function getNextNo($sptjbPengemudiId)
     {
         return SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $sptjbPengemudiId)->count() + 1;
+    }
+
+    protected function getGroupedRecords()
+    {
+        // This now returns a query builder instead of a collection.
+        return $this->getOwnerRecord()->details()
+            ->select(
+                'nama',
+                DB::raw('ROW_NUMBER() OVER (ORDER BY MIN(id)) as no'),
+                DB::raw('MIN(jabatan) as jabatan'),
+                DB::raw('MIN(besaran_uang_per_hari) as besaran_uang_per_hari'),
+                DB::raw('SUM(jumlah_hari) as jumlah_hari'),
+                DB::raw('SUM(jumlah_uang_diterima) as jumlah_uang_diterima'),
+                DB::raw('MIN(nomor_rekening) as nomor_rekening'),
+                DB::raw('MIN(golongan) as golongan'),
+                DB::raw("GROUP_CONCAT(DISTINCT nomor_surat ORDER BY CAST(nomor_surat AS UNSIGNED) SEPARATOR ',') as nomor_surat"),
+                DB::raw("GROUP_CONCAT(DISTINCT tanggal_penugasan SEPARATOR ',') as tanggal_penugasan")
+            )
+            ->groupBy('nama')
+            ->orderBy('no');
     }
 
     protected function resequenceNumbers(): void
