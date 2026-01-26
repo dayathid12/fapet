@@ -90,28 +90,24 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($sptjb->details as $index => $detail)
-                @php
-                    // Pre-fetch data staf untuk performa lebih baik
-                    $staf = \App\Models\Staf::where('nama_staf', $detail->nama)->first();
-                @endphp
+            @foreach($groupedDetails as $detail)
                 <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td class="text-center">{{ $detail->no }}</td>
                     <td>{{ $detail->nama }}</td>
                     <td class="text-center">{{ $detail->jabatan }}</td>
                     <td class="text-center">{{ $detail->tanggal_penugasan }}</td>
                     <td class="text-center">{{ $detail->jumlah_hari }}</td>
                     <td class="text-right">Rp. {{ number_format($detail->besaran_uang_per_hari, 0, ',', '.') }}</td>
-                    <td class="text-right">Rp. {{ number_format($detail->besaran_uang_per_hari * $detail->jumlah_hari, 0, ',', '.') }}</td>
-                    <td class="text-center">{{ $staf ? $staf->rekening : '-' }}</td>
-                    <td class="text-center">{{ $staf ? $staf->nama_bank : '-' }}</td>
+                    <td class="text-right">Rp. {{ number_format($detail->jumlah_uang_diterima, 0, ',', '.') }}</td>
+                    <td class="text-center">{{ $detail->nomor_rekening ?? '-' }}</td>
+                    <td class="text-center">{{ \App\Models\Staf::where('nama_staf', $detail->nama)->first()->nama_bank ?? '-' }}</td>
                 </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr style="font-weight: bold;">
                 <td colspan="6" class="text-right">Jumlah</td>
-                <td class="text-right">Rp{{ number_format($sptjb->details->sum(function($detail) { return $detail->besaran_uang_per_hari * $detail->jumlah_hari; }), 0, ',', '.') }}</td>
+                <td class="text-right">Rp{{ number_format($groupedDetails->sum('jumlah_uang_diterima'), 0, ',', '.') }}</td>
                 <td colspan="2" style="background-color: #e0e0e0;"></td>
             </tr>
         </tfoot>

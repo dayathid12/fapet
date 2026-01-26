@@ -94,6 +94,50 @@ class PdfController extends Controller
         // Set locale to Indonesian
         \Carbon\Carbon::setLocale('id');
 
+        // Generate grouped details
+        $details = $sptjb->details;
+        $grouped = $details->groupBy('nama');
+        $groupedDetails = collect();
+        $no = 1;
+        foreach ($grouped as $nama => $group) {
+            $record = new \stdClass();
+            $record->no = $no++;
+            $record->nama = $nama;
+            $record->jabatan = $group->first()->jabatan;
+            $record->besaran_uang_per_hari = $group->first()->besaran_uang_per_hari;
+            $record->jumlah_hari = $group->sum('jumlah_hari');
+            $record->jumlah_uang_diterima = $group->sum(function($item) {
+                return $item->besaran_uang_per_hari * $item->jumlah_hari;
+            });
+            $staf = \App\Models\Staf::where('nama_staf', $nama)->first();
+            $record->nomor_rekening = $staf ? $staf->rekening : null;
+            $record->golongan = $staf ? $staf->gol_pangkat : null;
+
+            // Combine nomor_surat: unique, sort numerically
+            $nomorSurat = $group->pluck('nomor_surat')->filter()->unique()->sort(function($a, $b) {
+                $aNum = is_numeric($a) ? (int)$a : $a;
+                $bNum = is_numeric($b) ? (int)$b : $b;
+                if (is_int($aNum) && is_int($bNum)) {
+                    return $aNum <=> $bNum;
+                }
+                return strcmp($a, $b);
+            })->implode(',');
+            $record->nomor_surat = $nomorSurat;
+
+            // Combine tanggal_penugasan: unique dates, sort chronologically
+            $tanggalPenugasan = collect();
+            foreach ($group as $item) {
+                if ($item->tanggal_penugasan) {
+                    $dates = explode(',', $item->tanggal_penugasan);
+                    $tanggalPenugasan = $tanggalPenugasan->merge($dates);
+                }
+            }
+            $tanggalPenugasan = $tanggalPenugasan->unique()->sort()->implode(',');
+            $record->tanggal_penugasan = $tanggalPenugasan;
+
+            $groupedDetails->push($record);
+        }
+
         $earliestStartDate = null;
         $latestEndDate = null;
 
@@ -123,7 +167,7 @@ class PdfController extends Controller
             }
         }
 
-        $pdf = Pdf::loadView('pdf.sptjb_table', compact('sptjb', 'dateRangeString'))->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView('pdf.sptjb_table', compact('sptjb', 'groupedDetails', 'dateRangeString'))->setPaper('a4', 'landscape');
 
         $fileName = 'sptjb-table-' . preg_replace('/[^a-zA-Z0-9_-]/', '', $sptjb->no_sptjb) . '.pdf';
 
