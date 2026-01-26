@@ -184,6 +184,15 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
+                        ->action(function ($records) {
+                            foreach ($records as $record) {
+                                // Delete all details with the same nama
+                                SPTJBUangPengemudiDetail::where('sptjb_pengemudi_id', $this->ownerRecord->id)
+                                    ->where('nama', $record->nama)
+                                    ->delete();
+                            }
+                        })
+                        ->deselectRecordsAfterCompletion()
                         ->after(function () {
                             $this->resequenceNumbers();
                         }),
@@ -215,7 +224,7 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                 DB::raw('SUM(sptjb_uang_pengemudi_details.besaran_uang_per_hari * sptjb_uang_pengemudi_details.jumlah_hari) as jumlah_uang_diterima'),
                 'stafs.rekening as nomor_rekening',
                 'stafs.gol_pangkat as golongan',
-                DB::raw("GROUP_CONCAT(DISTINCT sptjb_uang_pengemudi_details.nomor_surat ORDER BY CAST(sptjb_uang_pengemudi_details.nomor_surat AS UNSIGNED) SEPARATOR ',') as nomor_surat"),
+                DB::raw("GROUP_CONCAT(DISTINCT sptjb_uang_pengemudi_details.nomor_surat ORDER BY CAST(sptjb_uang_pengemudi_details.nomor_surat AS UNSIGNED) SEPARATOR ', ') as nomor_surat"),
                 DB::raw("GROUP_CONCAT(DISTINCT sptjb_uang_pengemudi_details.tanggal_penugasan SEPARATOR ',') as tanggal_penugasan")
             )
             ->groupBy('sptjb_uang_pengemudi_details.nama')
