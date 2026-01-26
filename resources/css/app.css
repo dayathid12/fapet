@@ -53,3 +53,8 @@ body {
 h1 {
     color: #1e3a8a; /* A darker, more professional blue for the title */
 }
+
+/* Set cursor to default for table rows */
+.fi-table tbody tr {
+    cursor: default !important;
+}

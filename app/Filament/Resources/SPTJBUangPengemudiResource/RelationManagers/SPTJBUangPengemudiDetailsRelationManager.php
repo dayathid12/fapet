@@ -205,19 +205,20 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
     {
         // This now returns a query builder instead of a collection.
         return $this->getOwnerRecord()->details()
+            ->leftJoin('stafs', 'sptjb_uang_pengemudi_details.nama', '=', 'stafs.nama_staf')
             ->select(
-                'nama',
-                DB::raw('ROW_NUMBER() OVER (ORDER BY MIN(id)) as no'),
-                DB::raw('MIN(jabatan) as jabatan'),
-                DB::raw('MIN(besaran_uang_per_hari) as besaran_uang_per_hari'),
-                DB::raw('SUM(jumlah_hari) as jumlah_hari'),
-                DB::raw('SUM(jumlah_uang_diterima) as jumlah_uang_diterima'),
-                DB::raw('MIN(nomor_rekening) as nomor_rekening'),
-                DB::raw('MIN(golongan) as golongan'),
-                DB::raw("GROUP_CONCAT(DISTINCT nomor_surat ORDER BY CAST(nomor_surat AS UNSIGNED) SEPARATOR ',') as nomor_surat"),
-                DB::raw("GROUP_CONCAT(DISTINCT tanggal_penugasan SEPARATOR ',') as tanggal_penugasan")
+                'sptjb_uang_pengemudi_details.nama',
+                DB::raw('ROW_NUMBER() OVER (ORDER BY MIN(sptjb_uang_pengemudi_details.id)) as no'),
+                DB::raw('MIN(sptjb_uang_pengemudi_details.jabatan) as jabatan'),
+                DB::raw('MIN(sptjb_uang_pengemudi_details.besaran_uang_per_hari) as besaran_uang_per_hari'),
+                DB::raw('SUM(sptjb_uang_pengemudi_details.jumlah_hari) as jumlah_hari'),
+                DB::raw('SUM(sptjb_uang_pengemudi_details.besaran_uang_per_hari * sptjb_uang_pengemudi_details.jumlah_hari) as jumlah_uang_diterima'),
+                'stafs.rekening as nomor_rekening',
+                'stafs.gol_pangkat as golongan',
+                DB::raw("GROUP_CONCAT(DISTINCT sptjb_uang_pengemudi_details.nomor_surat ORDER BY CAST(sptjb_uang_pengemudi_details.nomor_surat AS UNSIGNED) SEPARATOR ',') as nomor_surat"),
+                DB::raw("GROUP_CONCAT(DISTINCT sptjb_uang_pengemudi_details.tanggal_penugasan SEPARATOR ',') as tanggal_penugasan")
             )
-            ->groupBy('nama')
+            ->groupBy('sptjb_uang_pengemudi_details.nama')
             ->orderBy('no');
     }
 
