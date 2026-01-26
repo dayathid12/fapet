@@ -181,7 +181,14 @@ class SPTJBUangPengemudiDetailsRelationManager extends RelationManager
                     ->icon('heroicon-o-table-cells')
             ])
             ->actions([])
-            ->bulkActions([]);
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->after(function () {
+                            $this->resequenceNumbers();
+                        }),
+                ]),
+            ]);
     }
 
     public function getTableRecordKey(Model $record): string
