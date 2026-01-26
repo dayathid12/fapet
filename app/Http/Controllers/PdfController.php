@@ -15,6 +15,9 @@ class PdfController extends Controller
         // Eager load relationships to prevent N+1 query problems in the view
         $perjalanan->load('unitKerja', 'wilayah', 'pengemudi', 'asisten');
 
+        // Set locale to Indonesian
+        \Carbon\Carbon::setLocale('id');
+
         $pdf = Pdf::loadView('pdf.surat_tugas', compact('perjalanan'))->setPaper('a4', 'portrait');
 
         // Sanitize the filename

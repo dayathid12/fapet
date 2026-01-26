@@ -249,7 +249,7 @@
                     <p style="margin: 0;">a.n. Direktur</p>
                     <p style="margin: 0;">Sekretaris Direktorat Pengelolaan</p>
                     <p style="margin: 0;">Aset dan Sarana Prasarana,</p>
-                    @if($perjalanan->upload_tte)
+                    @if($perjalanan->upload_tte && file_exists(storage_path('app/public/' . $perjalanan->upload_tte)))
                         <img src="data:image/png;base64,{{ base64_encode(file_get_contents(storage_path('app/public/' . $perjalanan->upload_tte))) }}" alt="TTE Signature" style="max-width: 300px; max-height: 150px; margin: 10px 0;">
                     @endif
                     <p style="margin: 0;">Arief Irmansyah, S.Sos., M.Si.</p>
