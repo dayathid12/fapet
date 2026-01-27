@@ -319,7 +319,7 @@ class RincianPengeluaranRelationManager extends RelationManager
     protected function getTableQuery(): Builder
     {
         $includePertamaRetail = session('include_pertama_retail', true);
-        $bbmCondition = $includePertamaRetail ? '1=1' : 'bbm_biayas.pertama_retail = false';
+        $bbmCondition = $includePertamaRetail ? '1=1' : 'rb.pertama_retail = false';
 
         return $this->getRelationship()->getQuery()
             ->with([
@@ -329,10 +329,6 @@ class RincianPengeluaranRelationManager extends RelationManager
                 'perjalananKendaraan.pengemudi',
                 'perjalananKendaraan.kendaraan'
             ])
-            ->leftJoin('rincian_biayas as bbm_biayas', function ($join) {
-                $join->on('rincian_pengeluarans.id', '=', 'bbm_biayas.rincian_pengeluaran_id')
-                     ->where('bbm_biayas.tipe', '=', 'bbm');
-            })
             ->leftJoin('rincian_biayas as toll_biayas', function ($join) {
                 $join->on('rincian_pengeluarans.id', '=', 'toll_biayas.rincian_pengeluaran_id')
                      ->where('toll_biayas.tipe', '=', 'toll');
@@ -342,7 +338,7 @@ class RincianPengeluaranRelationManager extends RelationManager
                      ->where('parkir_biayas.tipe', '=', 'parkir');
             })
             ->select('rincian_pengeluarans.*')
-            ->selectRaw("COALESCE(SUM(CASE WHEN {$bbmCondition} THEN bbm_biayas.biaya ELSE 0 END), 0) as total_bbm")
+            ->selectRaw("(SELECT COALESCE(SUM(rb.biaya), 0) FROM rincian_biayas rb INNER JOIN rincian_pengeluarans rp2 ON rb.rincian_pengeluaran_id = rp2.id WHERE rp2.nomor_perjalanan = rincian_pengeluarans.nomor_perjalanan AND rb.tipe = 'bbm' AND ({$bbmCondition})) as total_bbm")
             ->selectRaw('COALESCE(SUM(toll_biayas.biaya), 0) as total_toll')
             ->selectRaw('COALESCE(SUM(parkir_biayas.biaya), 0) + COALESCE(rincian_pengeluarans.biaya_parkir, 0) as total_parkir')
             ->groupBy('rincian_pengeluarans.id');
