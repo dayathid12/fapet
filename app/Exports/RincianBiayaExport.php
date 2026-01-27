@@ -224,14 +224,19 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 $lastRow = $sheet->getHighestRow();
 
                 // Style Header Tabel (Baris 4)
-                $sheet->getStyle('A4:O4')->applyFromArray([
+                $sheet->getStyle('A4:P4')->applyFromArray([
                     'font' => ['bold' => true],
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
                 ]);
 
                 // Border untuk seluruh data (A4 sampai baris terakhir)
-                $sheet->getStyle('A4:O' . $lastRow)->applyFromArray([
+                $sheet->getStyle('A4:P' . $lastRow)->applyFromArray([
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                ]);
+
+                // Tambahkan border biasa untuk kolom Biaya Parkir/Lainnya (Rp.) (kolom P)
+                $sheet->getStyle('P4:P' . $lastRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
 
