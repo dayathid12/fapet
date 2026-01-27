@@ -234,7 +234,28 @@ class RincianPengeluaranRelationManager extends RelationManager
             ->recordTitleAttribute('nomor_perjalanan')
             ->columns([
                 Tables\Columns\TextColumn::make('perjalananKendaraan.perjalanan.nomor_perjalanan')
-                    ->label('Nomor Perjalanan'),
+                    ->label('Nomor Perjalanan')
+                    ->formatStateUsing(function ($state, $record) {
+                        $url = EntryPengeluaranResource::getUrl('rincian-biaya', [
+                            'record' => $this->getOwnerRecord()->id,
+                            'rincianPengeluaranId' => $record->id,
+                        ]);
+                        $button = '<div class="flex items-center justify-center"><a href="' . $url . '" class="inline-flex items-center px-2 py-1 bg-blue-600 border border-transparent rounded font-medium text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"><svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>Tambah Biaya</a></div>';
+                        return '<div class="text-center">' . $state . '</div>' . $button;
+                    })
+                    ->html(),
+                Tables\Columns\TextColumn::make('total_bbm')
+                    ->label('Total BBM')
+                    ->money('IDR')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('total_toll')
+                    ->label('Total Toll')
+                    ->money('IDR')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('total_parkir')
+                    ->label('Total Parkir')
+                    ->money('IDR')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('perjalananKendaraan.pengemudi.nama_staf')
                     ->label('Nama Pengemudi'),
                 Tables\Columns\TextColumn::make('perjalananKendaraan.perjalanan.waktu_keberangkatan')
@@ -259,18 +280,6 @@ class RincianPengeluaranRelationManager extends RelationManager
                     }),
                 Tables\Columns\TextColumn::make('perjalananKendaraan.perjalanan.wilayah.nama_wilayah')
                     ->label('Kota Kabupaten'),
-                Tables\Columns\TextColumn::make('total_bbm')
-                    ->label('Total BBM')
-                    ->money('IDR')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('total_toll')
-                    ->label('Total Toll')
-                    ->money('IDR')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('total_parkir')
-                    ->label('Total Parkir')
-                    ->money('IDR')
-                    ->sortable(),
 
             ])
             ->filters([
@@ -339,8 +348,8 @@ class RincianPengeluaranRelationManager extends RelationManager
             })
             ->select('rincian_pengeluarans.*')
             ->selectRaw("(SELECT COALESCE(SUM(rb.biaya), 0) FROM rincian_biayas rb INNER JOIN rincian_pengeluarans rp2 ON rb.rincian_pengeluaran_id = rp2.id WHERE rp2.nomor_perjalanan = rincian_pengeluarans.nomor_perjalanan AND rb.tipe = 'bbm' AND ({$bbmCondition})) as total_bbm")
-            ->selectRaw('COALESCE(SUM(toll_biayas.biaya), 0) as total_toll')
-            ->selectRaw('COALESCE(SUM(parkir_biayas.biaya), 0) + COALESCE(rincian_pengeluarans.biaya_parkir, 0) as total_parkir')
+            ->selectRaw("(SELECT COALESCE(SUM(rb.biaya), 0) FROM rincian_biayas rb INNER JOIN rincian_pengeluarans rp2 ON rb.rincian_pengeluaran_id = rp2.id WHERE rp2.nomor_perjalanan = rincian_pengeluarans.nomor_perjalanan AND rb.tipe = 'toll') as total_toll")
+            ->selectRaw("(SELECT COALESCE(SUM(rb.biaya), 0) FROM rincian_biayas rb INNER JOIN rincian_pengeluarans rp2 ON rb.rincian_pengeluaran_id = rp2.id WHERE rp2.nomor_perjalanan = rincian_pengeluarans.nomor_perjalanan AND rb.tipe = 'parkir') + (SELECT COALESCE(SUM(rp2.biaya_parkir), 0) FROM rincian_pengeluarans rp2 WHERE rp2.nomor_perjalanan = rincian_pengeluarans.nomor_perjalanan) as total_parkir")
             ->groupBy('rincian_pengeluarans.id');
     }
 
