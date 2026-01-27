@@ -555,7 +555,9 @@ class PerjalananResource extends Resource
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                         if ($state === 'Jemput (Kepulangan)') {
                                             $set('waktu_selesai_penugasan', $get('../../waktu_kepulangan'));
-                                            $set('waktu_mulai_tugas', $get('../../waktu_kepulangan'));
+                                            if (!$get('waktu_mulai_tugas')) {
+                                                $set('waktu_mulai_tugas', $get('../../waktu_kepulangan'));
+                                            }
                                         } elseif ($state === 'Antar (Keberangkatan)') {
                                             $set('waktu_selesai_penugasan', $get('../../waktu_keberangkatan'));
                                         } else {
@@ -594,12 +596,12 @@ class PerjalananResource extends Resource
                                     ->native(false)
                                     ->required(fn (Forms\Get $get): bool => !in_array($get('tipe_penugasan'), ['Antar & Jemput', 'Antar (Keberangkatan)']))
                                     ->visible(fn (Forms\Get $get): bool => !in_array($get('tipe_penugasan'), ['Antar & Jemput', 'Antar (Keberangkatan)']))
+                                    ->default(fn (Forms\Get $get, $record) => $get('tipe_penugasan') === 'Jemput (Kepulangan)' && $record ? ($record->waktu_mulai_tugas ?: $get('../../waktu_kepulangan')) : null)
                                     ->live(),
                                 \Filament\Forms\Components\Select::make('pengemudi_id')
                                     ->label('Nama Pengemudi')
                                     ->options(\App\Models\Staf::all()->pluck('nama_staf', 'staf_id'))
                                     ->searchable()
-                                    ->required()
                                     ->placeholder('Pilih pengemudi...'),
                                 \Filament\Forms\Components\Select::make('asisten_id')
                                     ->label('Nama Asisten')

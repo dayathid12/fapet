@@ -22,6 +22,7 @@ class PerjalananKendaraan extends Model
         'asisten_id',
         'tipe_penugasan', // Ini juga perlu ditambahkan jika belum ada
         'waktu_selesai_penugasan',
+        'waktu_mulai_tugas',
     ];
 
     /**
