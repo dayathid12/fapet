@@ -1,3 +1,6 @@
-- [ ] Delete models: app/Models/Infra.php, app/Models/Teknik.php, app/Models/Urbang.php
-- [ ] Delete policies: app/Policies/InfraPolicy.php, app/Policies/TeknikPolicy.php, app/Policies/UrbangPolicy.php
-- [ ] Delete migrations: database/migrations/2025_10_21_091331_create_infras_table.php, database/migrations/2025_10_21_101509_create_tekniks_table.php, database/migrations/2025_10_21_094004_create_urbangs_table.php
+# TODO: Update RincianBiayaExport.php
+
+- [x] Remove "Jumlah Kartu Pas BBM" column from headings and map (already done)
+- [x] Update styling to adjust column ranges (already done)
+- [x] Remove Pertamina Retail filtering logic
+- [x] Ensure all data is shown without filtering

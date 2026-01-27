@@ -51,7 +51,6 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
             'Jenis BBM',
             'Volume (liter)',
             'Biaya BBM (Rp.)',
-            'Jumlah Kartu Pas BBM',
             'Kartu Pas BBM',
             'Kode Kartu Tol',
             'Biaya Tol (Rp.)',
@@ -110,27 +109,20 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
 
                 $filteredBiayas = $filteredBbmBiayas->concat($otherBiayas);
 
-                $rincianPengeluaran->should_skip = false; // Default
-
-                if ($filteredBiayas->isEmpty() && ($bbmBiayas->isNotEmpty() || $otherBiayas->isNotEmpty())) {
-                     // If there were biayas initially, but all were filtered out, mark to skip this rincianPengeluaran
-                    $rincianPengeluaran->should_skip = true;
-                } else {
-                    foreach ($filteredBiayas as $biaya) {
-                        if ($biaya->tipe === 'bbm') {
-                            $totalBBM += $biaya->biaya;
-                            if (empty($jenisBBM) && !empty($biaya->jenis_bbm)) {
-                                $jenisBBM = $biaya->jenis_bbm;
-                            }
-                            if (empty($volumeBBM) && !empty($biaya->volume)) {
-                                $volumeBBM = $biaya->volume;
-                            }
-                        } elseif ($biaya->tipe === 'toll') {
-                            $totalTol += $biaya->biaya;
-                            $kodeKartuTol = $biaya->deskripsi ?? '-';
-                        } elseif ($biaya->tipe === 'parkir') {
-                            $totalParkir += $biaya->biaya;
+                foreach ($filteredBiayas as $biaya) {
+                    if ($biaya->tipe === 'bbm') {
+                        $totalBBM += $biaya->biaya;
+                        if (empty($jenisBBM) && !empty($biaya->jenis_bbm)) {
+                            $jenisBBM = $biaya->jenis_bbm;
                         }
+                        if (empty($volumeBBM) && !empty($biaya->volume)) {
+                            $volumeBBM = $biaya->volume;
+                        }
+                    } elseif ($biaya->tipe === 'toll') {
+                        $totalTol += $biaya->biaya;
+                        $kodeKartuTol = $biaya->deskripsi ?? '-';
+                    } elseif ($biaya->tipe === 'parkir') {
+                        $totalParkir += $biaya->biaya;
                     }
                 }
 
@@ -185,7 +177,6 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
             $row->aggregated_volume_bbm,
             $row->aggregated_total_bbm,
             $row->aggregated_total_bbm_pertamina_retail,
-            $row->aggregated_total_bbm_pertamina_retail,
             $row->aggregated_kode_kartu_tol,
             $row->aggregated_total_tol,
             $row->aggregated_total_parkir,
@@ -229,32 +220,30 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 $lastRow = $sheet->getHighestRow();
 
                 // Style Header Tabel (Baris 4)
-                $sheet->getStyle('A4:P4')->applyFromArray([
+                $sheet->getStyle('A4:O4')->applyFromArray([
                     'font' => ['bold' => true],
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
                 ]);
 
                 // Border untuk seluruh data (A4 sampai baris terakhir)
-                $sheet->getStyle('A4:P' . $lastRow)->applyFromArray([
+                $sheet->getStyle('A4:O' . $lastRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
 
-                // Tambahkan border biasa untuk kolom Biaya Parkir/Lainnya (Rp.) (kolom Q)
-                $sheet->getStyle('Q4:Q' . $lastRow)->applyFromArray([
+                // Tambahkan border biasa untuk kolom Biaya Parkir/Lainnya (Rp.) (kolom P)
+                $sheet->getStyle('P4:P' . $lastRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
 
-                // Formatting Rupiah/Accounting untuk kolom data Biaya BBM, Jumlah Kartu Pas BBM, Kartu Pas BBM, Biaya Tol, dan Biaya Parkir
+                // Formatting Rupiah/Accounting untuk kolom data Biaya BBM, Kartu Pas BBM, Biaya Tol, dan Biaya Parkir
                 $sheet->getStyle('L5:L' . $lastRow) // Kolom Biaya BBM
                       ->getNumberFormat()->setFormatCode('#,##0');
-                $sheet->getStyle('M5:M' . $lastRow) // Kolom Jumlah Kartu Pas BBM
+                $sheet->getStyle('M5:M' . $lastRow) // Kolom Kartu Pas BBM
                       ->getNumberFormat()->setFormatCode('#,##0');
-                $sheet->getStyle('N5:N' . $lastRow) // Kolom Kartu Pas BBM
+                $sheet->getStyle('N5:N' . $lastRow) // Kolom Biaya Tol
                       ->getNumberFormat()->setFormatCode('#,##0');
-                $sheet->getStyle('P5:P' . $lastRow) // Kolom Biaya Tol
-                      ->getNumberFormat()->setFormatCode('#,##0');
-                $sheet->getStyle('Q5:Q' . $lastRow) // Kolom Biaya Parkir/Lainnya
+                $sheet->getStyle('P5:P' . $lastRow) // Kolom Biaya Parkir/Lainnya
                       ->getNumberFormat()->setFormatCode('#,##0');
 
 
