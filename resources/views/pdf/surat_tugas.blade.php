@@ -226,7 +226,46 @@
                 <td class="label">Tanggal</td>
                 <td class="separator">:</td>
                 <td class="value">
-                    {{ $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->translatedFormat('d F Y') : 'N/A' }}
+                    @php
+                        // Debug: Uncomment to see data
+                        // dd($perjalanan->details->first(), $perjalanan->waktu_keberangkatan, $perjalanan->waktu_kepulangan);
+
+                        $jadwalText = '';
+                        $details = $perjalanan->details->first(); // Assuming single detail for simplicity
+                        $tipePenugasan = $details ? $details->tipe_penugasan : null;
+
+                        if ($tipePenugasan === 'Antar & Jemput') {
+                            $startDateTime = $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan) : null;
+                            $endDateTime = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                        } elseif ($tipePenugasan === 'Antar (Keberangkatan)') {
+                            $startDateTime = $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan) : null;
+                            $endDateTime = $details && $details->waktu_selesai_penugasan ? \Carbon\Carbon::parse($details->waktu_selesai_penugasan) : null;
+                        } elseif ($tipePenugasan === 'Jemput (Kepulangan)') {
+                            $startDateTime = $details && $details->waktu_selesai_penugasan ? \Carbon\Carbon::parse($details->waktu_selesai_penugasan) : null;
+                            $endDateTime = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                        } else {
+                            // Default to Antar & Jemput if no tipe_penugasan
+                            $startDateTime = $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan) : null;
+                            $endDateTime = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                        }
+
+                        if ($startDateTime && $endDateTime) {
+                            $startDate = $startDateTime->toDateString();
+                            $endDate = $endDateTime->toDateString();
+                            if ($startDate === $endDate) {
+                                $jadwalText = $startDateTime->translatedFormat('j F Y');
+                            } else {
+                                $jadwalText = $startDateTime->translatedFormat('j') . ' - ' . $endDateTime->translatedFormat('j F Y');
+                            }
+                        } elseif ($startDateTime) {
+                            $jadwalText = $startDateTime->translatedFormat('j F Y');
+                        } elseif ($endDateTime) {
+                            $jadwalText = $endDateTime->translatedFormat('j F Y');
+                        } else {
+                            $jadwalText = 'N/A';
+                        }
+                    @endphp
+                    {{ $jadwalText }}
                 </td>
             </tr>
         </table>

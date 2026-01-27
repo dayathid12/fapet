@@ -13,7 +13,7 @@ class PdfController extends Controller
         $perjalanan = Perjalanan::where('no_surat_tugas', $no_surat_tugas)->firstOrFail();
 
         // Eager load relationships to prevent N+1 query problems in the view
-        $perjalanan->load('unitKerja', 'wilayah', 'pengemudi', 'asisten');
+        $perjalanan->load('unitKerja', 'wilayah', 'pengemudi', 'asisten', 'details');
 
         // Set locale to Indonesian
         \Carbon\Carbon::setLocale('id');
@@ -31,7 +31,7 @@ class PdfController extends Controller
         $perjalanan = Perjalanan::where('no_surat_tugas', $no_surat_tugas)->firstOrFail();
 
         // Eager load relationships to prevent N+1 query problems in the view
-        $perjalanan->load('unitKerja', 'wilayah', 'pengemudi', 'asisten');
+        $perjalanan->load('unitKerja', 'wilayah', 'pengemudi', 'asisten', 'details');
 
         // Render the view to HTML
         $html = view('pdf.surat_tugas', compact('perjalanan'))->render();
