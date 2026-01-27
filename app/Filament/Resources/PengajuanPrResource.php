@@ -3,17 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PengajuanPrResource\Pages;
-use App\Filament\Resources\PengajuanPrResource\RelationManagers;
 use App\Models\PengajuanPr;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\TextInput\Mask;
-use Carbon\Carbon;
+use Filament\Forms\Components\TextInput;
 
 class PengajuanPrResource extends Resource
 {
@@ -32,18 +28,38 @@ class PengajuanPrResource extends Resource
                     ->icon('heroicon-o-document-plus')
                     ->schema([
                         Forms\Components\Textarea::make('nama_perkerjaan')
-                            ->label('Nama Perkerjaan')
+                            ->label('Nama Pekerjaan')
                             ->required()
                             ->rows(4)
                             ->columnSpanFull(),
 
-                        Forms\Components\TextInput::make('total')
+                        TextInput::make('total')
                             ->label('Total')
                             ->prefix('Rp')
                             ->placeholder('0,00')
-                            ->formatStateUsing(fn ($state) => $state ? number_format($state, 2, ',', '.') : null)
-                            ->dehydrateStateUsing(fn ($state) => $state ? (float) str_replace(',', '.', str_replace('.', '', $state)) : null)
-                            ->required(),
+                            /**
+                             * PERBAIKAN: Menggunakan single quote agar PHP tidak menganggap $money sebagai variabel PHP.
+                             * Ini akan merender x-mask:dynamic="$money($input, '.', ',')" di browser.
+                             */
+                            ->extraAlpineAttributes([
+                                'x-mask:dynamic' => '$money($input, ".", ",")',
+                            ])
+                            ->extraInputAttributes([
+                                'class' => 'text-right font-mono',
+                                'inputmode' => 'numeric',
+                            ])
+                            /**
+                             * Menggunakan formatStateUsing agar saat EDIT data,
+                             * angka dari database langsung terformat di form.
+                             */
+                            ->formatStateUsing(fn ($state) => $state ? number_format($state, 0, ',', '.') : null)
+                            /**
+                             * Dehydrate: Membersihkan semua titik sebelum dikirim ke server.
+                             * Ini memastikan data yang masuk ke database tetap numerik murni.
+                             */
+                            ->dehydrateStateUsing(fn ($state) => $state ? (float) str_replace('.', '', $state) : 0)
+                            ->required()
+                            ->minValue(0),
 
                         Forms\Components\DateTimePicker::make('tanggal_usulan')
                             ->label('Tanggal Usulan')
@@ -64,8 +80,6 @@ class PengajuanPrResource extends Resource
 
                         Forms\Components\TextInput::make('nomor_pr')
                             ->label('Nomor PR')
-                            ->required()
-                            ->placeholder('Masukkan nomor PR')
                             ->hidden(),
 
                         Forms\Components\FileUpload::make('proses_pr_screenshots')
@@ -74,18 +88,8 @@ class PengajuanPrResource extends Resource
                             ->image()
                             ->directory('pengajuan-pr-screenshots')
                             ->imageEditor()
-                            ->imageEditorAspectRatios([
-                                '16:9',
-                                '4:3',
-                                '1:1',
-                            ])
-                            ->acceptedFileTypes(['image/*'])
                             ->maxSize(5120)
                             ->downloadable()
-                            ->openable()
-                            ->reorderable()
-                            ->appendFiles()
-                            ->columnSpanFull()
                             ->hidden(),
                     ])
             ]);
@@ -102,33 +106,25 @@ class PengajuanPrResource extends Resource
 
                 Tables\Columns\TextColumn::make('nomor_pr')
                     ->label('Nomor PR')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('nama_perkerjaan')
-                    ->label('Nama Perkerjaan')
-                    ->limit(50)
-                    ->searchable()
-                    ->sortable(),
+                    ->label('Nama Pekerjaan')
+                    ->limit(50),
 
                 Tables\Columns\TextColumn::make('tanggal_usulan')
                     ->label('Tanggal Usulan')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
+                    ->dateTime('d/m/Y H:i'),
 
                 Tables\Columns\TextColumn::make('total')
                     ->label('Total')
-                    ->money('IDR')
-                    ->sortable(),
+                    ->money('IDR', locale: 'id_ID')
+                    ->sortable()
+                    ->alignment('right'),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
-            ])
-            ->selectable(false)
-            ->filters([
-                //
+                    ->dateTime('d/m/Y H:i'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -142,9 +138,7 @@ class PengajuanPrResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
