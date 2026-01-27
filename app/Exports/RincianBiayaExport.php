@@ -20,6 +20,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
     protected $entryPengeluaran;
     protected $nomorBerkas; // Will be set dynamically
     protected $totalBBM;
+    protected $totalKartuPasBBM;
     protected $totalTol;
     protected $totalParkir;
 
@@ -50,6 +51,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
             'Jenis BBM',
             'Volume (liter)',
             'Biaya BBM (Rp.)',
+            'Jumlah Kartu Pas BBM',
             'Kartu Pas BBM',
             'Kode Kartu Tol',
             'Biaya Tol (Rp.)',
@@ -60,6 +62,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
     public function collection(): Collection
     {
         $this->totalBBM = 0;
+        $this->totalKartuPasBBM = 0;
         $this->totalTol = 0;
         $this->totalParkir = 0;
 
@@ -133,6 +136,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
 
 
                 $this->totalBBM += $totalBBM;
+                $this->totalKartuPasBBM += $totalBBMPertaminaRetail;
                 $this->totalTol += $totalTol;
                 $this->totalParkir += $totalParkir;
 
@@ -181,6 +185,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
             $row->aggregated_volume_bbm,
             $row->aggregated_total_bbm,
             $row->aggregated_total_bbm_pertamina_retail,
+            $row->aggregated_total_bbm_pertamina_retail,
             $row->aggregated_kode_kartu_tol,
             $row->aggregated_total_tol,
             $row->aggregated_total_parkir,
@@ -196,7 +201,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 // --- 1. SETUP JUDUL (HEADER ATAS) ---
 
                 // Baris 1: Judul Utama
-                $sheet->mergeCells('A1:P1');
+                $sheet->mergeCells('A1:Q1');
                 $sheet->setCellValue('A1', 'Tanda Terima SPJ BBM dan Tol Th. 2025');
                 $sheet->getStyle('A1')->applyFromArray([
                     'font' => ['bold' => true, 'size' => 18, 'underline' => true],
@@ -204,7 +209,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 ]);
 
                 // Baris 2: Nomor Berkas
-                $sheet->mergeCells('A2:P2');
+                $sheet->mergeCells('A2:Q2');
                 $sheet->setCellValue('A2', 'Nomor Berkas: ' . $this->nomorBerkas);
                 $sheet->getStyle('A2')->applyFromArray([
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER], 'size' => 15,
@@ -213,8 +218,8 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 // Baris 3: Tanggal (Rata Kanan)
                 // Mengambil tanggal hari ini atau tanggal spesifik
                 $tanggalCetak = \Carbon\Carbon::now()->translatedFormat('d F Y');
-                $sheet->setCellValue('P3', $tanggalCetak);
-                $sheet->getStyle('P3')->applyFromArray([
+                $sheet->setCellValue('Q3', $tanggalCetak);
+                $sheet->getStyle('Q3')->applyFromArray([
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT]
                 ]);
 
@@ -235,19 +240,21 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
 
-                // Tambahkan border biasa untuk kolom Biaya Parkir/Lainnya (Rp.) (kolom P)
-                $sheet->getStyle('P4:P' . $lastRow)->applyFromArray([
+                // Tambahkan border biasa untuk kolom Biaya Parkir/Lainnya (Rp.) (kolom Q)
+                $sheet->getStyle('Q4:Q' . $lastRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
 
-                // Formatting Rupiah/Accounting untuk kolom data Biaya BBM, Kartu Pas BBM, Biaya Tol, dan Biaya Parkir
+                // Formatting Rupiah/Accounting untuk kolom data Biaya BBM, Jumlah Kartu Pas BBM, Kartu Pas BBM, Biaya Tol, dan Biaya Parkir
                 $sheet->getStyle('L5:L' . $lastRow) // Kolom Biaya BBM
                       ->getNumberFormat()->setFormatCode('#,##0');
-                $sheet->getStyle('M5:M' . $lastRow) // Kolom Kartu Pas BBM
+                $sheet->getStyle('M5:M' . $lastRow) // Kolom Jumlah Kartu Pas BBM
                       ->getNumberFormat()->setFormatCode('#,##0');
-                $sheet->getStyle('O5:O' . $lastRow) // Kolom Biaya Tol
+                $sheet->getStyle('N5:N' . $lastRow) // Kolom Kartu Pas BBM
                       ->getNumberFormat()->setFormatCode('#,##0');
-                $sheet->getStyle('P5:P' . $lastRow) // Kolom Biaya Parkir/Lainnya
+                $sheet->getStyle('P5:P' . $lastRow) // Kolom Biaya Tol
+                      ->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->getStyle('Q5:Q' . $lastRow) // Kolom Biaya Parkir/Lainnya
                       ->getNumberFormat()->setFormatCode('#,##0');
 
 
@@ -276,30 +283,33 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
 
                 // Header Kotak Rekapitulasi
                 $sheet->setCellValue('L' . $rekapHeaderRow, 'Jumlah BBM (Rp.)');
-                $sheet->setCellValue('M' . $rekapHeaderRow, 'Jumlah Biaya Tol (Rp.)');
-                $sheet->setCellValue('N' . $rekapHeaderRow, 'Jumlah Biaya Parkir/Lainnya (Rp.)'); // Perhatikan di gambar ini geser ke kiri (Kolom N, bukan O)
+                $sheet->setCellValue('M' . $rekapHeaderRow, 'Jumlah Kartu Pas BBM (Rp.)');
+                $sheet->setCellValue('N' . $rekapHeaderRow, 'Jumlah Biaya Tol (Rp.)');
+                $sheet->setCellValue('O' . $rekapHeaderRow, 'Jumlah Biaya Parkir/Lainnya (Rp.)');
 
                 // Styling Bold Header Rekap
-                $sheet->getStyle('L' . $rekapHeaderRow . ':N' . $rekapHeaderRow)->getFont()->setBold(true);
+                $sheet->getStyle('L' . $rekapHeaderRow . ':O' . $rekapHeaderRow)->getFont()->setBold(true);
 
                 // Set Total Values
                 // Total BBM (Kolom L)
                 $sheet->setCellValue('L' . $rekapValueRow, $this->totalBBM);
 
-                // Total Tol (Kolom N di data, tapi ditaruh di M di rekap sesuai gambar layout visual)
-                // Perhatikan: Data Tol ada di kolom N, tapi kotak rekap Tol ada di kolom M
-                $sheet->setCellValue('M' . $rekapValueRow, $this->totalTol);
+                // Total Kartu Pas BBM (Kolom M)
+                $sheet->setCellValue('M' . $rekapValueRow, $this->totalKartuPasBBM);
 
-                // Total Parkir (Kolom O di data, tapi ditaruh di N di rekap sesuai gambar layout visual)
-                $sheet->setCellValue('N' . $rekapValueRow, $this->totalParkir);
+                // Total Tol (Kolom N)
+                $sheet->setCellValue('N' . $rekapValueRow, $this->totalTol);
+
+                // Total Parkir (Kolom O)
+                $sheet->setCellValue('O' . $rekapValueRow, $this->totalParkir);
 
                 // Formatting Rupiah/Accounting (Opsional)
-                $sheet->getStyle('L' . $rekapValueRow . ':N' . $rekapValueRow)
+                $sheet->getStyle('L' . $rekapValueRow . ':O' . $rekapValueRow)
                       ->getNumberFormat()->setFormatCode('#,##0');
 
                 // Border Kotak Rekapitulasi
-                // Area: K(Header)-N(Value) sesuai visual
-                $sheet->getStyle('K' . $rekapHeaderRow . ':N' . $rekapValueRow)->applyFromArray([
+                // Area: K(Header)-O(Value)
+                $sheet->getStyle('K' . $rekapHeaderRow . ':O' . $rekapValueRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
                 ]);
