@@ -241,7 +241,7 @@
                             $startDateTime = $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan) : null;
                             $endDateTime = $details && $details->waktu_selesai_penugasan ? \Carbon\Carbon::parse($details->waktu_selesai_penugasan) : null;
                         } elseif ($tipePenugasan === 'Jemput (Kepulangan)') {
-                            $startDateTime = $details && $details->waktu_selesai_penugasan ? \Carbon\Carbon::parse($details->waktu_selesai_penugasan) : null;
+                            $startDateTime = $details && $details->waktu_mulai_tugas ? \Carbon\Carbon::parse($details->waktu_mulai_tugas) : null;
                             $endDateTime = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
                         } else {
                             // Default to Antar & Jemput if no tipe_penugasan

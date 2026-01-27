@@ -173,37 +173,49 @@
                     @php
                         $jadwalText = '';
                         $details = $perjalanan->details->first(); // Assuming single detail for simplicity
-                        $tipePenugasan = $details ? $details->tipe_penugasan : null;
+                        $tipePenugasan = $details->tipe_penugasan ?? null;
+
+                        $rawStartDateTime = null;
+                        $rawEndDateTime = null;
 
                         if ($tipePenugasan === 'Antar & Jemput') {
-                            $startDateTime = $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan) : null;
-                            $endDateTime = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                            $rawStartDateTime = $perjalanan->waktu_keberangkatan;
+                            $rawEndDateTime = $perjalanan->waktu_kepulangan;
                         } elseif ($tipePenugasan === 'Antar (Keberangkatan)') {
-                            $startDateTime = $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan) : null;
-                            $endDateTime = $details && $details->waktu_selesai_penugasan ? \Carbon\Carbon::parse($details->waktu_selesai_penugasan) : null;
+                            $rawStartDateTime = $perjalanan->waktu_keberangkatan;
+                            $rawEndDateTime = $details->waktu_selesai_penugasan ?? null;
                         } elseif ($tipePenugasan === 'Jemput (Kepulangan)') {
-                            $startDateTime = $details && $details->waktu_mulai_tugas ? \Carbon\Carbon::parse($details->waktu_mulai_tugas) : null;
-                            $endDateTime = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                            // Menggunakan waktu mulai tugas dan kepulangan keseluruhan perjalanan
+                            $rawStartDateTime = $details->waktu_mulai_tugas ?? null;
+                            $rawEndDateTime = $perjalanan->waktu_kepulangan;
                         } else {
                             // Default to Antar & Jemput if no tipe_penugasan
-                            $startDateTime = $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan) : null;
-                            $endDateTime = $perjalanan->waktu_kepulangan ? \Carbon\Carbon::parse($perjalanan->waktu_kepulangan) : null;
+                            $rawStartDateTime = $perjalanan->waktu_keberangkatan;
+                            $rawEndDateTime = $perjalanan->waktu_kepulangan;
                         }
 
+                        // Pastikan semua waktu di-parse ke Carbon instance sekali saja
+                        $startDateTime = $rawStartDateTime ? \Carbon\Carbon::parse($rawStartDateTime) : null;
+                        $endDateTime = $rawEndDateTime ? \Carbon\Carbon::parse($rawEndDateTime) : null;
+
                         if ($startDateTime && $endDateTime) {
-                            $startDate = $startDateTime->toDateString();
-                            $endDate = $endDateTime->toDateString();
-                            $startTime = $startDateTime->format('H:i');
-                            $endTime = $endDateTime->format('H:i');
-                            if ($startDate === $endDate) {
-                                $jadwalText = $startDateTime->format('j F Y') . ' ' . $startTime . ' - ' . $endTime;
+                            if ($startDateTime->toDateString() === $endDateTime->toDateString()) {
+                                // Satu hari, tampilkan tanggal dan rentang waktu
+                                $jadwalText = $startDateTime->translatedFormat('j F Y (H:i') . ' - ' . $endDateTime->translatedFormat('H:i)');
                             } else {
-                                $jadwalText = $startDateTime->format('j') . ' - ' . $endDateTime->format('j F Y') . ' ' . $startTime . ' - ' . $endTime;
+                                // Lebih dari satu hari
+                                if ($startDateTime->format('Ym') === $endDateTime->format('Ym')) {
+                                    // Bulan dan tahun sama: 21 - 22 Januari 2026
+                                    $jadwalText = $startDateTime->translatedFormat('j') . ' - ' . $endDateTime->translatedFormat('j F Y');
+                                } else {
+                                    // Bulan atau tahun berbeda: 21 Januari 2026 - 22 Februari 2026
+                                    $jadwalText = $startDateTime->translatedFormat('j F Y') . ' - ' . $endDateTime->translatedFormat('j F Y');
+                                }
                             }
                         } elseif ($startDateTime) {
-                            $jadwalText = $startDateTime->format('j F Y') . ' ' . $startDateTime->format('H:i');
+                            $jadwalText = $startDateTime->translatedFormat('j F Y (H:i)');
                         } elseif ($endDateTime) {
-                            $jadwalText = $endDateTime->format('j F Y') . ' ' . $endDateTime->format('H:i');
+                            $jadwalText = $endDateTime->translatedFormat('j F Y (H:i)');
                         } else {
                             $jadwalText = 'N/A';
                         }
@@ -215,12 +227,12 @@
             <tr>
                 <td class="label">Nomor Kendaraan</td>
                 <td class="separator">:</td>
-                <td class="value">{{ $perjalanan->kendaraan->first()->nopol_kendaraan ?? 'N/A' }} ({{ $perjalanan->kendaraan->first()->merk_type ?? 'N/A' }})</td>
+                <td class="value">{{ $perjalanan->details->first()->kendaraan->nopol_kendaraan ?? 'N/A' }} ({{ $perjalanan->details->first()->kendaraan->merk_type ?? 'N/A' }})</td>
             </tr>
             <tr>
                 <td class="label">Lokasi Keberangkatan</td>
                 <td class="separator">:</td>
-                <td class="value">{{ str_replace('06 January 2026', $perjalanan->waktu_keberangkatan ? \Carbon\Carbon::parse($perjalanan->waktu_keberangkatan)->format('H:i') : 'BERANGKAT', $perjalanan->lokasi_keberangkatan ?? 'N/A') }}</td>
+                <td class="value">{{ $perjalanan->lokasi_keberangkatan ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td class="label">Alamat Tujuan</td>
@@ -246,7 +258,7 @@
             <td style="width: 50%;"></td>
             <td style="width: 50%; text-align: left; margin-left: auto;">
                 @php
-                    $signatureDate = $startDateTime ? $startDateTime->format('d F Y') : now()->format('d F Y');
+                    $signatureDate = $startDateTime ? $startDateTime->translatedFormat('d F Y') : now()->translatedFormat('d F Y');
                 @endphp
                 <p style="margin: 2px 0;">Jatinangor, {{ $signatureDate }}</p>
                 <p style="margin: 2px 0;">A.n Direktur Pengelolaan Aset</p>
@@ -262,4 +274,3 @@
 
 </body>
 </html>
-
