@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rupiah Currency Input Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .modal {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 400px;
+            max-width: 90%;
+        }
+        .modal h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        .error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .raw-value {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="modal">
+        <h2>Tambah Rincian Biaya</h2>
+        <form id="biaya-form">
+            <div class="form-group">
+                <label for="jumlah-bbm">Jumlah BBM (Rp)</label>
+                <input type="text" id="jumlah-bbm" placeholder="0" required>
+                <div class="error" id="error-message"></div>
+            </div>
+            <div class="raw-value">
+                Nilai mentah: <span id="raw-value">0</span>
+            </div>
+            <div class="buttons">
+                <button type="button" class="btn-secondary" onclick="resetForm()">Reset</button>
+                <button type="submit" class="btn-primary">Simpan</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const input = document.getElementById('jumlah-bbm');
+        const errorMessage = document.getElementById('error-message');
+        const rawValueDisplay = document.getElementById('raw-value');
+
+        input.addEventListener('input', function(e) {
+            let value = e.target.value;
+
+            // Validasi: Hanya izinkan angka dan satu koma
+            value = value.replace(/[^0-9,]/g, '');
+
+            // Pastikan hanya satu koma
+            const commaCount = (value.match(/,/g) || []).length;
+            if (commaCount > 1) {
+                const parts = value.split(',');
+                value = parts[0] + ',' + parts.slice(1).join('');
+            }
+
+            // Format real-time
+            const [integerPart, decimalPart] = value.split(',');
+            const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            const formattedValue = decimalPart !== undefined ? formattedInteger + ',' + decimalPart : formattedInteger;
+
+            e.target.value = formattedValue;
+
+            // Update nilai mentah
+            updateRawValue();
+
+            // Clear error message
+            errorMessage.textContent = '';
+        });
+
+        input.addEventListener('blur', function() {
+            // Validasi akhir saat kehilangan fokus
+            const value = input.value;
+            if (value && !isValidCurrency(value)) {
+                errorMessage.textContent = 'Format tidak valid. Gunakan angka dan maksimal satu koma.';
+            }
+        });
+
+        function isValidCurrency(value) {
+            // Regex untuk validasi: angka dengan pemisah ribuan titik dan opsional desimal koma
+            const regex = /^(\d{1,3}(\.\d{3})*|\d+)(,\d{1,2})?$/;
+            return regex.test(value);
+        }
+
+        function getRawNumber() {
+            const value = input.value;
+            if (!value) return 0;
+
+            // Hapus pemisah ribuan (titik) dan ganti koma dengan titik untuk desimal
+            const cleanValue = value.replace(/\./g, '').replace(',', '.');
+            return parseFloat(cleanValue) || 0;
+        }
+
+        function updateRawValue() {
+            const raw = getRawNumber();
+            rawValueDisplay.textContent = raw.toString();
+        }
+
+        function resetForm() {
+            input.value = '';
+            errorMessage.textContent = '';
+            updateRawValue();
+        }
+
+        document.getElementById('biaya-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const rawValue = getRawNumber();
+            alert(`Nilai yang akan disimpan: ${rawValue}`);
+            // Di sini Anda bisa mengirim data ke server atau melakukan aksi lainnya
+        });
+
+        // Fungsi global untuk mendapatkan nilai mentah (untuk digunakan di luar komponen ini)
+        window.getRupiahRawValue = getRawNumber;
+    </script>
+</body>
+</html>
