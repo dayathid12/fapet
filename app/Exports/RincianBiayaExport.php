@@ -50,6 +50,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
             'Jenis BBM',
             'Volume (liter)',
             'Biaya BBM (Rp.)',
+            'Kartu Pas BBM',
             'Kode Kartu Tol',
             'Biaya Tol (Rp.)',
             'Biaya Parkir/Lainnya (Rp.)',
@@ -91,6 +92,11 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                     return $biaya->pertama_retail;
                 });
 
+                // Calculate total BBM for Pertamina Retail only
+                $totalBBMPertaminaRetail = $bbmBiayas->filter(function ($biaya) {
+                    return $biaya->pertama_retail;
+                })->sum('biaya');
+
                 if ($hasPertaminaRetailBBM) {
                     $filteredBbmBiayas = $bbmBiayas->filter(function ($biaya) {
                         return !$biaya->pertama_retail;
@@ -131,6 +137,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 $this->totalParkir += $totalParkir;
 
                 $rincianPengeluaran->aggregated_total_bbm = $totalBBM;
+                $rincianPengeluaran->aggregated_total_bbm_pertamina_retail = $totalBBMPertaminaRetail;
                 $rincianPengeluaran->aggregated_jenis_bbm = $jenisBBM;
                 $rincianPengeluaran->aggregated_volume_bbm = $volumeBBM;
                 $rincianPengeluaran->aggregated_total_tol = $totalTol;
@@ -146,7 +153,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                             return !$rincianPengeluaran->should_skip;
                         });
                 }
-            
+
                 public function map($row): array
                 {
                     static $no = 1;
@@ -173,6 +180,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
             $row->aggregated_jenis_bbm,
             $row->aggregated_volume_bbm,
             $row->aggregated_total_bbm,
+            $row->aggregated_total_bbm_pertamina_retail,
             $row->aggregated_kode_kartu_tol,
             $row->aggregated_total_tol,
             $row->aggregated_total_parkir,
@@ -188,7 +196,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 // --- 1. SETUP JUDUL (HEADER ATAS) ---
 
                 // Baris 1: Judul Utama
-                $sheet->mergeCells('A1:O1');
+                $sheet->mergeCells('A1:P1');
                 $sheet->setCellValue('A1', 'Tanda Terima SPJ BBM dan Tol Th. 2025');
                 $sheet->getStyle('A1')->applyFromArray([
                     'font' => ['bold' => true, 'size' => 18, 'underline' => true],
@@ -196,7 +204,7 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 ]);
 
                 // Baris 2: Nomor Berkas
-                $sheet->mergeCells('A2:O2');
+                $sheet->mergeCells('A2:P2');
                 $sheet->setCellValue('A2', 'Nomor Berkas: ' . $this->nomorBerkas);
                 $sheet->getStyle('A2')->applyFromArray([
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER], 'size' => 15,
@@ -205,8 +213,8 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                 // Baris 3: Tanggal (Rata Kanan)
                 // Mengambil tanggal hari ini atau tanggal spesifik
                 $tanggalCetak = \Carbon\Carbon::now()->translatedFormat('d F Y');
-                $sheet->setCellValue('O3', $tanggalCetak);
-                $sheet->getStyle('O3')->applyFromArray([
+                $sheet->setCellValue('P3', $tanggalCetak);
+                $sheet->getStyle('P3')->applyFromArray([
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT]
                 ]);
 
@@ -227,12 +235,14 @@ class RincianBiayaExport implements FromCollection, WithHeadings, WithMapping, W
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
 
-                // Formatting Rupiah/Accounting untuk kolom data Biaya BBM, Biaya Tol, dan Biaya Parkir
+                // Formatting Rupiah/Accounting untuk kolom data Biaya BBM, Kartu Pas BBM, Biaya Tol, dan Biaya Parkir
                 $sheet->getStyle('L5:L' . $lastRow) // Kolom Biaya BBM
                       ->getNumberFormat()->setFormatCode('#,##0');
-                $sheet->getStyle('N5:N' . $lastRow) // Kolom Biaya Tol
+                $sheet->getStyle('M5:M' . $lastRow) // Kolom Kartu Pas BBM
                       ->getNumberFormat()->setFormatCode('#,##0');
-                $sheet->getStyle('O5:O' . $lastRow) // Kolom Biaya Parkir/Lainnya
+                $sheet->getStyle('O5:O' . $lastRow) // Kolom Biaya Tol
+                      ->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->getStyle('P5:P' . $lastRow) // Kolom Biaya Parkir/Lainnya
                       ->getNumberFormat()->setFormatCode('#,##0');
 
 
