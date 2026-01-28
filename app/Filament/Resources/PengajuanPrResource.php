@@ -111,6 +111,7 @@ class PengajuanPrResource extends Resource
 
                 Tables\Columns\TextColumn::make('nama_perkerjaan')
                     ->label('Nama Pekerjaan')
+                    ->searchable()
                     ->limit(50),
 
                 Tables\Columns\TextColumn::make('tanggal_usulan')
@@ -120,6 +121,7 @@ class PengajuanPrResource extends Resource
                 Tables\Columns\TextColumn::make('total')
                     ->label('Total')
                     ->money('IDR', locale: 'id_ID')
+                    ->searchable()
                     ->sortable()
                     ->alignment('right'),
 
@@ -128,12 +130,10 @@ class PengajuanPrResource extends Resource
                     ->dateTime('d/m/Y H:i'),
             ])
             ->actions([
-                // Edit action removed
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Bulk actions are disabled for this custom view
             ]);
     }
 
