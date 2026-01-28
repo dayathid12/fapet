@@ -101,48 +101,6 @@ class PengajuanPrResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('nomor_ajuan')
-                    ->label('Nomor Ajuan')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('nama_perkerjaan')
-                    ->label('Nama Pekerjaan')
-                    ->searchable()
-                    ->limit(50),
-
-                Tables\Columns\TextColumn::make('tanggal_usulan')
-                    ->label('Tanggal Usulan')
-                    ->dateTime('d/m/Y H:i:s'),
-
-                ViewColumn::make('status_timeline')
-                    ->label('Modern Timeline Status')
-                    ->view('filament.tables.columns.modern-timeline')
-                    ->extraAttributes(['class' => 'min-w-[400px]']),
-
-                Tables\Columns\TextColumn::make('total')
-                    ->label('Total')
-                    ->money('IDR', locale: 'id_ID')
-                    ->searchable()
-                    ->sortable()
-                    ->alignment('right'),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Dibuat Pada')
-                    ->dateTime('d/m/Y H:i'),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                // Bulk actions are disabled for this custom view
-            ]);
-    }
-
     public static function getRelations(): array
     {
         return [];
