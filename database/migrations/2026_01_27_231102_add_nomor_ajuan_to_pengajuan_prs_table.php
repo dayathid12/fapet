@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pengajuan_prs', function (Blueprint $table) {
-            $table->datetime('tanggal_usulan')->change();
+            $table->string('nomor_ajuan')->nullable()->after('upload_files');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('pengajuan_prs', function (Blueprint $table) {
-            $table->date('tanggal_usulan')->change();
+            $table->dropColumn('nomor_ajuan');
         });
     }
 };

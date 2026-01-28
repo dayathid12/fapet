@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PengajuanPrResource\Pages;
+use App\Filament\Resources\AjuanPrResource\Pages;
 use App\Models\PengajuanPr;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,13 +11,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 
-class PengajuanPrResource extends Resource
+class AjuanPrResource extends Resource
 {
     protected static ?string $model = PengajuanPr::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+   protected static ?string $navigationGroup = 'Pelaporan';
 
-    protected static ?string $navigationLabel = 'Pengajuan PR';
+    protected static ?string $navigationLabel = 'Ajuan PR';
 
     public static function form(Form $form): Form
     {
@@ -140,9 +140,9 @@ class PengajuanPrResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPengajuanPrs::route('/'),
-            'create' => Pages\CreatePengajuanPr::route('/create'),
-            'edit' => Pages\EditPengajuanPr::route('/{record}/edit'),
+            'index' => Pages\ListAjuanPrs::route('/'),
+            'create' => Pages\CreateAjuanPr::route('/create'),
+            'edit' => Pages\EditAjuanPr::route('/{record}/edit'),
         ];
     }
 }

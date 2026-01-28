@@ -16,6 +16,7 @@ class PengajuanPr extends Model
         'upload_files',
         'nomor_pr',
         'proses_pr_screenshots',
+        'nomor_ajuan',
     ];
 
     protected $casts = [
@@ -31,7 +32,7 @@ class PengajuanPr extends Model
 
         static::creating(function ($model) {
             if (empty($model->nomor_ajuan)) {
-                $model->nomor_ajuan = 'PR-' . str_pad((static::count() + 1), 4, '0', STR_PAD_LEFT);
+                $model->nomor_ajuan = str_pad((static::count() + 1), 4, '0', STR_PAD_LEFT);
             }
         });
     }

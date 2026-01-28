@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -14,7 +15,7 @@ return new class extends Migration
         Schema::create('pengajuan_prs', function (Blueprint $table) {
             $table->id();
             $table->text('nama_perkerjaan')->nullable();
-            $table->date('tanggal_usulan')->default(now());
+            $table->date('tanggal_usulan')->default(DB::raw('CURRENT_DATE'));
             $table->decimal('total', 15, 2)->nullable();
             $table->json('upload_files')->nullable();
             $table->string('nomor_pr')->nullable();
