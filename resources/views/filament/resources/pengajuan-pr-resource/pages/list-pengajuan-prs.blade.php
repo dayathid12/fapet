@@ -93,8 +93,8 @@
                         <tr class="bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
                             <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest">Ref</th>
                             <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest">Informasi Pengajuan</th>
-                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-center">Modern Timeline Status</th>
                             <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-right">Nilai</th>
+                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-center">Modern Timeline Status</th>
                             <th class="px-8 py-5 w-16"></th>
                         </tr>
                     </thead>
@@ -196,9 +196,14 @@
                                 </td>
 
                                 <td class="px-8 py-7 align-top text-right">
-                                    <button class="p-3 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-xl transition-all shadow-sm hover:shadow-md">
-                                        <x-heroicon-m-chevron-right class="w-6 h-6" />
-                                    </button>
+                                    <div class="flex gap-2">
+                                        <button wire:click="openEditModal({{ $item->id }})" class="p-3 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-xl transition-all shadow-sm hover:shadow-md">
+                                            <x-heroicon-m-pencil class="w-6 h-6" />
+                                        </button>
+                                        <button wire:click="downloadFiles({{ $item->id }})" class="p-3 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-xl transition-all shadow-sm hover:shadow-md">
+                                            <x-heroicon-m-arrow-down-tray class="w-6 h-6" />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -234,4 +239,74 @@
             </div>
         </footer>
     </main>
+
+    {{-- Edit Modal --}}
+    @if($showEditModal && $selectedRecord)
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Edit Pengajuan PR</h2>
+                <button wire:click="closeEditModal" class="text-slate-400 hover:text-slate-600">
+                    <x-heroicon-m-x-mark class="w-6 h-6" />
+                </button>
+            </div>
+
+            <form wire:submit.prevent="saveEdit" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nama Pekerjaan</label>
+                    <input type="text" value="{{ $selectedRecord->nama_pekerjaan }}" disabled class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Total</label>
+                    <input type="text" value="{{ $selectedRecord->total ? 'Rp ' . number_format($selectedRecord->total, 0, ',', '.') : 'Belum Input' }}" disabled class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Upload File</label>
+                    <button type="button" wire:click="downloadFiles({{ $selectedRecord->id }})" class="w-full px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium transition-colors">
+                        <x-heroicon-m-arrow-down-tray class="w-5 h-5 inline mr-2" />
+                        Download Semua File
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nomor PR</label>
+                    <input type="text" wire:model="nomor_pr" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:text-slate-100">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Proses PR Screenshots</label>
+                    <input type="file" wire:model="proses_pr_screenshots" multiple accept="image/*" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:text-slate-100" id="screenshots-input">
+                    <p class="text-xs text-slate-500 mt-1">Anda juga dapat paste gambar langsung (Ctrl+V)</p>
+                </div>
+
+                <div class="flex justify-end gap-4">
+                    <button type="button" wire:click="closeEditModal" class="px-6 py-3 bg-slate-300 hover:bg-slate-400 text-slate-700 rounded-xl font-medium transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium transition-colors">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
+
+    <script>
+        document.addEventListener('paste', function(e) {
+            const screenshotsInput = document.getElementById('screenshots-input');
+            if (screenshotsInput && e.target.closest('.modal')) {
+                const items = e.clipboardData.items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        const file = items[i].getAsFile();
+                        // Handle paste image - you might need to adjust this based on Livewire file upload
+                        console.log('Pasted image:', file);
+                    }
+                }
+            }
+        });
+    </script>
 </x-filament-panels::page>

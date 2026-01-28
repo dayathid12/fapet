@@ -1,6 +1,8 @@
-# TODO: Update RincianBiayaExport.php
+# TODO: Add Edit Button with Modal to Pengajuan PR List View
 
-- [x] Remove "Jumlah Kartu Pas BBM" column from headings and map (already done)
-- [x] Update styling to adjust column ranges (already done)
-- [x] Remove Pertamina Retail filtering logic
-- [x] Ensure all data is shown without filtering
+## Steps to Complete:
+- [x] Update ListPengajuanPrs.php page class with modal properties and methods
+- [x] Update list-pengajuan-prs.blade.php to add Edit button and modal form
+- [x] Implement download functionality for upload_files
+- [x] Add JavaScript for paste image in proses_pr_screenshots
+- [x] Test the modal, save, download, and paste features
