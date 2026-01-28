@@ -1,133 +1,237 @@
 <x-filament-panels::page>
+    {{--
+        Penting:
+        Secara best practice, CSS kustom dan CDN Tailwind harus diintegrasikan
+        melalui proses kompilasi aset (misalnya Vite/Webpack) atau ditambahkan
+        ke layout utama Filament Anda (misalnya di `app/Providers/Filament/AdminPanelProvider.php`
+        menggunakan `->viteTheme('resources/css/filament/admin/theme.css')` atau
+        `->discoverStyles()`/`->discoverScripts()`).
+        Namun, untuk mereplikasi tampilan persis seperti yang Anda berikan,
+        saya menempatkannya di sini. Perlu diingat bahwa ini mungkin bukan
+        pendekatan paling optimal untuk produksi.
+    --}}
     <style>
-        .premium-row { transition: all 0.2s ease-in-out; border-left: 3px solid transparent; }
-        .premium-row:hover { background: rgba(20, 184, 166, 0.03); border-left: 3px solid #14b8a6; }
-        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+        /* Modern Typography & Smoothness */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(226, 232, 240, 0.8);
+            --accent-primary: #14b8a6;
+            --accent-secondary: #10b981;
+        }
+
+        .dark {
+            --glass-bg: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(30, 41, 59, 0.6);
+        }
+
+        .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2.5s infinite linear;
+        }
+
+        .filament-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        .shimmer-fast { animation: shimmer 2.5s infinite linear; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); }
+        .table-row:hover { background: rgba(20, 184, 166, 0.04); }
     </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    <main class="w-full -mt-8 space-y-4">
-        {{-- Header --}}
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
-            <div>
-                <h1 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white uppercase italic">Pengadaan Dashboard</h1>
-                <p class="text-xs text-gray-500 font-bold uppercase tracking-widest opacity-70">Sistem Pemantauan Alur Kerja</p>
+    <main class="w-full font-jakarta space-y-8 pb-12">
+        {{-- Footer ini mungkin duplikat dari footer di bawah, sesuaikan jika perlu --}}
+        <footer class="flex justify-between items-center px-2">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-[0.25em]">
+                 {{ now()->format('H:i') }} WIB
             </div>
-            <div class="flex items-center gap-3">
-                @if(method_exists($this, 'table'))
-                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-1">
-                        {{ $this->table->getFiltersForm() }}
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
-            {{-- Toolbar --}}
-            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/50">
-                <div class="relative max-w-xl group">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <x-heroicon-m-magnifying-glass class="w-4 h-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
-                    </span>
-                    <input type="search" wire:model.live.debounce.500ms="tableSearch" placeholder="Cari data pengajuan..." class="block w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all shadow-sm" />
+        </footer>
+        {{-- Main Table Container --}}
+        <div class="filament-card rounded-2xl overflow-hidden">
+            {{-- Search & Filter Bar --}}
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900/50">
+                <div class="relative w-full sm:max-w-md group">
+                    <x-heroicon-m-magnifying-glass class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-teal-500 transition-colors" />
+                    <input
+                        type="text"
+                        wire:model.live.debounce.500ms="tableSearch"
+                        placeholder="Cari data pengadaan..."
+                        class="w-full pl-12 pr-4 py-3 text-base border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all"
+                    />
+                </div>
+                <div class="flex items-center gap-3">
+                    <button class="flex items-center gap-2 px-5 py-3 text-base font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 transition">
+                        <x-heroicon-m-funnel class="w-5 h-5" />
+                        <span>Filter</span>
+                    </button>
+                    <button class="flex items-center gap-2 px-5 py-3 text-base font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 transition">
+                        <span>Urutkan</span>
+                        <x-heroicon-m-chevron-down class="w-4 h-4" />
+                    </button>
                 </div>
             </div>
 
+            {{-- Table Content --}}
             <div class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-left border-collapse min-w-[1000px]">
                     <thead>
-                        <tr class="bg-gray-50/80 dark:bg-gray-800/50">
-                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-800 w-32">Ref.</th>
-                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-800">Nama Pekerjaan</th>
-                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-800">Estimasi Biaya</th>
-                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-800 text-center">Status Alur</th>
-                            <th class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 w-24"></th>
+                        <tr class="bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
+                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest">Ref</th>
+                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest">Informasi Pengajuan</th>
+                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-center">Modern Timeline Status</th>
+                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-right">Nilai</th>
+                            <th class="px-8 py-5 w-16"></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50">
                         @forelse ($this->getTableRecords() as $item)
                             @php
-                                $step1 = (isset($item->total) && $item->total > 0);
-                                $step2 = !empty($item->nomor_pr);
+                                $hasAnggaran = (isset($item->total) && $item->total > 0);
+                                $hasPR = !empty($item->nomor_pr);
+                                $progress = $hasPR ? 100 : ($hasAnggaran ? 50 : 15);
                             @endphp
-                            <tr class="premium-row group" wire:key="row-{{ $item->id ?? $loop->index }}">
-                                <td class="px-6 py-6 whitespace-nowrap">
-                                    <span class="text-[11px] font-black font-mono px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded">#{{ $item->nomor_ajuan ?? '-' }}</span>
+                            <tr class="table-row group">
+                                <td class="px-8 py-7 align-top whitespace-nowrap">
+                                    <span class="text-sm font-bold font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded">#{{ str_pad($item->id ?? $loop->iteration, 4, '0', STR_PAD_LEFT) }}</span>
                                 </td>
 
-                                <td class="px-6 py-6">
-                                    <div class="flex flex-col">
-                                        <h3 class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-teal-600 transition-colors">{{ $item->nama_perkerjaan ?? 'N/A' }}</h3>
-                                        <span class="text-[10px] font-bold text-gray-400 mt-1 uppercase">{{ $item->tanggal_usulan ? \Carbon\Carbon::parse($item->tanggal_usulan)->translatedFormat('d M Y') : '-' }}</span>
-                                    </div>
-                                </td>
-
-                                <td class="px-6 py-6 whitespace-nowrap">
-                                    <span class="text-sm font-black text-gray-900 dark:text-white">
-                                        {{ $step1 ? 'Rp ' . number_format($item->total, 0, ',', '.') : '-' }}
-                                    </span>
-                                </td>
-
-                                {{-- Status Alur dengan 2 Checklist --}}
-                                <td class="px-6 py-6">
-                                    <div class="flex items-center justify-center gap-8">
-                                        {{-- Step 1: Anggaran --}}
-                                        <div class="flex flex-col items-center gap-1">
-                                            <div @class([
-                                                'w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all shadow-sm',
-                                                'bg-emerald-500 border-emerald-200 text-white shadow-emerald-200' => $step1,
-                                                'bg-gray-50 border-gray-200 text-gray-300 dark:bg-gray-800 dark:border-gray-700' => !$step1,
-                                            ])>
-                                                <x-heroicon-m-check class="w-4 h-4" />
-                                            </div>
-                                            <span class="text-[9px] font-black uppercase tracking-tighter {{ $step1 ? 'text-emerald-600' : 'text-gray-400' }}">Anggaran</span>
-                                        </div>
-
-                                        {{-- Connector --}}
-                                        <div class="w-8 h-0.5 {{ $step2 ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700' }} -mt-4"></div>
-
-                                        {{-- Step 2: Nomor PR --}}
-                                        <div class="flex flex-col items-center gap-1">
-                                            <div @class([
-                                                'w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all shadow-sm',
-                                                'bg-emerald-500 border-emerald-200 text-white shadow-emerald-200' => $step2,
-                                                'bg-gray-50 border-gray-200 text-gray-300 dark:bg-gray-800 dark:border-gray-700' => !$step2,
-                                            ])>
-                                                <x-heroicon-m-check class="w-4 h-4" />
-                                            </div>
-                                            <span class="text-[9px] font-black uppercase tracking-tighter {{ $step2 ? 'text-emerald-600' : 'text-gray-400' }}">Nomor PR</span>
+                                <td class="px-8 py-7 align-top">
+                                    <div class="flex flex-col gap-1.5">
+                                        <span class="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-teal-600 transition-colors duration-300 leading-tight">
+                                            {{ $item->nama_pekerjaan ?? $item->nama_perkerjaan ?? 'Untitled Project' }}
+                                        </span>
+                                        <div class="flex items-center gap-4 mt-1 text-sm font-semibold text-slate-400 uppercase tracking-tight">
+                                            <span class="flex items-center gap-1.5">
+                                                <x-heroicon-m-calendar class="w-4 h-4" />
+                                                {{ $item->tanggal_usulan ? \Carbon\Carbon::parse($item->tanggal_usulan)->format('d M Y') : '-' }}
+                                            </span>
+                                            <span class="flex items-center gap-1.5">
+                                                <x-heroicon-m-clock class="w-4 h-4" />
+                                                {{ $item->created_at ? $item->created_at->format('H:i') : '-' }}
+                                            </span>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td class="px-6 py-6 text-right whitespace-nowrap">
-                                    @php
-                                        $editAction = $this->getTable()->getAction('edit');
-                                        if ($editAction) { $editAction->record($item); }
-                                    @endphp
-                                    @if ($editAction && $editAction->isVisible())
-                                        <a href="{{ $editAction->getUrl() }}" class="inline-flex items-center gap-1 px-4 py-2 bg-gray-900 dark:bg-teal-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-teal-600 transition-all shadow-sm">
-                                            Detail <x-heroicon-m-chevron-right class="w-3 h-3" />
-                                        </a>
-                                    @endif
+                                <td class="px-8 py-7 align-top">
+                                    <div class="flex flex-col gap-3 max-w-[320px] mx-auto">
+                                        <div class="flex justify-between items-end">
+                                            <span @class([
+                                                'text-xs font-black uppercase tracking-[0.15em]',
+                                                'text-emerald-600' => $progress === 100,
+                                                'text-teal-600' => $progress === 50,
+                                                'text-slate-400' => $progress < 50,
+                                            ])>
+                                                {{ $progress === 100 ? 'Verified' : ($progress === 50 ? 'Validating' : 'Drafting') }}
+                                            </span>
+                                            <span class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ $progress }}%</span>
+                                        </div>
+
+                                        <div class="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden relative border border-slate-200/50 dark:border-slate-700/50">
+                                            <div
+                                                @class([
+                                                    'h-full rounded-full transition-all duration-1000 relative shadow-sm',
+                                                    'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.3)]' => $progress === 100,
+                                                    'bg-gradient-to-r from-teal-400 to-teal-600' => $progress < 100,
+                                                ])
+                                                style="width: {{ $progress }}%"
+                                            >
+                                                <div class="absolute inset-0 animate-shimmer opacity-30"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex gap-3 mt-1">
+                                            <div @class([
+                                                'flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all',
+                                                'bg-teal-50 border-teal-100 text-teal-700 dark:bg-teal-900/20 dark:border-teal-800' => $hasAnggaran,
+                                                'bg-slate-50 border-slate-100 text-slate-300 opacity-60 dark:bg-slate-800/50 dark:border-slate-800' => !$hasAnggaran
+                                            ])>
+                                                <span>ANGGARAN</span>
+                                                @if($hasAnggaran) <x-heroicon-m-check class="w-3.5 h-3.5" /> @endif
+                                            </div>
+
+                                            <div @class([
+                                                'flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all',
+                                                'bg-emerald-50 border-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800' => $hasPR,
+                                                'bg-white border-teal-200 text-teal-600 ring-4 ring-teal-500/5' => !$hasPR && $hasAnggaran,
+                                                'bg-slate-50 border-slate-100 text-slate-300 opacity-60 dark:bg-slate-800/50 dark:border-slate-800' => !$hasPR && !$hasAnggaran
+                                            ])>
+                                                <span>PR TERBIT</span>
+                                                @if($hasPR) <x-heroicon-m-shield-check class="w-3.5 h-3.5" /> @elseif($hasAnggaran) <x-heroicon-m-arrow-path class="w-3.5 h-3.5 animate-spin" /> @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-8 py-7 align-top text-right">
+                                    <div class="flex flex-col items-end gap-2">
+                                        <span @class([
+                                            'text-xl font-extrabold tracking-tight',
+                                            'text-slate-950 dark:text-white' => $hasAnggaran,
+                                            'text-slate-300 italic font-bold' => !$hasAnggaran
+                                        ])>
+                                            {{ $hasAnggaran ? 'Rp ' . number_format($item->total, 0, ',', '.') : 'Belum Input' }}
+                                        </span>
+                                        @if($hasPR)
+                                            <span class="text-xs font-black px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-800 uppercase tracking-widest">
+                                                {{ $item->nomor_pr }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </td>
+
+                                <td class="px-8 py-7 align-top text-right">
+                                    <button class="p-3 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-xl transition-all shadow-sm hover:shadow-md">
+                                        <x-heroicon-m-chevron-right class="w-6 h-6" />
+                                    </button>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="px-6 py-24 text-center opacity-30 text-sm font-black uppercase tracking-widest">Tiada Data</td></tr>
+                            <tr>
+                                <td colspan="5" class="py-32 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <div class="p-6 bg-slate-50 dark:bg-slate-900 rounded-full mb-6">
+                                            <x-heroicon-o-document-magnifying-glass class="w-16 h-16 text-slate-200 dark:text-slate-800" />
+                                        </div>
+                                        <p class="text-base font-bold text-slate-400 uppercase tracking-[0.3em]">No Data Intelligence Found</p>
+                                    </div>
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
 
-            <div class="px-6 py-4 bg-gray-50/50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                <div class="flex items-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>System Active</div>
-                <div>{{ now()->translatedFormat('l, d F Y') }}</div>
-            </div>
+            {{-- Footer Pagination --}}
+            <footer class="p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-sm font-bold text-slate-500 uppercase tracking-widest">
+                <div>Menampilkan {{ count($this->getTableRecords()) }} entri data</div>
+                <div class="flex gap-3">
+                    <button class="px-5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl opacity-50 cursor-not-allowed">Prev</button>
+                    <button class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm hover:bg-slate-50 transition">Next</button>
+                </div>
+            </footer>
         </div>
+
+        {{-- System Meta --}}
+        <footer class="flex justify-between items-center px-2">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-[0.25em]">
+                 {{ now()->format('H:i') }} WIB
+            </div>
+        </footer>
     </main>
 </x-filament-panels::page>
