@@ -12,6 +12,8 @@ class ListPengajuanPrs extends ListRecords
 
     protected static string $view = 'filament.resources.pengajuan-pr-resource.pages.list-pengajuan-prs';
 
+    protected static bool $shouldMaximize = true;
+
     protected function getHeaderActions(): array
     {
         return [

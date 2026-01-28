@@ -1,173 +1,228 @@
 <x-filament-panels::page>
-
-    {{-- Custom Animations & Styles --}}
+    {{-- Custom Enhanced Styles --}}
     <style>
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(20, 184, 166, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
+        /* Smooth Gradient Background for Row Hover */
+        .premium-row {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .animate-pulse-glow { animation: pulse-glow 2s infinite; }
-
-        @keyframes slide-shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .shimmer-line {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-            background-size: 200% 100%;
-            animation: slide-shimmer 1.5s infinite linear;
+        .premium-row:hover {
+            background: linear-gradient(90deg, rgba(20, 184, 166, 0.04) 0%, transparent 100%);
+            transform: translateX(4px);
         }
 
-        .fi-section {
-            border-radius: 3rem !important;
-            border: 1px solid rgb(241 245 249 / 0.5) !important;
-            box-shadow: 0 25px 50px -12px rgb(100 116 139 / 0.15) !important;
+        /* Sophisticated Glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-card {
+            background: rgba(17, 24, 39, 0.8);
+        }
+
+        /* Animated Progress Bar Shimmer */
+        @keyframes shimmer-fast {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .shimmer-fast {
+            animation: shimmer-fast 2.5s infinite ease-in-out;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+
+        /* Connecting Line for Workflow */
+        .workflow-line {
+            position: relative;
+        }
+        .workflow-line::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 0;
+            transform: translateY(-50%);
+        }
+        .dark .workflow-line::before {
+            background: #374151;
         }
     </style>
 
+    <main class="w-full max-w-none -mt-8">
+        <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white">Daftar Pengajuan</h1>
+                <p class="text-sm text-gray-500 font-medium italic">Manajemen alur kerja pengadaan secara real-time</p>
+            </div>
+        </div>
 
+        <div class="glass-card rounded-[3rem] border border-gray-200/60 dark:border-gray-700/40 shadow-2xl overflow-hidden">
 
-    {{-- Main Content: Table Container --}}
-    <main class="w-full -mt-6">
-        <div class="bg-white dark:bg-gray-800 rounded-[3rem] border border-gray-200/50 dark:border-gray-700/50 shadow-2xl shadow-gray-900/5 dark:shadow-black/10 overflow-hidden">
-
-            {{-- Toolbar --}}
-            <div class="p-8 border-b border-gray-100 dark:border-gray-700/50 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div class="relative flex-1 max-w-2xl group">
-                    <x-heroicon-s-magnifying-glass class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-600 transition-colors w-5 h-5" />
+            {{-- Enhanced Toolbar --}}
+            <div class="p-8 border-b border-gray-100/50 dark:border-gray-800/50 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div class="relative flex-1 group">
+                    <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                        <x-heroicon-m-magnifying-glass class="w-5 h-5 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                    </div>
                     <input
                         type="search"
                         wire:model.live.debounce.500ms="tableSearch"
-                        placeholder="Cari ID, Nama Pekerjaan, atau Nominal..."
-                        class="w-full pl-14 pr-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent rounded-2xl text-sm font-medium focus:bg-white dark:focus:bg-gray-800 focus:border-teal-500/20 focus:ring-4 focus:ring-teal-500/10 transition-all outline-none"
+                        placeholder="Cari referensi atau nama pekerjaan..."
+                        class="block w-full pl-14 pr-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-none rounded-[1.5rem] text-sm font-semibold placeholder-gray-400 focus:ring-2 focus:ring-teal-500/20 focus:bg-white dark:focus:bg-gray-800 transition-all outline-none"
                     />
                 </div>
-                <div class="flex items-center gap-4">
-                    {!! $this->table->getFiltersForm()->render() !!}
+
+                <div class="flex items-center gap-3">
+                    {{-- Pastikan method filtersForm ada atau ganti dengan standar Filament --}}
+                    @if(method_exists($this, 'table'))
+                        {{ $this->table->getFiltersForm() }}
+                    @endif
                 </div>
             </div>
 
-            {{-- Table Implementation --}}
-            <div class="overflow-x-auto px-4">
-                <table class="w-full text-left border-collapse min-w-[1200px]">
+            {{-- Table Content --}}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-separate border-spacing-0 min-w-[1200px]">
                     <thead>
-                        <tr>
-                            <th class="px-6 py-6 text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest w-24 text-center">Ref.</th>
-                            <th class="px-8 py-6 text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Informasi Pekerjaan</th>
-                            <th class="px-8 py-6 text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest text-center w-[500px]">Timeline Status</th>
-                            <th class="px-8 py-6 text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest text-right">Nilai Anggaran</th>
+                        <tr class="bg-gray-50/50 dark:bg-gray-900/30">
+                            <th class="px-8 py-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-gray-800">Ref.</th>
+                            <th class="px-8 py-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-gray-800">Detail Pekerjaan</th>
+                            <th class="px-8 py-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800 w-[450px]">Status Alur Kerja</th>
+                            <th class="px-8 py-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] text-right border-b border-gray-100 dark:border-gray-800">Estimasi Biaya</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    <tbody class="divide-y divide-gray-100/50 dark:divide-gray-800/50">
                         @forelse ($this->getTableRecords() as $item)
                             @php
-                                $step1 = $item->total > 0;
-                                // Anggap step2 selesai jika ada nomor_pr
+                                $step1 = (isset($item->total) && $item->total > 0);
                                 $step2 = !empty($item->nomor_pr);
-                                $progress = $step2 ? 100 : ($step1 ? 50 : 5);
+                                $progress = $step2 ? 100 : ($step1 ? 55 : 15);
+                                $themeColor = $step2 ? 'emerald' : ($step1 ? 'teal' : 'slate');
                             @endphp
-                            <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/20 transition-all duration-300 cursor-pointer">
-                                <td class="px-6 py-10 align-top text-center">
-                                    <span class="font-mono text-xs font-black text-teal-600 bg-teal-50 dark:bg-teal-500/10 dark:text-teal-400 px-3 py-1.5 rounded-xl border border-teal-100 dark:border-teal-500/20 shadow-sm">
-                                        #{{ $item->nomor_ajuan }}
+                            <tr class="premium-row group" wire:key="row-{{ $item->id ?? $loop->index }}">
+                                {{-- ID --}}
+                                <td class="px-8 py-10 align-top">
+                                    <span class="font-mono text-[11px] font-black text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/10 px-3 py-1.5 rounded-full border border-teal-100 dark:border-teal-500/20">
+                                        #{{ $item->nomor_ajuan ?? '-' }}
                                     </span>
                                 </td>
-                                <td class="px-8 py-10 align-top">
-                                    <div class="flex flex-col gap-3">
-                                        <div class="flex items-center gap-3">
-                                            <div class="p-3 bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-400 rounded-2xl group-hover:bg-teal-600 group-hover:text-white transition-all duration-500 shadow-sm">
-                                                <x-heroicon-o-document-text class="w-5 h-5" />
-                                            </div>
-                                            <p class="text-base font-bold text-gray-800 dark:text-gray-100 leading-tight group-hover:text-teal-900 dark:group-hover:text-teal-300 transition-colors">
-                                                {{ $item->nama_perkerjaan }}
-                                            </p>
-                                        </div>
-                                        <div class="flex items-center gap-4 text-[11px] font-bold text-gray-400 dark:text-gray-500 ml-14">
-                                            <span class="flex items-center gap-1.5"><x-heroicon-s-calendar class="w-3 h-3 text-teal-500" /> {{ \Carbon\Carbon::parse($item->tanggal_usulan)->format('d/m/Y') }}</span>
-                                            <span class="w-1 h-1 rounded-full bg-gray-200 dark:bg-gray-700"></span>
-                                            <span class="flex items-center gap-1.5"><x-heroicon-s-clock class="w-3 h-3" /> {{ \Carbon\Carbon::parse($item->created_at)->format('H:i') }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-10 align-top">
-                                    <div class="flex flex-col gap-4 max-w-[420px] mx-auto">
-                                        <div class="flex justify-between items-end px-1">
-                                            <span class="text-[10px] font-black uppercase tracking-widest {{ $progress === 100 ? 'text-emerald-500' : 'text-teal-600' }}">
-                                                {{ $progress === 100 ? 'Verified' : 'In Progress' }}
+
+                                {{-- Job Info --}}
+                                <td class="px-8 py-10">
+                                    <div class="space-y-2">
+                                        <h3 class="text-base font-extrabold text-gray-900 dark:text-white group-hover:text-teal-600 transition-colors">
+                                            {{ $item->nama_perkerjaan ?? 'Tanpa Nama' }}
+                                        </h3>
+                                        <div class="flex items-center gap-4 text-[11px] font-bold text-gray-400 dark:text-gray-500">
+                                            <span class="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-md">
+                                                <x-heroicon-s-calendar class="w-3 h-3 text-teal-500" />
+                                                {{ $item->tanggal_usulan ? \Carbon\Carbon::parse($item->tanggal_usulan)->translatedFormat('d M Y') : '-' }}
                                             </span>
-                                            <span class="text-[13px] font-black text-gray-900 dark:text-white">{{ $progress }}%</span>
+                                            <span class="flex items-center gap-1.5">
+                                                <x-heroicon-s-clock class="w-3 h-3" />
+                                                {{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->format('H:i') : '-' }}
+                                            </span>
                                         </div>
-                                        <div class="h-3 w-full bg-gray-100 dark:bg-gray-700 rounded-full p-1 relative overflow-hidden shadow-inner">
-                                            <div class="h-full rounded-full transition-all duration-1000 ease-out relative shadow-sm {{ $progress === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-teal-400 to-teal-600' }}" style="width: {{ $progress }}%;">
-                                                <div class="absolute inset-0 shimmer-line"></div>
+                                    </div>
+                                </td>
+
+                                {{-- Workflow Status --}}
+                                <td class="px-8 py-10">
+                                    <div class="flex flex-col gap-5">
+                                        <div class="flex justify-between items-center px-1">
+                                            <div @class([
+                                                'flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all',
+                                                'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' => $step2,
+                                                'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-400' => $step1 && !$step2,
+                                                'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' => !$step1,
+                                            ])>
+                                                <span class="relative flex h-2 w-2">
+                                                    <span @class([
+                                                        'animate-ping absolute inline-flex h-full w-full rounded-full opacity-75',
+                                                        'bg-emerald-400' => $step2,
+                                                        'bg-teal-400' => $step1 && !$step2,
+                                                        'bg-slate-400' => !$step1,
+                                                    ])></span>
+                                                    <span @class([
+                                                        'relative inline-flex rounded-full h-2 w-2',
+                                                        'bg-emerald-500' => $step2,
+                                                        'bg-teal-500' => $step1 && !$step2,
+                                                        'bg-slate-500' => !$step1,
+                                                    ])></span>
+                                                </span>
+                                                {{ $step2 ? 'TERBIT (COMPLETED)' : ($step1 ? 'PROSES VALIDASI' : 'DRAFT PENGAJUAN') }}
+                                            </div>
+                                            <span class="text-sm font-black text-gray-900 dark:text-white">{{ $progress }}%</span>
+                                        </div>
+
+                                        <div class="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden relative">
+                                            <div @class([
+                                                'h-full rounded-full transition-all duration-1000 ease-in-out relative',
+                                                'bg-emerald-500' => $step2,
+                                                'bg-gradient-to-r from-teal-400 to-teal-600' => !$step2,
+                                            ]) style="width: {{ $progress }}%;">
+                                                <div class="absolute inset-0 shimmer-fast"></div>
                                             </div>
                                         </div>
-                                        <div class="flex gap-4">
-                                            <div @class([
-                                                'flex-1 p-3 rounded-2xl border-2 transition-all duration-500 flex flex-col gap-1.5',
-                                                'bg-teal-50/40 dark:bg-teal-500/10 border-teal-100 dark:border-teal-500/20' => $step1,
-                                                'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 opacity-60' => !$step1,
-                                            ])>
-                                                <div class="flex items-center justify-between">
-                                                    <span class="text-[9px] font-black uppercase tracking-tighter {{ $step1 ? 'text-teal-600' : 'text-gray-400' }}">Anggaran</span>
-                                                    @if ($step1)
-                                                        <x-heroicon-s-check class="w-2.5 h-2.5 text-teal-600" stroke-width="4" />
-                                                    @else
-                                                        <x-heroicon-o-minus-circle class="w-2.5 h-2.5 text-gray-200 dark:text-gray-600" />
-                                                    @endif
+
+                                        <div class="flex justify-between items-center relative px-2">
+                                            <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-100 dark:bg-gray-800 -translate-y-1/2 z-0"></div>
+                                            <div class="absolute top-1/2 left-0 h-0.5 bg-teal-500 -translate-y-1/2 z-0 transition-all duration-1000" style="width: {{ $step2 ? '100%' : ($step1 ? '50%' : '0%') }}"></div>
+
+                                            <div class="relative z-10 flex flex-col items-center gap-2">
+                                                <div @class([
+                                                    'w-8 h-8 rounded-full flex items-center justify-center border-4 transition-all duration-500 shadow-sm',
+                                                    'bg-teal-500 border-teal-100 dark:border-teal-900 text-white' => $step1,
+                                                    'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-300' => !$step1,
+                                                ])>
+                                                    <x-heroicon-s-banknotes class="w-3.5 h-3.5" />
                                                 </div>
-                                                <span class="text-[11px] font-bold {{ $step1 ? 'text-gray-800 dark:text-gray-200' : 'text-gray-300 dark:text-gray-600 italic' }}">Tervalidasi</span>
+                                                <span class="text-[9px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-tighter">Anggaran</span>
                                             </div>
-                                            <div @class([
-                                                'flex-1 p-3 rounded-2xl border-2 transition-all duration-500 flex flex-col gap-1.5',
-                                                'bg-emerald-50/40 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20' => $step2,
-                                                'bg-white dark:bg-gray-800 border-teal-200 dark:border-teal-600 animate-pulse-glow' => $step1 && !$step2,
-                                                'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 opacity-60' => !$step1,
-                                            ])>
-                                                <div class="flex items-center justify-between">
-                                                    <span class="text-[9px] font-black uppercase tracking-tighter {{ $step2 ? 'text-emerald-600' : ($step1 ? 'text-teal-600' : 'text-gray-400') }}">PR</span>
-                                                     @if ($step2)
-                                                        <x-heroicon-s-shield-check class="w-2.5 h-2.5 text-emerald-600" stroke-width="3" />
-                                                    @elseif ($step1)
-                                                        <svg class="animate-spin h-2.5 w-2.5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                        </svg>
+
+                                            <div class="relative z-10 flex flex-col items-center gap-2">
+                                                <div @class([
+                                                    'w-8 h-8 rounded-full flex items-center justify-center border-4 transition-all duration-500 shadow-sm',
+                                                    'bg-emerald-500 border-emerald-100 dark:border-emerald-900 text-white' => $step2,
+                                                    'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-300' => !$step2,
+                                                    'ring-4 ring-teal-500/20 animate-pulse' => $step1 && !$step2,
+                                                ])>
+                                                    @if($step2)
+                                                        <x-heroicon-s-check-circle class="w-4 h-4" />
                                                     @else
-                                                        <x-heroicon-o-minus-circle class="w-2.5 h-2.5 text-gray-200 dark:text-gray-600" />
+                                                        <x-heroicon-s-document-text class="w-3.5 h-3.5" />
                                                     @endif
                                                 </div>
-                                                <span class="text-[11px] font-bold {{ $step2 ? 'text-gray-800 dark:text-gray-200' : ($step1 ? 'text-teal-700 dark:text-teal-400' : 'text-gray-300 dark:text-gray-600 italic') }}">Penerbitan</span>
+                                                <span class="text-[9px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-tighter">Nomor PR</span>
                                             </div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-8 py-10 align-top text-right">
-                                    <div class="flex flex-col items-end gap-1">
-                                        <span @class([
-                                            'text-xl font-black tracking-tight transition-all duration-300',
-                                            'text-gray-900 dark:text-white group-hover:text-teal-600' => $item->total > 0,
-                                            'text-gray-300 dark:text-gray-600 italic text-sm' => !($item->total > 0),
-                                        ])>
-                                            {{ $item->total > 0 ? 'Rp ' . number_format($item->total, 0, ',', '.') : 'N/A' }}
-                                        </span>
-                                        @if($item->total > 0)
-                                            <div class="flex items-center gap-1.5 text-[9px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-100 dark:border-emerald-500/20">
-                                                <x-heroicon-s-shield-check class="w-2.5 h-2.5" /> Verified
-                                            </div>
-                                        @endif
+
+                                {{-- Value --}}
+                                <td class="px-8 py-10 text-right">
+                                    <div class="flex flex-col items-end gap-3">
+                                        <div class="space-y-1">
+                                            <p class="text-xl font-black text-gray-900 dark:text-white tracking-tight">
+                                                {{ (isset($item->total) && $item->total > 0) ? 'Rp' . number_format($item->total, 0, ',', '.') : '-' }}
+                                            </p>
+                                            @if(isset($item->total) && $item->total > 0)
+                                                <div class="flex items-center justify-end gap-1.5 text-[9px] font-bold text-emerald-500 uppercase">
+                                                    <x-heroicon-m-shield-check class="w-3 h-3" /> Validated
+                                                </div>
+                                            @endif
+                                        </div>
 
                                         @php
                                             $editAction = $this->getTable()->getAction('edit');
-                                            if ($editAction) {
-                                                $editAction->record($item);
-                                            }
+                                            if ($editAction) { $editAction->record($item); }
                                         @endphp
 
                                         @if ($editAction && $editAction->isVisible())
-                                            <a href="{{ $editAction->getUrl() }}" class="mt-6 flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-900 dark:hover:bg-gray-600 hover:text-white dark:text-gray-300 rounded-xl text-[10px] font-black text-gray-600 uppercase tracking-widest transition-all shadow-sm">
-                                                Detail <x-heroicon-s-chevron-right class="w-3 h-3" stroke-width="3" />
+                                            <a href="{{ $editAction->getUrl() }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg hover:shadow-teal-500/20">
+                                                Lihat Detail <x-heroicon-m-arrow-right class="w-3 h-3" />
                                             </a>
                                         @endif
                                     </div>
@@ -176,15 +231,9 @@
                         @empty
                             <tr>
                                 <td colspan="4">
-                                    <div class="flex flex-col items-center justify-center text-center p-20">
-                                        <div class="p-4 bg-gray-100 rounded-full mb-4">
-                                            <x-heroicon-o-archive-box-x-mark class="w-10 h-10 text-gray-400" />
-                                        </div>
-                                        <h3 class="text-lg font-bold text-gray-800">Data Tidak Ditemukan</h3>
-                                        <p class="text-sm text-gray-500">Belum ada pengajuan PR yang dibuat.</p>
-                                        <div class="mt-6">
-                                            {{ $this->getCreateAction() }}
-                                        </div>
+                                    <div class="flex flex-col items-center justify-center py-32 opacity-60">
+                                        <x-heroicon-o-inbox class="w-16 h-16 text-gray-300 mb-4" />
+                                        <p class="text-gray-500 font-bold">Data tidak ditemukan</p>
                                     </div>
                                 </td>
                             </tr>
@@ -193,14 +242,18 @@
                 </table>
             </div>
 
-            {{-- Footer Pagination --}}
-            <div class="p-8 border-t border-gray-100 dark:border-gray-800 bg-gray-50/20 dark:bg-gray-900/10 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6">
+            {{-- Footer --}}
+            <div class="p-8 bg-gray-50/30 dark:bg-gray-900/40 border-t border-gray-100/50 dark:border-gray-800/50 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-3 h-3 rounded-full bg-teal-500 animate-ping"></div>
-                    <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Sistem Online & Terhubung</p>
+                    <div class="flex items-center gap-2 px-3 py-1 bg-white dark:bg-gray-800 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Cloud Synchronized</span>
+                    </div>
+                </div>
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    {{ now()->translatedFormat('l, d F Y') }}
                 </div>
             </div>
         </div>
     </main>
-
 </x-filament-panels::page>
