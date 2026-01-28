@@ -41,12 +41,12 @@ class PengajuanPrResource extends Resource
                              * PERBAIKAN: Menggunakan single quote agar PHP tidak menganggap $money sebagai variabel PHP.
                              * Ini akan merender x-mask:dynamic="$money($input, '.', ',')" di browser.
                              */
-                            ->extraAlpineAttributes([
-                                'x-mask:dynamic' => '$money($input, ".", ",")',
-                            ])
+
                             ->extraInputAttributes([
                                 'class' => 'text-right font-mono',
                                 'inputmode' => 'numeric',
+                                'maxlength' => '20',
+                                'oninput' => "let v = this.value.replace(/\\D/g, ''); if(!v){ this.value = ''; return; } this.value = new Intl.NumberFormat('id-ID').format(v);",
                             ])
                             /**
                              * Menggunakan formatStateUsing agar saat EDIT data,
@@ -54,10 +54,15 @@ class PengajuanPrResource extends Resource
                              */
                             ->formatStateUsing(fn ($state) => $state ? number_format($state, 0, ',', '.') : null)
                             /**
-                             * Dehydrate: Membersihkan semua titik sebelum dikirim ke server.
-                             * Ini memastikan data yang masuk ke database tetap numerik murni.
+                             * Dehydrate: Mengubah format mata uang (koma sebagai pemisah ribuan, titik sebagai desimal)
+                             * menjadi format numerik standar untuk database.
                              */
-                            ->dehydrateStateUsing(fn ($state) => $state ? (float) str_replace('.', '', $state) : 0)
+                            ->dehydrateStateUsing(function ($state) {
+                                if (!$state) return 0;
+                                // Hapus semua karakter selain angka (menghilangkan pemisah ribuan '.' atau ',')
+                                $cleaned = preg_replace('/\D/', '', $state);
+                                return (float) $cleaned;
+                            })
                             ->required()
                             ->minValue(0),
 
@@ -110,7 +115,7 @@ class PengajuanPrResource extends Resource
 
                 Tables\Columns\TextColumn::make('tanggal_usulan')
                     ->label('Tanggal Usulan')
-                    ->dateTime('d/m/Y H:i'),
+                    ->dateTime('d/m/Y H:i:s'),
 
                 Tables\Columns\TextColumn::make('total')
                     ->label('Total')

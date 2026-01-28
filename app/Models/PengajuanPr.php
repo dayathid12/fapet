@@ -20,7 +20,7 @@ class PengajuanPr extends Model
     ];
 
     protected $casts = [
-        'tanggal_usulan' => 'date',
+        'tanggal_usulan' => 'datetime',
         'total' => 'decimal:2',
         'upload_files' => 'array',
         'proses_pr_screenshots' => 'array',
@@ -33,6 +33,9 @@ class PengajuanPr extends Model
         static::creating(function ($model) {
             if (empty($model->nomor_ajuan)) {
                 $model->nomor_ajuan = str_pad((static::count() + 1), 4, '0', STR_PAD_LEFT);
+            }
+            if (empty($model->tanggal_usulan)) {
+                $model->tanggal_usulan = now();
             }
         });
     }
