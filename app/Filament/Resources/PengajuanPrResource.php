@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\ViewColumn;
 
 class PengajuanPrResource extends Resource
 {
@@ -117,6 +118,11 @@ class PengajuanPrResource extends Resource
                 Tables\Columns\TextColumn::make('tanggal_usulan')
                     ->label('Tanggal Usulan')
                     ->dateTime('d/m/Y H:i:s'),
+
+                ViewColumn::make('status_timeline')
+                    ->label('Modern Timeline Status')
+                    ->view('filament.tables.columns.modern-timeline')
+                    ->extraAttributes(['class' => 'min-w-[400px]']),
 
                 Tables\Columns\TextColumn::make('total')
                     ->label('Total')

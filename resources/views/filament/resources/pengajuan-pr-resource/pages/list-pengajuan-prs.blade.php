@@ -26,26 +26,10 @@
         }
     </style>
 
-    {{-- Header --}}
-    <header class="max-w-[1600px] mx-auto mb-10 -mt-4">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="flex items-center gap-4">
-                <div class="p-3 bg-teal-600 rounded-2xl shadow-lg shadow-teal-200 text-white">
-                    <x-heroicon-o-document-chart-bar class="w-7 h-7" />
-                </div>
-                <div>
-                    <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Monitoring PR</h1>
-                    <p class="text-gray-500 dark:text-gray-400 text-xs font-bold mt-1 uppercase tracking-[0.2em] flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span> Panel Kontrol Pengadaan
-                    </p>
-                </div>
-            </div>
-            {{ $this->getCreateAction() }}
-        </div>
-    </header>
+
 
     {{-- Main Content: Table Container --}}
-    <main class="max-w-[1600px] mx-auto -mt-6">
+    <main class="w-full -mt-6">
         <div class="bg-white dark:bg-gray-800 rounded-[3rem] border border-gray-200/50 dark:border-gray-700/50 shadow-2xl shadow-gray-900/5 dark:shadow-black/10 overflow-hidden">
 
             {{-- Toolbar --}}
