@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PengajuanPrResource\Pages;
 use App\Filament\Resources\PengajuanPrResource;
 use App\Models\PengajuanPr;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
@@ -45,7 +46,7 @@ class ListPengajuanPrs extends ListRecords
     {
         $this->selectedRecord = PengajuanPr::find($recordId);
         $this->nomor_pr = $this->selectedRecord->nomor_pr ?? '';
-        $this->proses_pr_screenshots = [];
+        // Don't reset proses_pr_screenshots here - keep the uploaded file
         $this->showEditModal = true;
     }
 
@@ -57,6 +58,27 @@ class ListPengajuanPrs extends ListRecords
         $this->proses_pr_screenshots = [];
     }
 
+    public function removeScreenshot($screenshotPath, $recordId)
+    {
+        $record = PengajuanPr::find($recordId);
+        if ($record) {
+            $existingScreenshots = $record->proses_pr_screenshots ?? [];
+            $updatedScreenshots = array_filter($existingScreenshots, function($path) use ($screenshotPath) {
+                return $path !== $screenshotPath;
+            });
+
+            $record->update([
+                'proses_pr_screenshots' => array_values($updatedScreenshots),
+            ]);
+
+            // Delete the file from storage
+            Storage::delete($screenshotPath);
+
+            // Refresh the selected record
+            $this->selectedRecord = $record->fresh();
+        }
+    }
+
     public function saveEdit()
     {
         $this->validate([
@@ -64,9 +86,16 @@ class ListPengajuanPrs extends ListRecords
             'proses_pr_screenshots.*' => 'nullable|image|max:5120',
         ]);
 
-        $this->selectedRecord->update([
+        $updateData = [
             'nomor_pr' => $this->nomor_pr,
-        ]);
+        ];
+
+        // Set tanggal_proses_pr_screenshots otomatis jika ada proses_pr_screenshots (existing atau baru)
+        if (!empty($this->selectedRecord->proses_pr_screenshots) || $this->proses_pr_screenshots) {
+            $updateData['tanggal_proses_pr_screenshots'] = now();
+        }
+
+        $this->selectedRecord->update($updateData);
 
         if ($this->proses_pr_screenshots) {
             $existingScreenshots = $this->selectedRecord->proses_pr_screenshots ?? [];
@@ -83,7 +112,12 @@ class ListPengajuanPrs extends ListRecords
         }
 
         $this->closeEditModal();
-        $this->notify('success', 'Data berhasil diperbarui.');
+
+        Notification::make()
+            ->success()
+            ->title('Berhasil')
+            ->body('Data berhasil diperbarui.')
+            ->send();
     }
 
     public function downloadFiles($recordId)
@@ -92,7 +126,11 @@ class ListPengajuanPrs extends ListRecords
         $files = $record->upload_files ?? [];
 
         if (empty($files)) {
-            $this->notify('warning', 'Tidak ada file untuk diunduh.');
+            Notification::make()
+                ->warning()
+                ->title('Peringatan')
+                ->body('Tidak ada file untuk diunduh.')
+                ->send();
             return;
         }
 

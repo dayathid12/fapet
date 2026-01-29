@@ -181,6 +181,11 @@
                                             <span class="text-xs font-black px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-800 uppercase tracking-widest">
                                                 {{ $item->nomor_pr }}
                                             </span>
+                                            @if($item->tanggal_proses_pr_screenshots)
+                                                <span class="text-xs font-medium text-slate-500 dark:text-slate-400 block mt-1">
+                                                    Proses PR: {{ $item->tanggal_proses_pr_screenshots->format('d M Y H:i') }}
+                                                </span>
+                                            @endif
                                         @endif
                                     </div>
                                 </td>
@@ -265,8 +270,29 @@
 
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Proses PR Screenshots</label>
-                    <input type="file" wire:model="proses_pr_screenshots" multiple accept="image/*" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:text-slate-100" id="screenshots-input">
-                    <p class="text-xs text-slate-500 mt-1">Anda juga dapat paste gambar langsung (Ctrl+V)</p>
+                    <input type="file" wire:model="proses_pr_screenshots" accept="image/*" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:text-slate-100" id="screenshots-input" wire:ignore>
+                    <p class="text-xs text-slate-500 mt-1">Anda juga dapat paste gambar langsung (Ctrl+V) - Hanya 1 file</p>
+
+                    <!-- Preview Container - Single File Only -->
+                    <div id="screenshots-preview" class="mt-4 flex justify-center min-h-0" style="max-width: 100%; overflow: hidden;" wire:ignore>
+                        @if($selectedRecord && !empty($selectedRecord->proses_pr_screenshots))
+                            @foreach($selectedRecord->proses_pr_screenshots as $index => $screenshot)
+                                <div class="relative group w-full max-w-xs" data-existing="true" data-path="{{ $screenshot }}">
+                                    <div class="aspect-square rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-700 shadow-md hover:shadow-lg transition-shadow">
+                                        <img src="{{ Storage::url($screenshot) }}" alt="Existing Screenshot {{ $index + 1 }}" class="w-full h-full object-cover">
+                                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                                            <button type="button" class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full" onclick="removeExistingScreenshot('{{ $screenshot }}', {{ $selectedRecord->id }})">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 truncate text-center" title="Screenshot {{ $index + 1 }}">Screenshot {{ $index + 1 }}</p>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-4">
@@ -310,38 +336,102 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // Handle file upload via Livewire
-        function handleScreenshotFiles(files, inputElement) {
-            if (!inputElement) return;
+        // Update preview for single file
+        function updateScreenshotsPreview(inputElement) {
+            const previewContainer = document.getElementById('screenshots-preview');
+            if (!previewContainer || !inputElement) return;
 
-            // Create DataTransfer to set files
-            const dataTransfer = new DataTransfer();
+            previewContainer.innerHTML = '';
+            const files = inputElement.files;
 
-            // Add existing files if any
-            if (inputElement.files.length > 0) {
-                Array.from(inputElement.files).forEach(file => {
-                    dataTransfer.items.add(file);
-                });
+            if (files.length === 0) {
+                previewContainer.innerHTML = '';
+                return;
             }
 
-            // Add new files
-            files.forEach(file => {
-                dataTransfer.items.add(file);
-            });
+            // Only process first file (single file mode)
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Clear container to ensure only 1 preview
+                previewContainer.innerHTML = '';
 
+                const previewItem = document.createElement('div');
+                previewItem.className = 'relative group w-full max-w-xs';
+                previewItem.id = 'screenshot-preview-item'; // Add ID to prevent duplicates
+                previewItem.innerHTML = `
+                    <div class="aspect-square rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-700 shadow-md hover:shadow-lg transition-shadow">
+                        <img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                            <button type="button" class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full" onclick="removeScreenshotPreview('${file.name}')">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 truncate text-center" title="${file.name}">${file.name}</p>
+                `;
+                previewContainer.appendChild(previewItem);
+                console.log('[Screenshots] Preview updated - single file:', file.name);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove screenshot preview - clear the input
+        function removeScreenshotPreview(fileName) {
+            const screenshotsInput = document.getElementById('screenshots-input');
+            if (!screenshotsInput) return;
+
+            screenshotsInput.value = '';
+            screenshotsInput.dispatchEvent(new Event('change', { bubbles: true }));
+            updateScreenshotsPreview(screenshotsInput);
+            showToast(`${fileName} dihapus`, 'warning');
+            console.log('[Screenshots] File removed:', fileName);
+        }
+
+        // Remove existing screenshot from database and storage
+        function removeExistingScreenshot(screenshotPath, recordId) {
+            if (confirm('Apakah Anda yakin ingin menghapus screenshot ini?')) {
+                // Use Livewire to call the remove method
+                @this.call('removeScreenshot', screenshotPath, recordId);
+                showToast('Screenshot dihapus', 'warning');
+                console.log('[Screenshots] Existing screenshot removed:', screenshotPath);
+            }
+        }
+
+        // Handle file upload via Livewire - only accept single file
+        function handleScreenshotFiles(files, inputElement) {
+            if (!inputElement || files.length === 0) return;
+
+            // Only use the first file (single file mode)
+            const file = files[0];
+
+            // Create DataTransfer and add only the first file
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
             inputElement.files = dataTransfer.files;
 
             // Trigger change event to notify Livewire
             inputElement.dispatchEvent(new Event('change', { bubbles: true }));
 
+            // Update preview
+            updateScreenshotsPreview(inputElement);
+
             // Show feedback to user
-            showToast(`${files.length} gambar berhasil ditambahkan!`, 'success');
-            console.log('[Screenshots] Files handled:', files.length);
+            showToast(`${file.name} berhasil ditambahkan!`, 'success');
+            console.log('[Screenshots] File handled:', file.name);
         }
 
         // Attach handlers to a specific input element
         function attachHandlersToInput(screenshotsInput) {
             if (!screenshotsInput) return;
+
+            // Change handler for file picker
+            screenshotsInput.addEventListener('change', function(e) {
+                console.log('[Screenshots] File picker change detected');
+                updateScreenshotsPreview(screenshotsInput);
+            }, false);
 
             // Drag and drop handlers
             screenshotsInput.addEventListener('dragover', function(e) {
@@ -447,6 +537,16 @@
         }
 
         // Re-initialize after Livewire updates
-        document.addEventListener('livewire:updated', initializeWatcher);
+        document.addEventListener('livewire:updated', function() {
+            initializeWatcher();
+            // Update preview if input exists with files
+            setTimeout(() => {
+                const screenshotsInput = document.getElementById('screenshots-input');
+                if (screenshotsInput && screenshotsInput.files && screenshotsInput.files.length > 0) {
+                    console.log('[Screenshots] Preview update triggered after Livewire update');
+                    updateScreenshotsPreview(screenshotsInput);
+                }
+            }, 100);
+        });
     </script>
 </x-filament-panels::page>
