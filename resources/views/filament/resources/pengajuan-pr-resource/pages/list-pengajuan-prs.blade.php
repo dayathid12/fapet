@@ -242,7 +242,7 @@
             <form wire:submit.prevent="saveEdit" class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nama Pekerjaan</label>
-                    <input type="text" readonly value="{{ $selectedRecord->nama_pekerjaan }}" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+                    <input type="text" readonly value="{{ $selectedRecord->nama_pekerjaan ?? $selectedRecord->nama_perkerjaan ?? 'Belum Input' }}" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
                 </div>
 
                 <div>
