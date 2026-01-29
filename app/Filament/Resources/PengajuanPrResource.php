@@ -112,7 +112,7 @@ class PengajuanPrResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('id', 'desc')
+            ->defaultSort('nomor_ajuan', 'desc')
             ->columns([
                 // Add columns if needed, but since using custom view, might not be necessary
             ])

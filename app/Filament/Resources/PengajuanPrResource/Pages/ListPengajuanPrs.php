@@ -25,11 +25,6 @@ class ListPengajuanPrs extends ListRecords
         return 'id';
     }
 
-    protected function getDefaultSortDirection(): ?string
-    {
-        return 'desc';
-    }
-
     public $showEditModal = false;
     public $selectedRecord = null;
     public $nomor_pr = '';

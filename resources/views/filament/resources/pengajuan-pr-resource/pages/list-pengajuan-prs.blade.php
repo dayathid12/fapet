@@ -64,7 +64,7 @@
         {{-- Main Table Container --}}
         <div class="filament-card rounded-2xl overflow-hidden">
             {{-- Search & Filter Bar --}}
-            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900/50">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-end items-center gap-4 bg-white dark:bg-slate-900/50">
                 <div class="relative w-full sm:max-w-md group">
                     <x-heroicon-m-magnifying-glass class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-teal-500 transition-colors" />
                     <input
@@ -74,16 +74,6 @@
                         class="w-full pl-12 pr-4 py-3 text-base border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all"
                     />
                 </div>
-                <div class="flex items-center gap-3">
-                    <button class="flex items-center gap-2 px-5 py-3 text-base font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 transition">
-                        <x-heroicon-m-funnel class="w-5 h-5" />
-                        <span>Filter</span>
-                    </button>
-                    <button class="flex items-center gap-2 px-5 py-3 text-base font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 transition">
-                        <span>Urutkan</span>
-                        <x-heroicon-m-chevron-down class="w-4 h-4" />
-                    </button>
-                </div>
             </div>
 
             {{-- Table Content --}}
@@ -91,7 +81,7 @@
                 <table class="w-full text-left border-collapse min-w-[1000px]">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
-                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest">Ref</th>
+                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest">Nomor Ajuan</th>
                             <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest">Informasi Pengajuan</th>
                             <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-right">Timeline Status</th>
                             <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-center">Nilai </th>
