@@ -185,6 +185,14 @@ if (!function_exists('terbilang')) {
         </tbody>
     </table>
 
+    <p class="text-justify mt-4">
+        Bukti-bukti pengeluaran anggaran dan asli setoran pajak ( SPP/BPN ) tersebut diatas disimpan oleh Pengguna anggaran / Kuasa Pengguna Anggaran untuk kelengkapan administrasi dan pemeriksaan aparat pengawasan fungsional
+    </p>
+
+    <p class="text-justify mt-4">
+        Demikian surat pernyataan ini kami buat dengan sesungguhnya.
+    </p>
+
 <table style="width: 100%; border: none; margin-top: 50px; border-collapse: collapse;">
         <tr>
             <td style="width: 60%; border: none;"></td>
