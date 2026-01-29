@@ -602,8 +602,7 @@ class PerjalananResource extends Resource
                                     ->label('Nama Pengemudi')
                                     ->options(\App\Models\Staf::all()->pluck('nama_staf', 'staf_id'))
                                     ->searchable()
-                                    ->placeholder('Pilih pengemudi...')
-                                    ->required(), // Tambahkan ini
+                                    ->placeholder('Pilih pengemudi...'),
                                 \Filament\Forms\Components\Select::make('asisten_id')
                                     ->label('Nama Asisten')
                                     ->options(\App\Models\Staf::all()->pluck('nama_staf', 'staf_id'))
