@@ -99,7 +99,8 @@ class PengajuanPrResource extends Resource
                             ->imageEditor()
                             ->maxSize(5120)
                             ->downloadable()
-                            ->hidden(),
+                            ->appendFiles()
+                            ->columnSpanFull(),
                     ])
             ]);
     }

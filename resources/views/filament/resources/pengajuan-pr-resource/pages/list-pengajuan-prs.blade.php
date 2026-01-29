@@ -283,18 +283,170 @@
     @endif
 
     <script>
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toastId = 'toast-' + Date.now();
+            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `fixed bottom-5 right-5 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg z-[9999] animate-fadeIn`;
+            toast.textContent = message;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
+            `;
+            if (!document.getElementById('fade-in-style')) {
+                style.id = 'fade-in-style';
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Handle file upload via Livewire
+        function handleScreenshotFiles(files, inputElement) {
+            if (!inputElement) return;
+
+            // Create DataTransfer to set files
+            const dataTransfer = new DataTransfer();
+
+            // Add existing files if any
+            if (inputElement.files.length > 0) {
+                Array.from(inputElement.files).forEach(file => {
+                    dataTransfer.items.add(file);
+                });
+            }
+
+            // Add new files
+            files.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+
+            inputElement.files = dataTransfer.files;
+
+            // Trigger change event to notify Livewire
+            inputElement.dispatchEvent(new Event('change', { bubbles: true }));
+
+            // Show feedback to user
+            showToast(`${files.length} gambar berhasil ditambahkan!`, 'success');
+            console.log('[Screenshots] Files handled:', files.length);
+        }
+
+        // Attach handlers to a specific input element
+        function attachHandlersToInput(screenshotsInput) {
+            if (!screenshotsInput) return;
+
+            // Drag and drop handlers
+            screenshotsInput.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                screenshotsInput.style.borderColor = '#14b8a6';
+                screenshotsInput.style.backgroundColor = 'rgba(20, 184, 166, 0.05)';
+            }, false);
+
+            screenshotsInput.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                screenshotsInput.style.borderColor = '';
+                screenshotsInput.style.backgroundColor = '';
+            }, false);
+
+            screenshotsInput.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                screenshotsInput.style.borderColor = '';
+                screenshotsInput.style.backgroundColor = '';
+
+                const files = Array.from(e.dataTransfer.files).filter(file => file.type.indexOf('image') !== -1);
+                if (files.length > 0) {
+                    console.log('[Screenshots] Drop detected:', files.length, 'files');
+                    handleScreenshotFiles(files, screenshotsInput);
+                }
+            }, false);
+
+            console.log('[Screenshots] Handlers attached to input');
+        }
+
+        // Global paste handler with proper modal detection
         document.addEventListener('paste', function(e) {
             const screenshotsInput = document.getElementById('screenshots-input');
-            if (screenshotsInput && e.target.closest('.modal')) {
-                const items = e.clipboardData.items;
-                for (let i = 0; i < items.length; i++) {
-                    if (items[i].type.indexOf('image') !== -1) {
-                        const file = items[i].getAsFile();
-                        // Handle paste image - you might need to adjust this based on Livewire file upload
-                        console.log('Pasted image:', file);
-                    }
+
+            if (!screenshotsInput) {
+                console.log('[Paste] Input tidak ditemukan');
+                return;
+            }
+
+            // Check if input is in the visible modal
+            const modal = screenshotsInput.closest('.fixed');
+            const isModalVisible = modal && window.getComputedStyle(modal).display !== 'none';
+
+            console.log('[Paste] Detected - Modal visible:', isModalVisible);
+
+            if (!isModalVisible) return;
+
+            const items = e.clipboardData.items;
+            const files = [];
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].kind === 'file' && items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    console.log('[Paste] Image file detected:', file.name, file.size);
+                    files.push(file);
                 }
             }
-        });
+
+            if (files.length > 0) {
+                console.log('[Paste] Total images found:', files.length);
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                handleScreenshotFiles(files, screenshotsInput);
+            }
+        }, false);
+
+        // Watch for input element appearing in DOM
+        function initializeWatcher() {
+            // Try to attach handlers immediately if input exists
+            const screenshotsInput = document.getElementById('screenshots-input');
+            if (screenshotsInput) {
+                console.log('[Screenshots] Input ditemukan - attaching handlers');
+                attachHandlersToInput(screenshotsInput);
+            }
+
+            // Use MutationObserver to detect when input is added to DOM
+            const observer = new MutationObserver(function(mutations) {
+                const screenshotsInput = document.getElementById('screenshots-input');
+                if (screenshotsInput && !screenshotsInput.dataset.handlerAttached) {
+                    console.log('[Screenshots] Input muncul di DOM - attaching handlers');
+                    screenshotsInput.dataset.handlerAttached = 'true';
+                    attachHandlersToInput(screenshotsInput);
+                }
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: false,
+                characterData: false
+            });
+
+            console.log('[Screenshots] Watcher initialized');
+        }
+
+        // Initialize on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeWatcher);
+        } else {
+            initializeWatcher();
+        }
+
+        // Re-initialize after Livewire updates
+        document.addEventListener('livewire:updated', initializeWatcher);
     </script>
 </x-filament-panels::page>

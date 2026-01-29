@@ -41,17 +41,6 @@ class ListPengajuanPrs extends ListRecords
         ];
     }
 
-    /**
-     * Define the CreateAction for this page, used in custom Blade views.
-     */
-    public function getCreateAction(): Actions\CreateAction
-    {
-        return Actions\CreateAction::make()
-            ->label('Buat Pengajuan') // Consistent with getHeaderActions
-            ->icon('heroicon-s-plus') // Consistent with getHeaderActions
-            ->size('lg'); // Consistent with getHeaderActions
-    }
-
     public function openEditModal($recordId)
     {
         $this->selectedRecord = PengajuanPr::find($recordId);
