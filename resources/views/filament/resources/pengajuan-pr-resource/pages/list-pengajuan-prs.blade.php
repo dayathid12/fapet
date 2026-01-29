@@ -273,8 +273,8 @@
                     <input type="file" wire:model="proses_pr_screenshots" accept="image/*" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:text-slate-100" id="screenshots-input" wire:ignore>
                     <p class="text-xs text-slate-500 mt-1">Anda juga dapat paste gambar langsung (Ctrl+V) - Hanya 1 file</p>
 
-                    <!-- Preview Container - Single File Only -->
-                    <div id="screenshots-preview" class="mt-4 flex justify-center min-h-0" style="max-width: 100%; overflow: hidden;" wire:ignore>
+                    <!-- Preview Container - Show both existing and new files -->
+                    <div id="screenshots-preview" class="mt-4 flex flex-wrap gap-4 justify-center min-h-0" style="max-width: 100%; overflow: hidden;" wire:ignore>
                         @if($selectedRecord && !empty($selectedRecord->proses_pr_screenshots))
                             @foreach($selectedRecord->proses_pr_screenshots as $index => $screenshot)
                                 <div class="relative group w-full max-w-xs" data-existing="true" data-path="{{ $screenshot }}">
@@ -336,16 +336,22 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // Update preview for single file
+        // Update preview for single file - show both existing and new files
         function updateScreenshotsPreview(inputElement) {
             const previewContainer = document.getElementById('screenshots-preview');
             if (!previewContainer || !inputElement) return;
 
-            previewContainer.innerHTML = '';
+            // Don't clear the entire container - preserve existing files
+            // Remove only the new file preview if it exists
+            const existingPreview = previewContainer.querySelector('#new-screenshot-preview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+
             const files = inputElement.files;
 
             if (files.length === 0) {
-                previewContainer.innerHTML = '';
+                // Remove new file preview if no files selected
                 return;
             }
 
@@ -353,15 +359,12 @@
             const file = files[0];
             const reader = new FileReader();
             reader.onload = function(e) {
-                // Clear container to ensure only 1 preview
-                previewContainer.innerHTML = '';
-
                 const previewItem = document.createElement('div');
                 previewItem.className = 'relative group w-full max-w-xs';
-                previewItem.id = 'screenshot-preview-item'; // Add ID to prevent duplicates
+                previewItem.id = 'new-screenshot-preview'; // Unique ID for new file
                 previewItem.innerHTML = `
                     <div class="aspect-square rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-700 shadow-md hover:shadow-lg transition-shadow">
-                        <img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">
+                        <img src="${e.target.result}" alt="New Preview" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
                             <button type="button" class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full" onclick="removeScreenshotPreview('${file.name}')">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -373,7 +376,7 @@
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 truncate text-center" title="${file.name}">${file.name}</p>
                 `;
                 previewContainer.appendChild(previewItem);
-                console.log('[Screenshots] Preview updated - single file:', file.name);
+                console.log('[Screenshots] New file preview added:', file.name);
             };
             reader.readAsDataURL(file);
         }
@@ -539,12 +542,23 @@
         // Re-initialize after Livewire updates
         document.addEventListener('livewire:updated', function() {
             initializeWatcher();
-            // Update preview if input exists with files
+            // Always refresh the preview container to show current state
             setTimeout(() => {
                 const screenshotsInput = document.getElementById('screenshots-input');
-                if (screenshotsInput && screenshotsInput.files && screenshotsInput.files.length > 0) {
-                    console.log('[Screenshots] Preview update triggered after Livewire update');
-                    updateScreenshotsPreview(screenshotsInput);
+                const previewContainer = document.getElementById('screenshots-preview');
+
+                if (previewContainer) {
+                    // Remove only new file previews, keep existing ones
+                    const newPreview = previewContainer.querySelector('#new-screenshot-preview');
+                    if (newPreview) {
+                        newPreview.remove();
+                    }
+
+                    // If input has files, show new file preview
+                    if (screenshotsInput && screenshotsInput.files && screenshotsInput.files.length > 0) {
+                        console.log('[Screenshots] Preview update triggered after Livewire update');
+                        updateScreenshotsPreview(screenshotsInput);
+                    }
                 }
             }, 100);
         });
