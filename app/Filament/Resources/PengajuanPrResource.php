@@ -15,8 +15,8 @@ use Filament\Tables\Columns\ViewColumn;
 class PengajuanPrResource extends Resource
 {
     protected static ?string $model = PengajuanPr::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+      protected static ?int $navigationSort = 0;
+  protected static ?string $navigationGroup = 'Pelaporan';
 
     protected static ?string $navigationLabel = 'Pengajuan PR';
 
@@ -34,44 +34,47 @@ class PengajuanPrResource extends Resource
                             ->rows(4)
                             ->columnSpanFull(),
 
-                        TextInput::make('total')
-                            ->label('Total')
-                            ->prefix('Rp')
-                            ->placeholder('0,00')
-                            /**
-                             * PERBAIKAN: Menggunakan single quote agar PHP tidak menganggap $money sebagai variabel PHP.
-                             * Ini akan merender x-mask:dynamic="$money($input, '.', ',')" di browser.
-                             */
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                TextInput::make('total')
+                                    ->label('Total')
+                                    ->prefix('Rp')
+                                    ->placeholder('0,00')
+                                    /**
+                                     * PERBAIKAN: Menggunakan single quote agar PHP tidak menganggap $money sebagai variabel PHP.
+                                     * Ini akan merender x-mask:dynamic="$money($input, '.', ',')" di browser.
+                                     */
 
-                            ->extraInputAttributes([
-                                'class' => 'text-right font-mono',
-                                'inputmode' => 'numeric',
-                                'maxlength' => '20',
-                                'oninput' => "let v = this.value.replace(/\\D/g, ''); if(!v){ this.value = ''; return; } this.value = new Intl.NumberFormat('id-ID').format(v);",
-                            ])
-                            /**
-                             * Menggunakan formatStateUsing agar saat EDIT data,
-                             * angka dari database langsung terformat di form.
-                             */
-                            ->formatStateUsing(fn ($state) => $state ? number_format($state, 0, ',', '.') : null)
-                            /**
-                             * Dehydrate: Mengubah format mata uang (koma sebagai pemisah ribuan, titik sebagai desimal)
-                             * menjadi format numerik standar untuk database.
-                             */
-                            ->dehydrateStateUsing(function ($state) {
-                                if (!$state) return 0;
-                                // Hapus semua karakter selain angka (menghilangkan pemisah ribuan '.' atau ',')
-                                $cleaned = preg_replace('/\D/', '', $state);
-                                return (float) $cleaned;
-                            })
-                            ->required()
-                            ->minValue(0),
+                                    ->extraInputAttributes([
+                                        'class' => 'text-right font-mono',
+                                        'inputmode' => 'numeric',
+                                        'maxlength' => '20',
+                                        'oninput' => "let v = this.value.replace(/\\D/g, ''); if(!v){ this.value = ''; return; } this.value = new Intl.NumberFormat('id-ID').format(v);",
+                                    ])
+                                    /**
+                                     * Menggunakan formatStateUsing agar saat EDIT data,
+                                     * angka dari database langsung terformat di form.
+                                     */
+                                    ->formatStateUsing(fn ($state) => $state ? number_format($state, 0, ',', '.') : null)
+                                    /**
+                                     * Dehydrate: Mengubah format mata uang (koma sebagai pemisah ribuan, titik sebagai desimal)
+                                     * menjadi format numerik standar untuk database.
+                                     */
+                                    ->dehydrateStateUsing(function ($state) {
+                                        if (!$state) return 0;
+                                        // Hapus semua karakter selain angka (menghilangkan pemisah ribuan '.' atau ',')
+                                        $cleaned = preg_replace('/\D/', '', $state);
+                                        return (float) $cleaned;
+                                    })
+                                    ->required()
+                                    ->minValue(0),
 
-                        Forms\Components\DateTimePicker::make('tanggal_usulan')
-                            ->label('Tanggal Usulan')
-                            ->default(now())
-                            ->disabled()
-                            ->required(),
+                                Forms\Components\DateTimePicker::make('tanggal_usulan')
+                                    ->label('Tanggal Usulan')
+                                    ->default(now())
+                                    ->disabled()
+                                    ->required(),
+                            ]),
 
                         Forms\Components\FileUpload::make('upload_files')
                             ->label('Upload File')
@@ -104,6 +107,24 @@ class PengajuanPrResource extends Resource
     public static function getRelations(): array
     {
         return [];
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->defaultSort('id', 'desc')
+            ->columns([
+                // Add columns if needed, but since using custom view, might not be necessary
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                //
+            ])
+            ->bulkActions([
+                //
+            ]);
     }
 
     public static function getPages(): array

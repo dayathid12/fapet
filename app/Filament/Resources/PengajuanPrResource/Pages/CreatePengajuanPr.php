@@ -13,12 +13,18 @@ class CreatePengajuanPr extends CreateRecord
     protected function getCreateFormAction(): Actions\Action
     {
         return parent::getCreateFormAction()
-            ->label('Ajukan');
+            ->label('Ajukan')
+            ->successRedirectUrl($this->getResource()::getUrl('index'));
     }
 
     protected function getCreateAnotherFormAction(): Actions\Action
     {
         return parent::getCreateAnotherFormAction()
             ->label('Ajukan dan Buat Baru');
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('create');
     }
 }

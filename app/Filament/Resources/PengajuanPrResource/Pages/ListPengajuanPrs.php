@@ -20,6 +20,16 @@ class ListPengajuanPrs extends ListRecords
 
     protected static bool $shouldMaximize = true;
 
+    protected function getDefaultSortColumn(): ?string
+    {
+        return 'id';
+    }
+
+    protected function getDefaultSortDirection(): ?string
+    {
+        return 'desc';
+    }
+
     public $showEditModal = false;
     public $selectedRecord = null;
     public $nomor_pr = '';
