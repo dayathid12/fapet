@@ -93,8 +93,8 @@
                         <tr class="bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
                             <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest">Ref</th>
                             <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest">Informasi Pengajuan</th>
-                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-right">Nilai</th>
-                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-center">Modern Timeline Status</th>
+                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-right">Timeline Status</th>
+                            <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase tracking-widest text-center">Nilai </th>
                             <th class="px-8 py-5 w-16"></th>
                         </tr>
                     </thead>
@@ -198,11 +198,9 @@
                                 <td class="px-8 py-7 align-top text-right">
                                     <div class="flex gap-2">
                                         <button wire:click="openEditModal({{ $item->id }})" class="p-3 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-xl transition-all shadow-sm hover:shadow-md">
-                                            <x-heroicon-m-pencil class="w-6 h-6" />
+                                            <x-heroicon-m-rectangle-group class="w-6 h-6" />
                                         </button>
-                                        <button wire:click="downloadFiles({{ $item->id }})" class="p-3 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-xl transition-all shadow-sm hover:shadow-md">
-                                            <x-heroicon-m-arrow-down-tray class="w-6 h-6" />
-                                        </button>
+
                                     </div>
                                 </td>
                             </tr>
@@ -254,7 +252,7 @@
             <form wire:submit.prevent="saveEdit" class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nama Pekerjaan</label>
-                    <input type="text" value="{{ $selectedRecord->nama_pekerjaan }}" disabled class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+                    <input type="text" readonly value="{{ $selectedRecord->nama_pekerjaan ?: 'Belum Input' }}" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
                 </div>
 
                 <div>
