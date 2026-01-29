@@ -474,9 +474,10 @@ class PerjalananResource extends Resource
                                     ])
                                     ->grouped()
                                     ->required()
+                                    ->hiddenOn('view')
                                     ->extraAttributes(['class' => 'justify-start']),
 
-                                Forms\Components\ToggleButtons::make('status_perjalanan')
+                                Forms\Components\Select::make('status_perjalanan')
                                     ->label('Status Perjalanan')
                                     ->options([
                                         'Menunggu Persetujuan' => 'Menunggu Persetujuan',
@@ -484,22 +485,9 @@ class PerjalananResource extends Resource
                                         'Ditolak' => 'Ditolak',
                                         'Selesai' => 'Selesai',
                                     ])
-                                    ->icons([
-                                        'Menunggu Persetujuan' => 'heroicon-o-clock',
-                                        'Terjadwal' => 'heroicon-o-check-circle',
-                                        'Ditolak' => 'heroicon-o-x-circle',
-                                        'Selesai' => 'heroicon-o-check-badge',
-                                    ])
-                                    ->colors([
-                                        'Menunggu Persetujuan' => 'warning',
-                                        'Terjadwal' => 'success',
-                                        'Ditolak' => 'danger',
-                                        'Selesai' => 'primary',
-                                    ])
-                                    ->grouped()
                                     ->required()
-                                    ->live() // Added ->live() here
-                                    ->extraAttributes(['class' => 'justify-center']),
+                                    ->live()
+                                    ->hiddenOn('view'),
                             ]),
 
                         Forms\Components\ToggleButtons::make('jenis_kegiatan')
@@ -521,6 +509,7 @@ class PerjalananResource extends Resource
                             ])
                             ->grouped()
                             ->default(null)
+                            ->hiddenOn('view')
                             ->extraAttributes(['class' => 'justify-center']),
 
                         Forms\Components\Grid::make(2)
