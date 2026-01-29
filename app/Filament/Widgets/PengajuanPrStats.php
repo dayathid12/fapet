@@ -12,6 +12,7 @@ class PengajuanPrStats extends BaseWidget
     protected static ?int $sort = 1;
     protected static bool $isLazy = false;
     protected static ?string $pollingInterval = '10s';
+    protected int $columnSpan = 8;
 
     protected function getStats(): array
     {

@@ -11,7 +11,8 @@ class PengajuanPrStatusDoughnutChart extends ChartWidget
 
     protected static ?string $heading = 'Status Pengajuan PR (Doughnut)';
 
-    protected static ?string $maxHeight = '300px';
+    protected static ?string $maxHeight = '200px';
+    protected int $columnSpan = 4;
 
     protected function getType(): string
     {
