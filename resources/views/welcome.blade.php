@@ -579,7 +579,7 @@
                    MENGHAPUS: whitespace-nowrap overflow-hidden text-ellipsis
                    Agar teks tidak terpotong (truncate) dan bisa wrap.
                 -->
-                <p class="text-xl lg:text-4xl font-bold tracking-tight mb-2 uppercase whitespace-nowrap">
+                <p class="text-lg lg:text-4xl font-bold tracking-tight mb-2 uppercase">
                     Direktorat Pengelolaan Aset dan Sarana Prasarana
                 </p>
                 <p class="text-2xl lg:text-4xl font-semibold opacity-90">
