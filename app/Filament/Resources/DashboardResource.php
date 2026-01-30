@@ -19,7 +19,7 @@ class DashboardResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-home';
     protected static ?string $navigationLabel = 'Dashboard';
-   protected static ?string $navigationGroup = 'Filament Shield';
+
     protected static ?int $navigationSort = 0;
 
     public static function form(Form $form): Form
