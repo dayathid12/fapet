@@ -1,8 +1,8 @@
 {
-    "name": "SASARPRAS",
-    "short_name": "SASARPRAS",
-    "description": "A Laravel Progressive Web App",
-    "start_url": "https://sarpras.unpad.ac.id/app/login",
+    "name": "Sa Sarpras",
+    "short_name": "Sa Sarpras",
+    "description": "Sarpras Unpad Mobile Application",
+    "start_url": "https://sarpras.unpad.ac.id/app",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#000000",
