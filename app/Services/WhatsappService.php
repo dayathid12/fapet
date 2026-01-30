@@ -46,4 +46,36 @@ class WhatsappService
             Log::error('Exception caught while sending WhatsApp message: ' . $e->getMessage());
         }
     }
+
+    public function sendGroupMessage(string $numberKey, string $groupId, string $message): void
+    {
+        $apiKey = env('WATZAP_API_KEY');
+
+        if (!$apiKey) {
+            Log::error('WATZAP_API_KEY is not set in the .env file.');
+            return;
+        }
+
+        try {
+            $response = Http::post('https://api.watzap.id/v1/send_message_group', [
+                'api_key' => $apiKey,
+                'number_key' => $numberKey,
+                'group_id' => $groupId,
+                'message' => $message,
+            ]);
+
+            if ($response->failed()) {
+                Log::error('Failed to send WhatsApp group message.', [
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                ]);
+            } else {
+                Log::info('WhatsApp group message sent successfully.', [
+                    'response' => $response->body(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Exception caught while sending WhatsApp group message: ' . $e->getMessage());
+        }
+    }
 }

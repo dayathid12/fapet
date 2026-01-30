@@ -190,6 +190,11 @@ class PeminjamanKendaraanController extends Controller
 
         // 4. Use WatzapService to send the message
         $whatsappService->sendMessage($template->number_key, $recipientNumber, $finalMessage);
+
+        // 5. Send notification to the group
+        $groupId = '120363406566704378@g.us';
+        $groupMessage = "*Notifikasi Permohonan Baru*\n\nNomor Perjalanan: {$perjalanan->nomor_perjalanan}\n\nUntuk informasi lengkap, kunjungi: https://sarpras.unpad.ac.id/app";
+        $whatsappService->sendGroupMessage($template->number_key, $groupId, $groupMessage);
     }
 
     /**
