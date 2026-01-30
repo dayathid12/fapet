@@ -600,8 +600,6 @@ class PerjalananResource extends Resource
                             ])
                             ->columns(4)
                             ->addActionLabel('Tambah Kendaraan & Staf')
-                            ->minItems(1)
-                            ->defaultItems(1)
                             ->cloneable()
                             ->columnSpanFull(),
                     ]),
