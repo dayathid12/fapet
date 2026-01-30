@@ -16,9 +16,7 @@ class NotifikasiWAResource extends Resource
 {
     protected static ?string $model = NotifikasiWA::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
-
-    protected static ?string $navigationLabel = 'Notifikasi WA';
+  protected static ?string $navigationGroup = 'Filament Shield';
 
     protected static ?string $modelLabel = 'Notifikasi WA';
 
