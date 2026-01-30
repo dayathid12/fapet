@@ -471,16 +471,19 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="group">
                                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Surat Peminjaman Kendaraan <span class="text-red-500">*</span></label>
-                                        <input type="file" name="surat_peminjaman" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" required/>
+                                        <input type="file" name="surat_peminjaman" accept=".pdf" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" required/>
+                                        <p class="text-xs text-slate-400 mt-1">Format: PDF, Maksimal: 20MB</p>
                                         <p class="text-red-500 text-[10px] mt-1 hidden error-msg">Wajib diisi</p>
                                     </div>
                                     <div class="group">
                                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Dokumen Pendukung</label>
-                                        <input type="file" name="dokumen_pendukung" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"/>
+                                        <input type="file" name="dokumen_pendukung" accept=".pdf,.jpg,.jpeg,.png" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"/>
+                                        <p class="text-xs text-slate-400 mt-1">Format: PDF, JPG, PNG, Maksimal: 20MB</p>
                                     </div>
                                     <div id="suratIzinContainer" class="group hidden">
                                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Surat Izin Kegiatan <span class="text-red-500">*</span></label>
-                                        <input type="file" name="surat_izin_kegiatan" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"/>
+                                        <input type="file" name="surat_izin_kegiatan" accept=".pdf" class="tech-input block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"/>
+                                        <p class="text-xs text-slate-400 mt-1">Format: PDF, Maksimal: 20MB</p>
                                         <p class="text-red-500 text-[10px] mt-1 hidden error-msg">Wajib diisi</p>
                                     </div>
                                 </div>
@@ -927,7 +930,7 @@
             loadingIcon.classList.remove('hidden');
 
             const formData = new FormData(form);
-            
+
             // Append CSRF token to formData
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             formData.append('_token', csrfToken); // Laravel expects _token for CSRF

@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Perjalanan;
+use App\Models\NotifikasiWA;
 use App\Models\Wilayah;
 use App\Models\UnitKerja;
+use App\Services\WhatsappService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage; // Added this line
 
 class PeminjamanKendaraanController extends Controller
@@ -46,8 +49,9 @@ class PeminjamanKendaraanController extends Controller
             'nama_personil_perwakilan' => 'required|string|max:255',
             'kontak_pengguna_perwakilan' => 'required|string|max:20',
             'status_sebagai' => 'required|in:Mahasiswa,Dosen,Staf,Lainnya',
-            'surat_peminjaman' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'dokumen_pendukung' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'surat_peminjaman' => 'required|file|mimes:pdf|max:20480',
+            'dokumen_pendukung' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:20480',
+            'surat_izin_kegiatan' => 'nullable|file|mimes:pdf|max:20480',
         ];
 
         $validator = validator($data, $rules);
@@ -73,6 +77,11 @@ class PeminjamanKendaraanController extends Controller
             $dokumenPendukungPath = null;
             if ($request->hasFile('dokumen_pendukung')) {
                 $dokumenPendukungPath = $request->file('dokumen_pendukung')->store('dokumen-pendukung', 'public');
+            }
+
+            $suratIzinPath = null;
+            if ($request->hasFile('surat_izin_kegiatan')) {
+                $suratIzinPath = $request->file('surat_izin_kegiatan')->store('surat-izin-kegiatan', 'public');
             }
 
             // Prepare data for saving
@@ -106,9 +115,13 @@ class PeminjamanKendaraanController extends Controller
             // Save file paths to saveData
             $saveData['surat_peminjaman_kendaraan'] = $suratPeminjamanPath;
             $saveData['dokumen_pendukung'] = $dokumenPendukungPath;
+            $saveData['surat_izin_kegiatan'] = $suratIzinPath;
 
             // Save to database
             $perjalanan = Perjalanan::create($saveData);
+
+            // Send WhatsApp notification after successful save
+            $this->sendWhatsAppNotification($perjalanan, app(WhatsappService::class));
 
             return response()->json([
                 'success' => true,
@@ -150,5 +163,32 @@ class PeminjamanKendaraanController extends Controller
             'tracking_url' => route('peminjaman.status', ['token' => $token]),
         ]);
     }
-}
 
+    /**
+     * Send WhatsApp notification after form submission.
+     *
+     * @param Perjalanan $perjalanan
+     * @param WhatsappService $whatsappService
+     * @return void
+     */
+    private function sendWhatsAppNotification(Perjalanan $perjalanan, WhatsappService $whatsappService): void
+    {
+        // 1. Find the specific template by its unique number
+        $template = NotifikasiWA::where('nomor', 'WA-126D2A90')->first();
+
+        if (!$template) {
+            Log::error('Template NotifikasiWA dengan nomor WA-126D2A90 tidak ditemukan.');
+            return;
+        }
+
+        // 2. Prepare the recipient number and message
+        $recipientNumber = $perjalanan->kontak_pengguna;
+        $trackingLink = route('peminjaman.status', ['token' => $perjalanan->token]);
+
+        // 3. Construct the final message by appending the tracking link
+        $finalMessage = $template->isi_pesan . "\n\nLink Tracking: " . $trackingLink;
+
+        // 4. Use WatzapService to send the message
+        $whatsappService->sendMessage($template->number_key, $recipientNumber, $finalMessage);
+    }
+}
