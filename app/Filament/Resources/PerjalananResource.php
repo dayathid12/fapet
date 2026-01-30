@@ -538,7 +538,7 @@ class PerjalananResource extends Resource
                                         'Antar (Keberangkatan)' => 'Antar (Keberangkatan)',
                                         'Jemput (Kepulangan)' => 'Jemput (Kepulangan)',
                                     ])
-                                    ->required()
+
                                     ->default('Antar & Jemput')
                                     ->live()
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
@@ -568,7 +568,7 @@ class PerjalananResource extends Resource
                                         });
                                     })
                                     ->searchable()
-                                    ->required()
+                                
                                     ->live()
                                     ->placeholder('Pilih nomor polisi...'),
                                 \Filament\Forms\Components\DateTimePicker::make('waktu_selesai_penugasan')
