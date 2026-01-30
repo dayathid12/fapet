@@ -45,7 +45,7 @@ class SocialiteController extends Controller
             $request->session()->regenerate();
 
             // Redirect langsung ke dashboard admin
-            return redirect()->to('https://sarpras.unpad.ac.id/app/admin');
+            return redirect()->to('https://sarpras.unpad.ac.id/app');
 
         } catch (\Throwable $e) {
             Log::error('Google Login Error: ' . $e->getMessage());
