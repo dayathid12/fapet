@@ -182,7 +182,7 @@ class PeminjamanKendaraanController extends Controller
         }
 
         // 2. Prepare the recipient number and message
-        $recipientNumber = $perjalanan->kontak_pengguna;
+        $recipientNumber = $this->formatPhoneNumber($perjalanan->kontak_pengguna_perwakilan);
         $trackingLink = route('peminjaman.status', ['token' => $perjalanan->token]);
 
         // 3. Construct the final message by appending the tracking link
@@ -190,5 +190,24 @@ class PeminjamanKendaraanController extends Controller
 
         // 4. Use WatzapService to send the message
         $whatsappService->sendMessage($template->number_key, $recipientNumber, $finalMessage);
+    }
+
+    /**
+     * Format phone number to international format (62)
+     *
+     * @param string $number
+     * @return string
+     */
+    private function formatPhoneNumber(string $number): string
+    {
+        // Remove any non-numeric characters
+        $number = preg_replace('/[^0-9]/', '', $number);
+
+        // If number starts with 0, replace it with 62
+        if (substr($number, 0, 1) === '0') {
+            $number = '62' . substr($number, 1);
+        }
+
+        return $number;
     }
 }
