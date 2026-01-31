@@ -20,7 +20,7 @@ class UpdatePerjalananStatus extends Command
      *
      * @var string
      */
-    protected $description = 'Update status perjalanan to Selesai if waktu_kepulangan is today or earlier';
+    protected $description = 'Update status perjalanan to Selesai if waktu_kepulangan is today or later';
 
     /**
      * Execute the console command.
@@ -30,7 +30,7 @@ class UpdatePerjalananStatus extends Command
         $this->info('Updating perjalanan status...');
 
         $updatedCount = Perjalanan::where('status_perjalanan', 'Terjadwal')
-            ->where('waktu_kepulangan', '<=', Carbon::today())
+            ->where('waktu_kepulangan', '>=', Carbon::today())
             ->update(['status_perjalanan' => 'Selesai']);
 
         $this->info("Updated {$updatedCount} perjalanan records to 'Selesai'.");

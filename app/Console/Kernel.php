@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('perjalanan:update-status')->everyFiveMinutes();
+        $schedule->command('perjalanan:update-status')->everyThreeHours();
         // $schedule->command('inspire')->hourly();
     }
 
