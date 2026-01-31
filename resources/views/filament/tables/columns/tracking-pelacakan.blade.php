@@ -3,9 +3,13 @@
     $tglInputSurgas = $record->tgl_input_surat_tugas;
     $tglUploadSurgas = $record->tgl_upload_surat_tugas;
 
-    // Awaiting confirmation on this logic
-    $sptjbExists = false; 
+    // Logic for SPTJB
+    $sptjbDetail = $record->sptjbDetail;
+    $sptjbExists = $sptjbDetail !== null;
     $tglSptjb = null;
+    if ($sptjbExists && $sptjbDetail->sptjbPengemudi) {
+        $tglSptjb = $sptjbDetail->sptjbPengemudi->tanggal_surat;
+    }
 
 @endphp
 

@@ -148,6 +148,11 @@ class Perjalanan extends Model
         return $this->hasMany(JadwalPengemudi::class, 'perjalanan_id', 'id');
     }
 
+    public function sptjbDetail()
+    {
+        return $this->hasOne(SPTJBUangPengemudiDetail::class, 'nomor_surat', 'no_surat_tugas');
+    }
+
     public function getDynamicStatusAttribute(): string
     {
         if ($this->status_perjalanan === 'Terjadwal' && $this->waktu_kepulangan && $this->waktu_kepulangan->isPast()) {
