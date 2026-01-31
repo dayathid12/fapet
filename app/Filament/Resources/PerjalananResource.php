@@ -648,17 +648,7 @@ class PerjalananResource extends Resource
                         return new HtmlString("<span class='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {$color}' {$bgColor}>{$status}</span>");
                     }),
 
-                Tables\Columns\TextColumn::make('status_perjalanan')
-                    ->label('Status')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Menunggu Persetujuan' => 'warning',
-                        'Terjadwal' => 'success',
-                        'Ditolak' => 'danger',
-                        'Selesai' => 'primary',
-                        default => 'gray',
-                    })
-                    ->searchable(),
+
 
                 Tables\Columns\TextColumn::make('waktu_keberangkatan')
                     ->label('Jadwal')
