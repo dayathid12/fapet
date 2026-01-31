@@ -630,8 +630,13 @@ class PerjalananResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('nomor_perjalanan')
                     ->label('Nomor Perjalanan')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where('nomor_perjalanan', 'like', "%{$search}%")
+                            ->orWhere('nama_kegiatan', 'like', "%{$search}%");
+                    })
+                    ->sortable()
+                    ->description(fn (Perjalanan $record): string => $record->nama_kegiatan),
+
                 Tables\Columns\TextColumn::make('status_perjalanan')
                     ->label('Status')
                     ->badge()
@@ -641,43 +646,63 @@ class PerjalananResource extends Resource
                         'Ditolak' => 'danger',
                         'Selesai' => 'primary',
                         default => 'gray',
-                    }),
+                    })
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('waktu_keberangkatan')
-                    ->label('Waktu Keberangkatan')
-                    ->dateTime('d/m/Y H:i')
+                    ->label('Jadwal')
+                    ->dateTime('d M Y, H:i')
+                    ->sortable()
+                    ->description(fn (Perjalanan $record): string => 'Pulang: ' . ($record->waktu_kepulangan ? $record->waktu_kepulangan->format('d M Y, H:i') : 'N/A')),
+
+                Tables\Columns\TextColumn::make('jenis_kegiatan')
+                    ->label('Jenis Kegiatan')
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'LK' => 'info',
+                        'DK' => 'success',
+                        'LB' => 'gray',
+                        default => 'gray',
+                    })
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('waktu_kepulangan')
-                    ->label('Waktu Kepulangan')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('nama_pengguna')
+                    ->label('Pengguna & Unit')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where('nama_pengguna', 'like', "%{$search}%")
+                            ->orWhereHas('unitKerja', fn ($q) => $q->where('nama_unit_kerja', 'like', "%{$search}%"));
+                    })
+                    ->description(fn (Perjalanan $record): string => $record->unitKerja?->nama_unit_kerja ?? ''),
+
                 Tables\Columns\TextColumn::make('nopol_kendaraan_search')
-                    ->label('Nopol Kendaraan')
+                    ->label('Kendaraan & Pengemudi')
                     ->getStateUsing(function (Model $record) {
                         return $record->details->pluck('kendaraan_nopol')->filter()->join(', ');
                     })
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->orWhereHas('details', function ($q) use ($search) {
-                            $q->where('kendaraan_nopol', 'like', "%{$search}%");
+                        return $query->whereHas('details', function ($q) use ($search) {
+                            $q->where('kendaraan_nopol', 'like', "%{$search}%")
+                              ->orWhereHas('pengemudi', fn ($q2) => $q2->where('nama_staf', 'like', "%{$search}%"));
                         });
-                    }),
-                Tables\Columns\TextColumn::make('pengemudi_search')
-                    ->label('Pengemudi')
-                    ->getStateUsing(function (Model $record) {
-                        return $record->details->map(fn ($detail) => $detail->pengemudi?->nama_staf)->filter()->join(', ');
                     })
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->orWhereHas('details.pengemudi', function ($q) use ($search) {
-                            $q->where('nama_staf', 'like', "%{$search}%");
-                        });
+                    ->description(function (Model $record) {
+                        $drivers = $record->details->map(fn ($detail) => $detail->pengemudi?->nama_staf)->filter()->join(', ');
+                        return 'Pengemudi: ' . ($drivers ?: 'N/A');
                     }),
-                Tables\Columns\TextColumn::make('nama_pengguna')
-                    ->label('Pengguna')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('unitKerja.nama_unit_kerja')
-                    ->label('Unit Kerja')
-                    ->searchable(),
+                
                 Tables\Columns\ViewColumn::make('tracking_pelacakan')->view('filament.tables.columns.tracking-pelacakan')->label('Tracking Pelacakan'),
             ])
+            ->recordUrl(fn (Model $record) => PerjalananResource::getUrl('view', ['record' => $record]))
+            ->recordClasses(function (Model $record) {
+                return match ($record->status_perjalanan) {
+                    'Menunggu Persetujuan' => 'bg-yellow-50 dark:bg-yellow-500/10',
+                    'Terjadwal' => 'bg-green-50 dark:bg-green-500/10',
+                    'Ditolak' => 'bg-red-50 dark:bg-red-500/10',
+                    'Selesai' => 'bg-blue-50 dark:bg-blue-500/10',
+                    default => null,
+                };
+            })
 
             ->selectable(false)
 
