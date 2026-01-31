@@ -632,18 +632,26 @@ class PerjalananResource extends Resource
                     ->label('Waktu Kepulangan')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('details')
+                Tables\Columns\TextColumn::make('nopol_kendaraan_search')
                     ->label('Nopol Kendaraan')
-                    ->getStateUsing(fn ($record) => $record->details->first()?->kendaraan_nopol)
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('details')
-                    ->label('Jenis Kendaraan')
-                    ->getStateUsing(fn ($record) => $record->details->first()?->kendaraan?->jenis_kendaraan)
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('details')
+                    ->getStateUsing(function (Model $record) {
+                        return $record->details->pluck('kendaraan_nopol')->filter()->join(', ');
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->orWhereHas('details', function ($q) use ($search) {
+                            $q->where('kendaraan_nopol', 'like', "%{$search}%");
+                        });
+                    }),
+                Tables\Columns\TextColumn::make('pengemudi_search')
                     ->label('Pengemudi')
-                    ->getStateUsing(fn ($record) => $record->details->first()?->pengemudi?->nama_staf)
-                    ->searchable(),
+                    ->getStateUsing(function (Model $record) {
+                        return $record->details->map(fn ($detail) => $detail->pengemudi?->nama_staf)->filter()->join(', ');
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->orWhereHas('details.pengemudi', function ($q) use ($search) {
+                            $q->where('nama_staf', 'like', "%{$search}%");
+                        });
+                    }),
                 Tables\Columns\TextColumn::make('nama_pengguna')
                     ->label('Pengguna')
                     ->searchable(),
