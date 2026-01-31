@@ -632,10 +632,21 @@ class PerjalananResource extends Resource
                     ->label('Nomor Perjalanan')
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where('nomor_perjalanan', 'like', "%{$search}%")
-                            ->orWhere('nama_kegiatan', 'like', "%{$search}%");
+                            ->orWhere('status_perjalanan', 'like', "%{$search}%");
                     })
                     ->sortable()
-                    ->description(fn (Perjalanan $record): string => $record->nama_kegiatan),
+                    ->description(function (Perjalanan $record) {
+                        $status = $record->status_perjalanan;
+                        $color = match ($status) {
+                            'Menunggu Persetujuan' => 'bg-yellow-500 text-white',
+                            'Terjadwal' => 'text-white',
+                            'Ditolak' => 'bg-red-500 text-white',
+                            'Selesai' => 'bg-blue-500 text-white',
+                            default => 'bg-gray-500 text-white',
+                        };
+                        $bgColor = $status === 'Terjadwal' ? 'style="background-color: #3BC1A8;"' : '';
+                        return new HtmlString("<span class='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {$color}' {$bgColor}>{$status}</span>");
+                    }),
 
                 Tables\Columns\TextColumn::make('status_perjalanan')
                     ->label('Status')

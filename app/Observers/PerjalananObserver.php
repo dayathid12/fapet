@@ -22,5 +22,10 @@ class PerjalananObserver
         if ($perjalanan->isDirty('upload_surat_tugas') && !empty($perjalanan->upload_surat_tugas)) {
             $perjalanan->tgl_upload_surat_tugas = Carbon::now();
         }
+
+        // Automatically set status to 'Selesai' if waktu_kepulangan is today or later
+        if ($perjalanan->waktu_kepulangan && $perjalanan->waktu_kepulangan->gte(Carbon::today())) {
+            $perjalanan->status_perjalanan = 'Selesai';
+        }
     }
 }
