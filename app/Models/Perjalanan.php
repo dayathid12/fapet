@@ -26,10 +26,12 @@ class Perjalanan extends Model
         'jenis_operasional',
         'status_operasional',
         'no_surat_tugas',
+        'tgl_input_surat_tugas',
         'tanggal_surat_tugas',
         'file_surat_jalan',
         'docs_surat_tugas',
         'upload_surat_tugas',
+        'tgl_upload_surat_tugas',
         'upload_tte',
         'download_file',
         'surat_peminjaman_kendaraan',
@@ -55,6 +57,8 @@ class Perjalanan extends Model
         'waktu_keberangkatan' => 'datetime',
         'waktu_kepulangan' => 'datetime',
         'tanggal_surat_tugas' => 'date',
+        'tgl_input_surat_tugas' => 'datetime',
+        'tgl_upload_surat_tugas' => 'datetime',
     ];
 
 

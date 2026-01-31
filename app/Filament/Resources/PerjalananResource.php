@@ -380,6 +380,24 @@ class PerjalananResource extends Resource
                             ->visible(fn (?Model $record) => (bool) $record),
                     ]), // Penutup Section Dokumen & Berkas
 
+                Forms\Components\Section::make('Surat Tugas')
+                    ->description('Input nomor dan upload scan surat tugas')
+                    ->icon('heroicon-o-briefcase')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('no_surat_tugas')
+                                    ->label('No. Surat Tugas'),
+
+                                Forms\Components\FileUpload::make('upload_surat_tugas')
+                                    ->label('Scan Surat Tugas')
+                                    ->directory('scan-surat-tugas')
+                                    ->downloadable()
+                                    ->openable(),
+                            ]),
+                    ]),
+
 
                 Forms\Components\Section::make('Kendaraan & Staf')
                     ->description('Informasi kendaraan dan pengemudi yang bertugas')
@@ -658,6 +676,7 @@ class PerjalananResource extends Resource
                 Tables\Columns\TextColumn::make('unitKerja.nama_unit_kerja')
                     ->label('Unit Kerja')
                     ->searchable(),
+                Tables\Columns\ViewColumn::make('tracking_pelacakan')->view('filament.tables.columns.tracking-pelacakan')->label('Tracking Pelacakan'),
             ])
 
             ->selectable(false)
